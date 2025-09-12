@@ -2,12 +2,26 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FaPlus, FaDumbbell, FaEllipsisH, FaSearch } from "react-icons/fa";
+import {
+  FaPlus,
+  FaDumbbell,
+  FaEllipsisH,
+  FaSearch,
+  FaClock,
+  FaStar,
+  FaFilter,
+  FaPlayCircle,
+} from "react-icons/fa";
 
 type Workout = {
   id: string;
   name: string;
-  description?: string;
+  description: string;
+  duration: number;
+  intensity: string;
+  category: string;
+  rating: number;
+  image: string;
   exercises: number;
   lastPerformed?: string;
 };
@@ -16,6 +30,7 @@ export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     // In a real app, fetch workouts from the API
@@ -24,157 +39,209 @@ export default function WorkoutsPage() {
       setWorkouts([
         {
           id: "1",
-          name: "Upper Body Power",
-          description: "Focus on chest, shoulders, and triceps",
-          exercises: 6,
+          name: "Upper Body Focus",
+          description:
+            "Build strength in your chest, shoulders, and arms with this comprehensive upper body routine.",
+          duration: 45,
+          intensity: "High",
+          category: "strength",
+          rating: 4.8,
+          image: "https://source.unsplash.com/random/400x300/?fitness,weights",
+          exercises: 8,
           lastPerformed: "2025-09-05",
         },
         {
           id: "2",
-          name: "Lower Body Strength",
-          description: "Squats, deadlifts, and accessories",
-          exercises: 5,
+          name: "Core Crusher",
+          description:
+            "Strengthen your core with this targeted abdominal and lower back workout.",
+          duration: 30,
+          intensity: "Medium",
+          category: "strength",
+          rating: 4.6,
+          image: "https://source.unsplash.com/random/400x300/?abs,workout",
+          exercises: 6,
           lastPerformed: "2025-09-08",
         },
         {
           id: "3",
-          name: "Push Day",
-          description: "Chest, shoulders, and triceps",
-          exercises: 7,
+          name: "HIIT Cardio Blast",
+          description:
+            "Burn calories fast with this high-intensity interval training session.",
+          duration: 25,
+          intensity: "High",
+          category: "cardio",
+          rating: 4.9,
+          image: "https://source.unsplash.com/random/400x300/?cardio,workout",
+          exercises: 10,
           lastPerformed: "2025-09-01",
         },
         {
           id: "4",
-          name: "Pull Day",
-          description: "Back and biceps focus",
-          exercises: 6,
+          name: "Total Body Tone",
+          description:
+            "A complete full-body workout to build strength and endurance.",
+          duration: 50,
+          intensity: "Medium",
+          category: "strength",
+          rating: 4.7,
+          image: "https://source.unsplash.com/random/400x300/?workout,gym",
+          exercises: 12,
           lastPerformed: "2025-09-03",
         },
         {
           id: "5",
-          name: "Leg Day",
-          description: "Full lower body workout",
-          exercises: 6,
+          name: "Leg Day Challenge",
+          description:
+            "Build powerful legs with this comprehensive lower body workout.",
+          duration: 40,
+          intensity: "High",
+          category: "strength",
+          rating: 4.5,
+          image: "https://source.unsplash.com/random/400x300/?legs,squat",
+          exercises: 7,
           lastPerformed: "2025-09-10",
         },
         {
           id: "6",
-          name: "Core Crusher",
-          description: "Abs and lower back",
-          exercises: 4,
-        },
-        {
-          id: "7",
-          name: "Cardio & Conditioning",
-          description: "HIIT and endurance work",
-          exercises: 5,
+          name: "Flexibility Flow",
+          description:
+            "Improve your mobility and flexibility with this dynamic stretching routine.",
+          duration: 35,
+          intensity: "Low",
+          category: "flexibility",
+          rating: 4.4,
+          image: "https://source.unsplash.com/random/400x300/?stretch,yoga",
+          exercises: 9,
         },
       ]);
       setIsLoading(false);
     }, 500);
   }, []);
 
-  // Filter workouts based on search query
-  const filteredWorkouts = workouts.filter(
-    (workout) =>
+  // Filter workouts based on search query and category
+  const filteredWorkouts = workouts.filter((workout) => {
+    const matchesSearch =
       workout.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (workout.description &&
-        workout.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  // Format date to be more readable
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Never";
-
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+      workout.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      activeCategory === "All" ||
+      workout.category.toLowerCase() === activeCategory.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">My Workouts</h1>
-        <Link
-          href="/workouts/new"
-          className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md flex items-center transition-colors duration-200"
-        >
-          <FaPlus className="mr-2" />
-          <span>Create Workout</span>
-        </Link>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Workouts</h1>
+          <p className="text-gray-400">
+            Find the perfect workout for your goals
+          </p>
+        </div>
+        <div className="flex space-x-3 mt-4 sm:mt-0">
+          <button className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center">
+            <FaFilter className="mr-2" /> Filter
+          </button>
+          <Link
+            href="/workouts/create"
+            className="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded-lg flex items-center font-medium"
+          >
+            <FaPlus className="mr-2" /> Create
+          </Link>
+        </div>
       </div>
 
       {/* Search Bar */}
       <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <FaSearch className="text-secondary" />
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <FaSearch className="text-gray-400" />
         </div>
         <input
           type="text"
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary focus:ring-2 transition-colors duration-200 sm:text-sm"
+          className="block w-full pl-12 pr-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
           placeholder="Search workouts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
+      {/* Categories */}
+      <div className="flex space-x-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+        {[
+          "All",
+          "Strength",
+          "Cardio",
+          "Flexibility",
+          "Recovery",
+          "HIIT",
+          "Favorites",
+        ].map((category) => (
+          <button
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            className={`px-4 py-2 rounded-full whitespace-nowrap ${
+              category === activeCategory
+                ? "bg-yellow-400 text-black font-medium"
+                : "bg-gray-800 text-white hover:bg-gray-700"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
         </div>
       ) : filteredWorkouts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
+              className="bg-gray-800 rounded-xl overflow-hidden shadow-lg"
             >
-              <div className="p-6">
-                <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-semibold mb-2 text-primary">
-                    {workout.name}
-                  </h2>
-                  <div className="relative">
-                    <button className="text-secondary hover:text-primary transition-colors">
-                      <FaEllipsisH />
-                    </button>
-                    {/* Dropdown menu would go here in a real implementation */}
-                  </div>
-                </div>
-                <p className="text-gray-700 font-medium mb-4">
-                  {workout.description}
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <FaDumbbell className="mr-1 text-secondary" />
-                    <span className="font-medium">
-                      {workout.exercises} exercises
-                    </span>
-                  </div>
-                  <div className="font-medium">
-                    Last performed:{" "}
-                    <span className="text-secondary">
-                      {formatDate(workout.lastPerformed)}
-                    </span>
+              <div className="h-48 relative">
+                <img
+                  src={workout.image}
+                  alt={workout.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                  <div className="p-4 w-full">
+                    <div className="flex justify-between items-center">
+                      <span className="bg-yellow-400 text-black text-xs font-medium px-2 py-1 rounded capitalize">
+                        {workout.category}
+                      </span>
+                      <span className="flex items-center text-white">
+                        <FaStar className="text-yellow-400 mr-1" />{" "}
+                        {workout.rating}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-4">
-                <div className="flex justify-between">
+              <div className="p-4">
+                <h3 className="text-xl font-bold text-white">{workout.name}</h3>
+                <div className="flex items-center text-gray-400 mt-2 mb-3">
+                  <FaClock className="mr-1" /> {workout.duration} min •{" "}
+                  <FaDumbbell className="mx-1" /> {workout.intensity} intensity
+                </div>
+                <p className="text-gray-300 text-sm">{workout.description}</p>
+                <div className="mt-4">
                   <Link
                     href={`/workouts/${workout.id}`}
-                    className="text-primary hover:text-primary-dark font-medium transition-colors"
+                    className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg flex items-center justify-center transition"
                   >
-                    View Details
+                    View Workout
                   </Link>
                   <Link
                     href={`/workouts/start/${workout.id}`}
-                    className="bg-secondary hover:bg-secondary-dark text-white py-1 px-3 rounded-md text-sm font-medium transition-colors"
+                    className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-2 px-4 rounded-lg flex items-center justify-center mt-2 font-medium transition"
                   >
-                    Start Workout
+                    <FaPlayCircle className="mr-2" /> Start Workout
                   </Link>
                 </div>
               </div>
@@ -182,22 +249,22 @@ export default function WorkoutsPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <FaDumbbell className="mx-auto h-12 w-12 text-secondary mb-4" />
-          <h3 className="text-lg font-medium text-primary mb-2">
+        <div className="flex flex-col items-center justify-center py-16 bg-gray-800 rounded-lg">
+          <FaDumbbell className="text-yellow-400 h-16 w-16 mb-6" />
+          <h3 className="text-xl font-bold text-white mb-3">
             No workouts found
           </h3>
-          <p className="text-gray-700 mb-6 font-medium">
+          <p className="text-gray-300 mb-8 text-center max-w-md">
             {searchQuery
-              ? `No workouts match "${searchQuery}"`
-              : "You haven't created any workouts yet"}
+              ? `No workouts match "${searchQuery}" in the "${activeCategory}" category`
+              : "No workouts available in this category yet"}
           </p>
           <Link
-            href="/workouts/new"
-            className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md inline-flex items-center transition-colors"
+            href="/workouts/create"
+            className="bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-3 rounded-lg flex items-center font-medium transition"
           >
             <FaPlus className="mr-2" />
-            <span>Create Your First Workout</span>
+            <span>Create New Workout</span>
           </Link>
         </div>
       )}

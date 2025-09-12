@@ -8,14 +8,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        blue: {
-          700: "#1e40af",
-          800: "#1e3a8a",
-          900: "#1e3a8a",
+        yellow: {
+          400: "#e4ff1a", // Primary accent color from the image
+          300: "#ecff4d",
         },
-        sky: {
-          500: "#0ea5e9",
-        },
+        gray: {
+          800: "#1E1E1E", // Dark background
+          900: "#121212", // Even darker background
+        }
       },
       fontFamily: {
         sans: ["Exo 2", "sans-serif"],

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import AuthProvider from "./providers/AuthProvider";
 
 export const metadata: Metadata = {
   title: "FitTrack - Your Fitness Journey",
@@ -16,10 +17,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+      <body className="font-sans antialiased min-h-screen flex flex-col bg-gray-900 text-white">
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-grow pt-16">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
