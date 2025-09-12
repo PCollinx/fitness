@@ -1,38 +1,38 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { FaGoogle } from 'react-icons/fa';
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { FaGoogle } from "react-icons/fa";
 
 export default function SignIn() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         redirect: false,
         email,
         password,
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError("Invalid email or password");
       } else {
-        router.push('/dashboard');
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (error) {
-      setError('Something went wrong. Please try again.');
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -46,19 +46,22 @@ export default function SignIn() {
             Sign in to your account
           </h2>
           <p className="mt-2 text-sm text-gray-300">
-            Or{' '}
-            <Link href="/auth/signup" className="font-medium text-yellow-500 hover:text-yellow-400">
+            Or{" "}
+            <Link
+              href="/auth/signup"
+              className="font-medium text-yellow-500 hover:text-yellow-400"
+            >
               create a new account
             </Link>
           </p>
         </div>
-        
+
         {error && (
           <div className="rounded-md bg-red-900/50 p-4">
             <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
@@ -103,13 +106,19 @@ export default function SignIn() {
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-300"
+              >
                 Remember me
               </label>
             </div>
 
             <div className="text-sm">
-              <Link href="/auth/forgot-password" className="font-medium text-yellow-500 hover:text-yellow-400">
+              <Link
+                href="/auth/forgot-password"
+                className="font-medium text-yellow-500 hover:text-yellow-400"
+              >
                 Forgot your password?
               </Link>
             </div>
@@ -121,7 +130,7 @@ export default function SignIn() {
               disabled={isLoading}
               className="group relative flex w-full justify-center rounded-md bg-yellow-500 px-3 py-2.5 text-sm font-semibold text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-70"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
@@ -132,13 +141,15 @@ export default function SignIn() {
               <div className="w-full border-t border-gray-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-gray-900 px-2 text-gray-400">Or continue with</span>
+              <span className="bg-gray-900 px-2 text-gray-400">
+                Or continue with
+              </span>
             </div>
           </div>
 
           <div className="mt-6">
             <button
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
               className="group relative flex w-full justify-center rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
             >
               <span className="flex items-center">

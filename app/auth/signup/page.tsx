@@ -56,7 +56,9 @@ export default function SignupPage() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Registration error response:", errorData);
-        throw new Error(errorData.message || errorData.error || "Failed to sign up");
+        throw new Error(
+          errorData.message || errorData.error || "Failed to sign up"
+        );
       }
 
       // Sign in the user after successful registration
@@ -196,7 +198,9 @@ export default function SignupPage() {
               <div className="w-full border-t border-gray-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-gray-900 px-2 text-gray-400">Or continue with</span>
+              <span className="bg-gray-900 px-2 text-gray-400">
+                Or continue with
+              </span>
             </div>
           </div>
 

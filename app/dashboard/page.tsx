@@ -123,7 +123,9 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold text-yellow-500">
           Welcome, {session?.user?.name || "User"}
         </h1>
-        <p className="text-gray-400">Here's an overview of your fitness journey</p>
+        <p className="text-gray-400">
+          Here's an overview of your fitness journey
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -215,9 +217,7 @@ export default function Dashboard() {
                 className="border-b border-gray-700 pb-4 hover:bg-gray-700 p-2 rounded transition-colors"
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-white">
-                    {workout.name}
-                  </h3>
+                  <h3 className="font-medium text-white">{workout.name}</h3>
                   <span className="text-sm text-yellow-400">
                     {formatDate(workout.date)}
                   </span>
@@ -259,9 +259,7 @@ export default function Dashboard() {
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   <div className="text-center">
-                    <p className="text-xs text-gray-400 font-medium">
-                      Protein
-                    </p>
+                    <p className="text-xs text-gray-400 font-medium">Protein</p>
                     <p className="font-medium text-white">
                       {nutritionData[0].protein}g
                     </p>
@@ -282,9 +280,7 @@ export default function Dashboard() {
               </div>
 
               <div className="mt-4">
-                <h3 className="font-medium mb-2 text-white">
-                  Last 7 Days
-                </h3>
+                <h3 className="font-medium mb-2 text-white">Last 7 Days</h3>
                 <div className="h-32 bg-gray-700 rounded-lg flex items-end justify-between p-2">
                   {/* Simple bar chart representation */}
                   {nutritionData.map((day) => (
@@ -336,10 +332,7 @@ export default function Dashboard() {
               <div className="h-32 bg-gray-700 rounded-lg flex items-end justify-between p-2">
                 {/* Simple line chart representation */}
                 {progressData.map((point, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center w-1/3"
-                  >
+                  <div key={index} className="flex flex-col items-center w-1/3">
                     <div
                       className="bg-yellow-500 w-2 rounded-full"
                       style={{
@@ -355,14 +348,10 @@ export default function Dashboard() {
               </div>
 
               <div className="mt-4">
-                <h3 className="font-medium mb-2 text-white">
-                  Recent Changes
-                </h3>
+                <h3 className="font-medium mb-2 text-white">Recent Changes</h3>
                 <div className="flex justify-between">
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">
-                      1 Week
-                    </p>
+                    <p className="text-xs text-gray-400 font-medium">1 Week</p>
                     <p
                       className={`font-medium ${
                         progressData[2].weight < progressData[1].weight
@@ -377,9 +366,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">
-                      1 Month
-                    </p>
+                    <p className="text-xs text-gray-400 font-medium">1 Month</p>
                     <p
                       className={`font-medium ${
                         progressData[2].weight < progressData[0].weight

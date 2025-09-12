@@ -6,7 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcrypt";
 
-import prisma from "../../../lib/prisma";
+import prisma from "../prisma";
 
 // Extend the Session type to include user.id
 declare module "next-auth" {

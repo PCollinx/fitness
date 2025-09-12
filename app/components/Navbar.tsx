@@ -14,7 +14,7 @@ import {
   FaMusic,
   FaSignOutAlt,
   FaSignInAlt,
-  FaUserPlus
+  FaUserPlus,
 } from "react-icons/fa";
 
 export default function Navbar() {
@@ -91,55 +91,59 @@ export default function Navbar() {
             <button className="p-2 rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
               <FaBell className="h-5 w-5" />
             </button>
-            
+
             {/* Profile dropdown */}
             <div className="relative">
-              <button 
-                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} 
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="p-2 rounded-full hover:bg-gray-800 text-white flex items-center"
               >
                 {session?.user ? (
                   session.user.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "User"} 
+                    <img
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
                       className="h-6 w-6 rounded-full"
                     />
                   ) : (
                     <div className="bg-yellow-500 h-6 w-6 rounded-full flex items-center justify-center text-gray-900 font-bold">
-                      {session.user.name?.charAt(0) || 'U'}
+                      {session.user.name?.charAt(0) || "U"}
                     </div>
                   )
                 ) : (
                   <FaUser className="h-5 w-5" />
                 )}
               </button>
-              
+
               {isProfileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-10">
                   {session?.user ? (
                     <>
                       <div className="px-4 py-2 border-b border-gray-700">
-                        <p className="text-sm font-medium text-white">{session.user.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
+                        <p className="text-sm font-medium text-white">
+                          {session.user.name}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {session.user.email}
+                        </p>
                       </div>
-                      <Link 
-                        href="/profile" 
+                      <Link
+                        href="/profile"
                         className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
                         <FaUser className="mr-2" /> Profile
                       </Link>
-                      <Link 
-                        href="/dashboard" 
+                      <Link
+                        href="/dashboard"
                         className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
                         <FaChartLine className="mr-2" /> Dashboard
                       </Link>
-                      <button 
+                      <button
                         onClick={() => {
-                          signOut({ callbackUrl: '/' });
+                          signOut({ callbackUrl: "/" });
                           setIsProfileMenuOpen(false);
                         }}
                         className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
@@ -149,15 +153,15 @@ export default function Navbar() {
                     </>
                   ) : (
                     <>
-                      <Link 
-                        href="/auth/signin" 
+                      <Link
+                        href="/auth/signin"
                         className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
                         <FaSignInAlt className="mr-2" /> Sign in
                       </Link>
-                      <Link 
-                        href="/auth/signup" 
+                      <Link
+                        href="/auth/signup"
                         className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
@@ -231,7 +235,7 @@ export default function Navbar() {
               </div>
             </Link>
           ))}
-          
+
           {/* Authentication links for mobile */}
           <div className="border-t border-gray-700 pt-2 mt-2">
             {session?.user ? (
@@ -242,7 +246,9 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400"><FaChartLine /></span>
+                    <span className="text-gray-400">
+                      <FaChartLine />
+                    </span>
                     <span>Dashboard</span>
                   </div>
                 </Link>
@@ -252,19 +258,23 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400"><FaUser /></span>
+                    <span className="text-gray-400">
+                      <FaUser />
+                    </span>
                     <span>Profile</span>
                   </div>
                 </Link>
                 <button
                   onClick={() => {
-                    signOut({ callbackUrl: '/' });
+                    signOut({ callbackUrl: "/" });
                     setIsMenuOpen(false);
                   }}
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800 text-white"
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400"><FaSignOutAlt /></span>
+                    <span className="text-gray-400">
+                      <FaSignOutAlt />
+                    </span>
                     <span>Sign out</span>
                   </div>
                 </button>
@@ -277,7 +287,9 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400"><FaSignInAlt /></span>
+                    <span className="text-gray-400">
+                      <FaSignInAlt />
+                    </span>
                     <span>Sign in</span>
                   </div>
                 </Link>
@@ -287,7 +299,9 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400"><FaUserPlus /></span>
+                    <span className="text-gray-400">
+                      <FaUserPlus />
+                    </span>
                     <span>Sign up</span>
                   </div>
                 </Link>

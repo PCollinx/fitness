@@ -54,13 +54,19 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error details:", error instanceof Error ? error.message : String(error));
+    console.error(
+      "Registration error details:",
+      error instanceof Error ? error.message : String(error)
+    );
     if (error instanceof Error && error.stack) {
       console.error("Error stack:", error.stack);
     }
-    
+
     return NextResponse.json(
-      { message: "An error occurred during registration", error: error instanceof Error ? error.message : String(error) },
+      {
+        message: "An error occurred during registration",
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
