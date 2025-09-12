@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -29,11 +30,25 @@
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.16",
-    "eslint": "^9.35.0",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.32",
     "postcss": "^8.4.31",
     "prisma": "^5.10.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
+  },
+  "resolutions": {
+    "eslint": "^8.57.0",
+    "glob": "^8.1.0",
+    "rimraf": "^4.4.1",
+    "next": "^14.2.32"
+  },
+  "overrides": {
+    "eslint": "^8.57.0",
+    "glob": "^8.1.0",
+    "rimraf": "^4.4.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
