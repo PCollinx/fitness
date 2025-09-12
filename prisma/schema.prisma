@@ -1,0 +1,166 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  password      String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  image         String?
+  bio           String?
+  height        Float?     // in cm
+  weight        Float?     // in kg
+  
+  workouts      Workout[]
+  exercises     Exercise[]
+  progress      Progress[]
+  meals         Meal[]
+  followers     Follow[]   @relation("following")
+  following     Follow[]   @relation("follower")
+  posts         Post[]
+}
+
+model Workout {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  exercises   WorkoutExercise[]
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  public      Boolean    @default(false)
+  
+  @@index([userId])
+}
+
+model Exercise {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  muscleGroup String?
+  difficulty  String?
+  instructions String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  workouts    WorkoutExercise[]
+  
+  @@index([userId])
+}
+
+model WorkoutExercise {
+  id          String     @id @default(cuid())
+  workoutId   String
+  workout     Workout    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseId  String
+  exercise    Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  sets        Int
+  reps        Int
+  weight      Float?
+  duration    Int?       // in seconds
+  notes       String?
+  order       Int
+  
+  @@index([workoutId])
+  @@index([exerciseId])
+}
+
+model Progress {
+  id          String     @id @default(cuid())
+  date        DateTime   @default(now())
+  weight      Float?     // in kg
+  bodyFat     Float?     // percentage
+  chest       Float?     // in cm
+  waist       Float?     // in cm
+  hips        Float?     // in cm
+  arms        Float?     // in cm
+  thighs      Float?     // in cm
+  notes       String?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([date])
+}
+
+model Meal {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  calories    Int?
+  protein     Float?     // in grams
+  carbs       Float?     // in grams
+  fat         Float?     // in grams
+  date        DateTime   @default(now())
+  mealType    String?    // breakfast, lunch, dinner, snack
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([date])
+}
+
+model Follow {
+  id          String     @id @default(cuid())
+  followerId  String
+  follower    User       @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User       @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  content     String
+  image       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes       Like[]
+  comments    Comment[]
+  
+  @@index([userId])
+}
+
+model Like {
+  id          String     @id @default(cuid())
+  postId      String
+  post        Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId      String
+  createdAt   DateTime   @default(now())
+  
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Comment {
+  id          String     @id @default(cuid())
+  content     String
+  postId      String
+  post        Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId      String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  @@index([postId])
+  @@index([userId])
+}
