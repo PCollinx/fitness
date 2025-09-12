@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../lib/prisma";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -64,7 +62,5 @@ export async function POST(req: NextRequest) {
       { message: "Internal server error" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../lib/prisma";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -30,7 +28,7 @@ export async function POST(req: NextRequest) {
       where: { email },
     });
 
-    if (!user) {
+    if (!user || !user.password) {
       return NextResponse.json(
         { message: "Invalid email or password" },
         { status: 401 }
@@ -62,7 +60,5 @@ export async function POST(req: NextRequest) {
       { message: "Internal server error" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
