@@ -62,14 +62,14 @@ export default function ProgressPage() {
   };
 
   const metricIcons: Record<MetricType, React.ReactNode> = {
-    weight: <FaWeight className="text-primary" />,
-    bodyFat: <FaWeight className="text-secondary" />,
-    muscleMass: <FaWeight className="text-primary-dark" />,
-    chest: <FaRuler className="text-secondary-dark" />,
-    waist: <FaRuler className="text-primary-light" />,
-    arms: <FaRuler className="text-secondary-light" />,
-    legs: <FaRuler className="text-primary" />,
-    restingHeartRate: <FaHeartbeat className="text-secondary" />,
+    weight: <FaWeight className="text-yellow-500" />,
+    bodyFat: <FaWeight className="text-yellow-400" />,
+    muscleMass: <FaWeight className="text-yellow-500" />,
+    chest: <FaRuler className="text-yellow-400" />,
+    waist: <FaRuler className="text-yellow-500" />,
+    arms: <FaRuler className="text-yellow-400" />,
+    legs: <FaRuler className="text-yellow-500" />,
+    restingHeartRate: <FaHeartbeat className="text-yellow-400" />,
   };
 
   useEffect(() => {
@@ -213,35 +213,35 @@ export default function ProgressPage() {
   const getMetricColor = (metric: MetricType) => {
     switch (metric) {
       case "weight":
-        return "#BB6653"; // primary
+        return "#EAB308"; // yellow-500
       case "bodyFat":
-        return "#F08B51"; // secondary
+        return "#FACC15"; // yellow-400
       case "muscleMass":
-        return "#A45546"; // primary-dark
+        return "#CA8A04"; // yellow-600
       case "chest":
-        return "#D87941"; // secondary-dark
+        return "#FDE68A"; // yellow-200
       case "waist":
-        return "#CF7866"; // primary-light
+        return "#FEF3C7"; // yellow-100
       case "arms":
-        return "#F79F6C"; // secondary-light
+        return "#F59E0B"; // amber-500
       case "legs":
-        return "#BB6653"; // primary
+        return "#D97706"; // amber-600
       case "restingHeartRate":
-        return "#F08B51"; // secondary
+        return "#FBBF24"; // amber-400
       default:
-        return "#BB6653"; // primary
+        return "#EAB308"; // yellow-500
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">
+    <div className="container mx-auto px-4 py-8 mt-8 sm:mt-16">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-yellow-500 fade-in">
           Progress Tracking
         </h1>
         <Link
           href="/progress/new"
-          className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md flex items-center transition-colors"
+          className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md flex items-center transition-colors font-medium fade-in w-full sm:w-auto justify-center sm:justify-start"
         >
           <FaPlus className="mr-2" />
           <span>Add Progress</span>
@@ -249,22 +249,22 @@ export default function ProgressPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="flex justify-center items-center h-64 fade-in">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent"></div>
         </div>
       ) : progressData.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <FaWeight className="mx-auto h-12 w-12 text-secondary mb-4" />
-          <h3 className="text-lg font-medium text-primary mb-2">
+        <div className="text-center py-16 bg-gray-800 rounded-lg fade-in">
+          <FaWeight className="mx-auto h-12 w-12 text-yellow-500 mb-4" />
+          <h3 className="text-lg font-medium text-yellow-500 mb-2">
             No progress entries yet
           </h3>
-          <p className="text-gray-700 mb-6 font-medium">
+          <p className="text-gray-300 mb-6 font-medium">
             Start tracking your fitness progress to see your improvements over
             time
           </p>
           <Link
             href="/progress/new"
-            className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md inline-flex items-center transition-colors"
+            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md inline-flex items-center transition-colors font-medium"
           >
             <FaPlus className="mr-2" />
             <span>Record Your First Entry</span>
@@ -273,15 +273,15 @@ export default function ProgressPage() {
       ) : (
         <>
           {/* Metric Selector */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 mb-6 slide-up">
             {Object.entries(metricLabels).map(([key, label]) => (
               <button
                 key={key}
                 onClick={() => setSelectedMetric(key as MetricType)}
                 className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${
                   selectedMetric === key
-                    ? "bg-primary/10 border-2 border-primary text-primary shadow-md"
-                    : "bg-gray-100 hover:bg-gray-200 hover:shadow"
+                    ? "bg-gray-700 border-2 border-yellow-500 text-yellow-500 shadow-md"
+                    : "bg-gray-800 hover:bg-gray-700 text-gray-300 hover:shadow"
                 }`}
               >
                 <div className="mb-2">{metricIcons[key as MetricType]}</div>
@@ -291,46 +291,48 @@ export default function ProgressPage() {
           </div>
 
           {/* Time Range Selector */}
-          <div className="flex flex-wrap justify-end gap-2 mb-4">
-            <div className="text-gray-600 mr-2 flex items-center font-medium">
-              <FaCalendarAlt className="mr-1 text-secondary" />
+          <div className="flex flex-col sm:flex-row flex-wrap sm:justify-end gap-2 mb-4 slide-in-right">
+            <div className="text-gray-300 mr-2 flex items-center font-medium mb-2 sm:mb-0">
+              <FaCalendarAlt className="mr-1 text-yellow-500" />
               <span>Time Range:</span>
             </div>
-            {[
-              { value: "7d", label: "7 Days" },
-              { value: "30d", label: "30 Days" },
-              { value: "90d", label: "90 Days" },
-              { value: "1y", label: "1 Year" },
-              { value: "all", label: "All Time" },
-            ].map((range) => (
-              <button
-                key={range.value}
-                onClick={() =>
-                  setTimeRange(
-                    range.value as "7d" | "30d" | "90d" | "1y" | "all"
-                  )
-                }
-                className={`px-3 py-1 text-sm rounded-md transition-all ${
-                  timeRange === range.value
-                    ? "bg-secondary text-white shadow"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow"
-                }`}
-              >
-                {range.label}
-              </button>
-            ))}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: "7d", label: "7 Days" },
+                { value: "30d", label: "30 Days" },
+                { value: "90d", label: "90 Days" },
+                { value: "1y", label: "1 Year" },
+                { value: "all", label: "All Time" },
+              ].map((range) => (
+                <button
+                  key={range.value}
+                  onClick={() =>
+                    setTimeRange(
+                      range.value as "7d" | "30d" | "90d" | "1y" | "all"
+                    )
+                  }
+                  className={`px-3 py-1 text-sm rounded-md transition-all ${
+                    timeRange === range.value
+                      ? "bg-yellow-500 text-gray-900 shadow font-medium"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:shadow"
+                  }`}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Summary Stats */}
           {latestEntry && earliestFilteredEntry && change && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4">
-                <div className="text-sm text-gray-600 mb-1 font-medium">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 slide-up">
+              <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4">
+                <div className="text-sm text-gray-400 mb-1 font-medium">
                   Latest Measurement
                 </div>
-                <div className="text-2xl font-bold text-foreground">
+                <div className="text-2xl font-bold text-white">
                   {latestEntry.metrics[selectedMetric]?.toFixed(1)}
-                  <span className="text-sm font-normal text-secondary ml-1">
+                  <span className="text-sm font-normal text-yellow-500 ml-1">
                     {selectedMetric === "weight" ||
                     selectedMetric === "muscleMass"
                       ? "kg"
@@ -341,24 +343,24 @@ export default function ProgressPage() {
                       : "cm"}
                   </span>
                 </div>
-                <div className="text-xs text-gray-600 mt-1 font-medium">
+                <div className="text-xs text-gray-400 mt-1 font-medium">
                   {format(parseISO(latestEntry.date), "MMMM d, yyyy")}
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4">
-                <div className="text-sm text-gray-600 mb-1 font-medium">
+              <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4">
+                <div className="text-sm text-gray-400 mb-1 font-medium">
                   Change Over Time
                 </div>
                 <div className="flex items-center">
                   <div
                     className={`text-2xl font-bold ${
-                      change.isPositive ? "text-secondary" : "text-red-500"
+                      change.isPositive ? "text-yellow-500" : "text-red-500"
                     }`}
                   >
                     {change.isPositive ? "+" : "-"}
                     {change.value}
-                    <span className="text-sm font-normal text-gray-600 ml-1">
+                    <span className="text-sm font-normal text-gray-400 ml-1">
                       {selectedMetric === "weight" ||
                       selectedMetric === "muscleMass"
                         ? "kg"
@@ -372,27 +374,27 @@ export default function ProgressPage() {
                   <div
                     className={`ml-2 px-2 py-1 text-xs rounded-full ${
                       change.isPositive
-                        ? "bg-secondary/20 text-secondary"
-                        : "bg-red-100 text-red-800"
+                        ? "bg-yellow-500/20 text-yellow-500"
+                        : "bg-red-500/20 text-red-400"
                     }`}
                   >
                     {change.percentage}%
                   </div>
                 </div>
-                <div className="text-xs text-gray-600 mt-1 font-medium">
+                <div className="text-xs text-gray-400 mt-1 font-medium">
                   Since{" "}
                   {format(parseISO(earliestFilteredEntry.date), "MMMM d, yyyy")}
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4">
-                <div className="text-sm text-gray-600 mb-1 font-medium">
+              <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4">
+                <div className="text-sm text-gray-400 mb-1 font-medium">
                   Tracking Period
                 </div>
-                <div className="text-2xl font-bold text-primary">
+                <div className="text-2xl font-bold text-yellow-500">
                   {progressData.length} entries
                 </div>
-                <div className="text-xs text-gray-600 mt-1 font-medium">
+                <div className="text-xs text-gray-400 mt-1 font-medium">
                   {format(parseISO(progressData[0].date), "MMMM d, yyyy")} -
                   {format(
                     parseISO(progressData[progressData.length - 1].date),
@@ -404,8 +406,8 @@ export default function ProgressPage() {
           )}
 
           {/* Progress Chart */}
-          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 mb-6">
-            <h2 className="text-xl font-semibold mb-4 text-primary">
+          <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 mb-6 fade-in">
+            <h2 className="text-xl font-semibold mb-4 text-yellow-500">
               {metricLabels[selectedMetric]} Progress
             </h2>
             <div className="h-80">
@@ -414,25 +416,38 @@ export default function ProgressPage() {
                   data={chartData}
                   margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
                     tickMargin={10}
+                    stroke="#4B5563"
                   />
                   <YAxis
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
                     tickMargin={10}
                     domain={["auto", "auto"]}
+                    stroke="#4B5563"
                   />
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "#1F2937", 
+                      border: "1px solid #374151",
+                      borderRadius: "0.375rem",
+                      color: "#F9FAFB"
+                    }}
+                    itemStyle={{ color: "#EAB308" }}
+                    labelStyle={{ color: "#F9FAFB" }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ color: "#F9FAFB" }}
+                  />
                   <Line
                     type="monotone"
                     dataKey={selectedMetric}
                     name={metricLabels[selectedMetric]}
-                    stroke={getMetricColor(selectedMetric)}
-                    activeDot={{ r: 8 }}
+                    stroke="#EAB308"
+                    activeDot={{ r: 8, fill: "#EAB308" }}
                     strokeWidth={2}
                   />
                 </LineChart>
@@ -441,19 +456,22 @@ export default function ProgressPage() {
           </div>
 
           {/* Recent Entries */}
-          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-primary">
+          <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden slide-up">
+            <div className="p-4 border-b border-gray-700">
+              <h2 className="text-xl font-semibold text-yellow-500">
                 Recent Entries
               </h2>
+              <p className="text-gray-400 text-sm mt-1 hidden sm:block">
+                Scroll horizontally to view all metrics
+              </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-700">
+                <thead className="bg-gray-900">
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-yellow-500 uppercase tracking-wider sticky left-0 bg-gray-900"
                     >
                       Date
                     </th>
@@ -461,35 +479,35 @@ export default function ProgressPage() {
                       <th
                         key={key}
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider"
+                        className="px-6 py-3 text-left text-xs font-semibold text-yellow-500 uppercase tracking-wider"
                       >
                         {label}
                       </th>
                     ))}
                     <th
                       scope="col"
-                      className="px-6 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider"
+                      className="px-6 py-3 text-right text-xs font-semibold text-yellow-500 uppercase tracking-wider"
                     >
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-gray-800 divide-y divide-gray-700">
                   {progressData
                     .slice(-5)
                     .reverse()
                     .map((entry) => (
                       <tr
                         key={entry.id}
-                        className="hover:bg-gray-50 transition-colors"
+                        className="hover:bg-gray-700 transition-colors"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-0 bg-gray-800">
                           {format(parseISO(entry.date), "MMM d, yyyy")}
                         </td>
                         {Object.keys(metricLabels).map((key) => (
                           <td
                             key={key}
-                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium"
+                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium"
                           >
                             {entry.metrics[key as MetricType]?.toFixed(1) ||
                               "-"}
@@ -498,7 +516,7 @@ export default function ProgressPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <Link
                             href={`/progress/${entry.id}`}
-                            className="text-secondary hover:text-primary transition-colors"
+                            className="text-yellow-500 hover:text-yellow-400 transition-colors"
                           >
                             View
                           </Link>
@@ -508,10 +526,10 @@ export default function ProgressPage() {
                 </tbody>
               </table>
             </div>
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-4 border-t border-gray-700">
               <Link
                 href="/progress/history"
-                className="text-secondary hover:text-primary font-medium transition-colors"
+                className="text-yellow-500 hover:text-yellow-400 font-medium transition-colors"
               >
                 View All Entries
               </Link>
