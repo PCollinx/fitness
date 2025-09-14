@@ -16,6 +16,15 @@ export async function middleware(req: NextRequest) {
     "/profile",
   ];
 
+  // Handle root path - redirect to login if not authenticated, dashboard if authenticated
+  if (pathname === "/") {
+    if (!token) {
+      return NextResponse.redirect(new URL("/auth/signin", req.url));
+    } else {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
@@ -43,6 +52,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     // Add paths you want the middleware to run on
+    "/",
     "/dashboard/:path*",
     "/workouts/:path*",
     "/nutrition/:path*",

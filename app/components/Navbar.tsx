@@ -9,16 +9,16 @@ import {
   FaUtensils,
   FaChartLine,
   FaUser,
-  FaSearch,
-  FaBell,
   FaMusic,
   FaSignOutAlt,
   FaSignInAlt,
   FaUserPlus,
 } from "react-icons/fa";
+import { useUserProfile } from "../context/UserProfileContext";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const { userProfile } = useUserProfile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -36,6 +36,11 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [scrolled]);
+
+  // Determine the profile image to display
+  const profileImage = userProfile?.image || session?.user?.image || null;
+  const userName = userProfile?.name || session?.user?.name || "User";
+  const userInitial = userName.charAt(0) || "U";
 
   return (
     <nav className="fixed top-0 w-full z-50 transition-all duration-300 bg-gray-900 text-white border-b border-gray-800">
@@ -85,13 +90,6 @@ export default function Navbar() {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            <button className="p-2 rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
-              <FaSearch className="h-5 w-5" />
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
-              <FaBell className="h-5 w-5" />
-            </button>
-
             {/* Profile dropdown */}
             <div className="relative">
               <button
@@ -99,15 +97,15 @@ export default function Navbar() {
                 className="p-2 rounded-full hover:bg-gray-800 text-white flex items-center"
               >
                 {session?.user ? (
-                  session.user.image ? (
+                  profileImage ? (
                     <img
-                      src={session.user.image}
-                      alt={session.user.name || "User"}
-                      className="h-6 w-6 rounded-full"
+                      src={profileImage}
+                      alt={userName}
+                      className="h-6 w-6 rounded-full object-cover"
                     />
                   ) : (
                     <div className="bg-yellow-500 h-6 w-6 rounded-full flex items-center justify-center text-gray-900 font-bold">
-                      {session.user.name?.charAt(0) || "U"}
+                      {userInitial}
                     </div>
                   )
                 ) : (
@@ -121,7 +119,7 @@ export default function Navbar() {
                     <>
                       <div className="px-4 py-2 border-b border-gray-700">
                         <p className="text-sm font-medium text-white">
-                          {session.user.name}
+                          {userName}
                         </p>
                         <p className="text-xs text-gray-400 truncate">
                           {session.user.email}

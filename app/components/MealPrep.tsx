@@ -1,132 +1,182 @@
 "use client";
 
-import { useState } from "react";
-import { FaArrowLeft, FaStar, FaClock, FaFireAlt } from "react-icons/fa";
-import Image from "next/image";
-
-interface RecipeProps {
-  id: string;
-  title: string;
-  image: string;
-  prepTime: string;
-  calories: number;
-  rating: number;
-  ingredients: {
-    name: string;
-    amount: string;
-    calories: number;
-  }[];
-}
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { FaArrowLeft, FaHome } from "react-icons/fa";
+import { recipeData, RecipeProps } from "../data/recipes";
+import RecipeCard from "./RecipeCard";
 
 export default function MealPrep() {
   const [activeTab, setActiveTab] = useState("breakfast");
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  const recipe: RecipeProps = {
-    id: "eggs-avocado-toast",
-    title: "Eggs and avocado toast",
-    image: "/path/to/eggs-avocado-toast.jpg", // This would need to be updated with a real image
-    prepTime: "15 mins",
-    calories: 350,
-    rating: 4.8,
-    ingredients: [
-      { name: "Large eggs", amount: "2", calories: 156 },
-      { name: "Avocado", amount: "1/2", calories: 114 },
-      { name: "Whole grain bread", amount: "1 slice", calories: 80 },
-    ],
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('mealFavorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+  }, []);
+
+  // Save favorites to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('mealFavorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const handleToggleFavorite = (recipeId: string) => {
+    setFavorites(prev => {
+      if (prev.includes(recipeId)) {
+        return prev.filter(id => id !== recipeId);
+      } else {
+        return [...prev, recipeId];
+      }
+    });
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
   };
 
   const tabs = [
     { id: "breakfast", label: "Breakfast" },
     { id: "lunch", label: "Lunch" },
     { id: "dinner", label: "Dinner" },
-    { id: "dessert", label: "Dessert" },
     { id: "snack", label: "Snack" },
+    { id: "favorites", label: "Favorites" },
   ];
 
+  // Get favorite recipes
+  const getFavoriteRecipes = (): RecipeProps[] => {
+    const allRecipes = Object.values(recipeData).flat();
+    return allRecipes.filter(recipe => favorites.includes(recipe.id));
+  };
+
+  // Get recipes for the current tab
+  const getCurrentTabRecipes = (): RecipeProps[] => {
+    if (activeTab === 'favorites') {
+      return getFavoriteRecipes();
+    }
+    return recipeData[activeTab as keyof typeof recipeData] || [];
+  };
+
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-black text-white min-h-screen pb-20">
       {/* Header */}
-      <div className="p-4 flex items-center">
-        <button className="text-white p-2">
-          <FaArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="flex-1 text-center text-xl font-medium">Meal prep</h1>
-        <div className="w-10"></div> {/* Empty div for flex spacing */}
-      </div>
-
-      {/* Meal Image */}
-      <div className="relative h-72 w-full">
-        <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-          {/* This would be replaced with an actual image */}
-          <div className="text-center">
-            <p className="text-xl">Image Placeholder</p>
-            <p className="text-sm text-gray-400">Eggs and avocado toast</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Recipe Details */}
-      <div className="p-4 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{recipe.title}</h2>
-          <div className="flex items-center text-yellow-400">
-            <FaStar className="h-4 w-4" />
-            <span className="ml-1 text-sm">{recipe.rating}</span>
-          </div>
-        </div>
-
-        <div className="flex space-x-4 text-sm text-gray-300">
+      <div className="sticky top-0 z-20 bg-black bg-opacity-95 backdrop-blur-sm shadow-md">
+        <div className="p-4 flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center">
-            <FaClock className="h-4 w-4 mr-1" />
-            <span>{recipe.prepTime}</span>
+            <Link href="/" className="text-white p-2">
+              <FaArrowLeft className="h-5 w-5" />
+            </Link>
+            <h1 className="text-xl font-medium ml-2">Meal Prep</h1>
           </div>
-          <div className="flex items-center">
-            <FaFireAlt className="h-4 w-4 mr-1" />
-            <span>{recipe.calories} kcal</span>
-          </div>
+          <Link href="/" className="p-2 text-white">
+            <FaHome className="h-5 w-5" />
+          </Link>
         </div>
-
-        {/* Ingredients Section */}
-        <div>
-          <h3 className="text-xl font-medium mb-4">Ingredients</h3>
-          <div className="space-y-3">
-            {recipe.ingredients.map((ingredient, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between py-2 border-b border-gray-800"
+        
+        {/* Tabs for meal types */}
+        <div className="px-4 pb-2 overflow-x-auto no-scrollbar">
+          <div className="flex space-x-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`py-2 px-4 rounded-full text-sm whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-yellow-500 text-black font-medium"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }`}
+                onClick={() => handleTabChange(tab.id)}
               >
-                <div className="flex items-center">
-                  <div className="h-10 w-10 bg-gray-800 rounded-md mr-3"></div>
-                  <div>
-                    <p className="font-medium">{ingredient.name}</p>
-                    <p className="text-sm text-gray-400">{ingredient.amount}</p>
-                  </div>
-                </div>
-                <p className="text-gray-400">{ingredient.calories} kcal</p>
-              </div>
+                {tab.label}
+              </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Tabs for meal types */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4">
-        <div className="grid grid-cols-5 gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`py-2 rounded-md text-sm ${
-                activeTab === tab.id
-                  ? "bg-yellow-400 text-black font-medium"
-                  : "bg-transparent text-gray-400"
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="py-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-white mb-2">
+              {activeTab === 'favorites' 
+                ? 'Your Favorite Meals' 
+                : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Meals`}
+            </h2>
+            <p className="text-gray-400">
+              {activeTab === 'favorites'
+                ? 'Your saved favorite meals for quick access'
+                : `Simple and healthy ${activeTab} options for your meal plan`}
+            </p>
+          </div>
+          
+          {/* Recipe List */}
+          <div className="mb-8">
+            {getCurrentTabRecipes().length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getCurrentTabRecipes().map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onToggleFavorite={handleToggleFavorite}
+                    isFavorite={favorites.includes(recipe.id)}
+                    view="simple"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-gray-800 rounded-lg p-6 text-center">
+                {activeTab === 'favorites' ? (
+                  <div>
+                    <p className="text-gray-400 mb-2">You don't have any favorite meals yet.</p>
+                    <p className="text-gray-500 text-sm">Browse meals and click the heart icon to add favorites.</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400">No meals available in this category yet.</p>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Quick Access Compact View */}
+          {activeTab !== 'favorites' && favorites.length > 0 && (
+            <div>
+              <h3 className="text-lg font-medium text-white mb-4">Your Favorites</h3>
+              <div className="grid grid-cols-1 gap-2">
+                {getFavoriteRecipes().slice(0, 3).map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onToggleFavorite={handleToggleFavorite}
+                    isFavorite={true}
+                    view="compact"
+                  />
+                ))}
+                {favorites.length > 3 && (
+                  <button 
+                    className="bg-gray-800 rounded-lg p-3 text-gray-400 hover:bg-gray-700 transition-colors text-sm"
+                    onClick={() => setActiveTab('favorites')}
+                  >
+                    View all {favorites.length} favorites...
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+      
+      {/* Custom styles */}
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }

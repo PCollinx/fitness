@@ -429,19 +429,17 @@ export default function ProgressPage() {
                     domain={["auto", "auto"]}
                     stroke="#4B5563"
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "#1F2937", 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
                       border: "1px solid #374151",
                       borderRadius: "0.375rem",
-                      color: "#F9FAFB"
+                      color: "#F9FAFB",
                     }}
                     itemStyle={{ color: "#EAB308" }}
                     labelStyle={{ color: "#F9FAFB" }}
                   />
-                  <Legend 
-                    wrapperStyle={{ color: "#F9FAFB" }}
-                  />
+                  <Legend wrapperStyle={{ color: "#F9FAFB" }} />
                   <Line
                     type="monotone"
                     dataKey={selectedMetric}

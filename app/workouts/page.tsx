@@ -9,22 +9,9 @@ import {
   FaSearch,
   FaClock,
   FaStar,
-  FaFilter,
   FaPlayCircle,
 } from "react-icons/fa";
-
-type Workout = {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  intensity: string;
-  category: string;
-  rating: number;
-  image: string;
-  exercises: number;
-  lastPerformed?: string;
-};
+import { loadWorkouts, Workout } from "../utils/workoutStorage";
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -33,88 +20,13 @@ export default function WorkoutsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
-    // In a real app, fetch workouts from the API
-    // For now, we'll use mock data
+    // Set loading state
+    setIsLoading(true);
+    
     setTimeout(() => {
-      setWorkouts([
-        {
-          id: "1",
-          name: "Upper Body Focus",
-          description:
-            "Build strength in your chest, shoulders, and arms with this comprehensive upper body routine.",
-          duration: 45,
-          intensity: "High",
-          category: "strength",
-          rating: 4.8,
-          image: "https://source.unsplash.com/random/400x300/?fitness,weights",
-          exercises: 8,
-          lastPerformed: "2025-09-05",
-        },
-        {
-          id: "2",
-          name: "Core Crusher",
-          description:
-            "Strengthen your core with this targeted abdominal and lower back workout.",
-          duration: 30,
-          intensity: "Medium",
-          category: "strength",
-          rating: 4.6,
-          image: "https://source.unsplash.com/random/400x300/?abs,workout",
-          exercises: 6,
-          lastPerformed: "2025-09-08",
-        },
-        {
-          id: "3",
-          name: "HIIT Cardio Blast",
-          description:
-            "Burn calories fast with this high-intensity interval training session.",
-          duration: 25,
-          intensity: "High",
-          category: "cardio",
-          rating: 4.9,
-          image: "https://source.unsplash.com/random/400x300/?cardio,workout",
-          exercises: 10,
-          lastPerformed: "2025-09-01",
-        },
-        {
-          id: "4",
-          name: "Total Body Tone",
-          description:
-            "A complete full-body workout to build strength and endurance.",
-          duration: 50,
-          intensity: "Medium",
-          category: "strength",
-          rating: 4.7,
-          image: "https://source.unsplash.com/random/400x300/?workout,gym",
-          exercises: 12,
-          lastPerformed: "2025-09-03",
-        },
-        {
-          id: "5",
-          name: "Leg Day Challenge",
-          description:
-            "Build powerful legs with this comprehensive lower body workout.",
-          duration: 40,
-          intensity: "High",
-          category: "strength",
-          rating: 4.5,
-          image: "https://source.unsplash.com/random/400x300/?legs,squat",
-          exercises: 7,
-          lastPerformed: "2025-09-10",
-        },
-        {
-          id: "6",
-          name: "Flexibility Flow",
-          description:
-            "Improve your mobility and flexibility with this dynamic stretching routine.",
-          duration: 35,
-          intensity: "Low",
-          category: "flexibility",
-          rating: 4.4,
-          image: "https://source.unsplash.com/random/400x300/?stretch,yoga",
-          exercises: 9,
-        },
-      ]);
+      // Load both custom and default workouts
+      const allWorkouts = loadWorkouts();
+      setWorkouts(allWorkouts);
       setIsLoading(false);
     }, 500);
   }, []);
@@ -140,12 +52,9 @@ export default function WorkoutsPage() {
             Find the perfect workout for your goals
           </p>
         </div>
-        <div className="flex space-x-3 mt-4 sm:mt-0">
-          <button className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center">
-            <FaFilter className="mr-2" /> Filter
-          </button>
+        <div className="mt-4 sm:mt-0">
           <Link
-            href="/workouts/create"
+            href="/workouts/new"
             className="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded-lg flex items-center font-medium"
           >
             <FaPlus className="mr-2" /> Create
@@ -212,9 +121,16 @@ export default function WorkoutsPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                   <div className="p-4 w-full">
                     <div className="flex justify-between items-center">
-                      <span className="bg-yellow-400 text-black text-xs font-medium px-2 py-1 rounded capitalize">
-                        {workout.category}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="bg-yellow-400 text-black text-xs font-medium px-2 py-1 rounded capitalize">
+                          {workout.category}
+                        </span>
+                        {workout.isDefault && (
+                          <span className="bg-gray-700 text-gray-300 text-xs font-medium px-2 py-1 rounded">
+                            Default
+                          </span>
+                        )}
+                      </div>
                       <span className="flex items-center text-white">
                         <FaStar className="text-yellow-400 mr-1" />{" "}
                         {workout.rating}
@@ -260,7 +176,7 @@ export default function WorkoutsPage() {
               : "No workouts available in this category yet"}
           </p>
           <Link
-            href="/workouts/create"
+            href="/workouts/new"
             className="bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-3 rounded-lg flex items-center font-medium transition"
           >
             <FaPlus className="mr-2" />
