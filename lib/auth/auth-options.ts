@@ -72,7 +72,15 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+    async jwt({
+      token,
+      user,
+      account,
+    }: {
+      token: JWT;
+      user?: any;
+      account?: any;
+    }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -85,9 +93,13 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async signIn({ user, account, profile }) {
+      return true;
+    },
   },
   session: {
     strategy: "jwt" as const,
+    maxAge: 30 * 24 * 60 * 60, // 30 days by default
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

@@ -7,12 +7,12 @@ module.exports = {
   ],
   theme: {
     screens: {
-      'xs': '400px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
+      xs: "400px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
     },
     extend: {
       colors: {
@@ -23,7 +23,7 @@ module.exports = {
         gray: {
           800: "#1E1E1E", // Dark background
           900: "#121212", // Even darker background
-        }
+        },
       },
       fontFamily: {
         sans: ["Exo 2", "sans-serif"],

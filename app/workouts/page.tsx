@@ -22,7 +22,7 @@ export default function WorkoutsPage() {
   useEffect(() => {
     // Set loading state
     setIsLoading(true);
-    
+
     setTimeout(() => {
       // Load both custom and default workouts
       const allWorkouts = loadWorkouts();

@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { FaFireAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
-import { RecipeProps } from '../data/recipes';
+import { useState } from "react";
+import Image from "next/image";
+import { FaFireAlt, FaHeart, FaRegHeart } from "react-icons/fa";
+import { RecipeProps } from "../data/recipes";
 
 interface RecipeCardProps {
   recipe: RecipeProps;
   onToggleFavorite: (recipeId: string) => void;
   isFavorite: boolean;
-  view?: 'simple' | 'compact';
+  view?: "simple" | "compact";
 }
 
-export default function RecipeCard({ 
-  recipe, 
+export default function RecipeCard({
+  recipe,
   onToggleFavorite,
   isFavorite,
-  view = 'simple'
+  view = "simple",
 }: RecipeCardProps) {
   const [imageError, setImageError] = useState(false);
 
@@ -29,7 +29,7 @@ export default function RecipeCard({
     onToggleFavorite(recipe.id);
   };
 
-  if (view === 'compact') {
+  if (view === "compact") {
     return (
       <div className="bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 hover:bg-gray-750">
         <div className="flex items-center p-3">
@@ -39,17 +39,19 @@ export default function RecipeCard({
                 src={recipe.images[0]}
                 alt={recipe.title}
                 fill
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: "cover" }}
                 onError={handleImageError}
                 sizes="48px"
               />
             ) : (
               <div className="absolute inset-0 bg-gray-700 flex items-center justify-center">
-                <span className="text-gray-400 text-xs">{recipe.title.charAt(0)}</span>
+                <span className="text-gray-400 text-xs">
+                  {recipe.title.charAt(0)}
+                </span>
               </div>
             )}
           </div>
-          
+
           <div className="flex-1">
             <h3 className="font-medium text-white text-sm">{recipe.title}</h3>
             <div className="flex items-center text-xs text-gray-400">
@@ -57,11 +59,13 @@ export default function RecipeCard({
               <span>{recipe.calories} cal</span>
             </div>
           </div>
-          
-          <button 
+
+          <button
             onClick={handleFavoriteClick}
             className="ml-2 p-1.5"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-label={
+              isFavorite ? "Remove from favorites" : "Add to favorites"
+            }
           >
             {isFavorite ? (
               <FaHeart className="h-4 w-4 text-red-500" />
@@ -83,7 +87,7 @@ export default function RecipeCard({
             src={recipe.images[0]}
             alt={recipe.title}
             fill
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: "cover" }}
             onError={handleImageError}
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
           />
@@ -92,7 +96,7 @@ export default function RecipeCard({
             <span className="text-gray-400">{recipe.title}</span>
           </div>
         )}
-        <button 
+        <button
           onClick={handleFavoriteClick}
           className="absolute top-2 right-2 bg-black bg-opacity-70 rounded-full p-2"
           aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}

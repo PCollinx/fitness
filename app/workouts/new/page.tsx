@@ -17,7 +17,11 @@ import {
   FaWeightHanging,
   FaFire,
 } from "react-icons/fa";
-import { addWorkout, generateId, getRandomWorkoutImage } from "../../utils/workoutStorage";
+import {
+  addWorkout,
+  generateId,
+  getRandomWorkoutImage,
+} from "../../utils/workoutStorage";
 
 // Validation schema
 const workoutSchema = z.object({
@@ -25,7 +29,9 @@ const workoutSchema = z.object({
   description: z.string().optional(),
   isPublic: z.boolean().default(false),
   intensity: z.enum(["Low", "Medium", "High"]).default("Medium"),
-  category: z.enum(["Strength", "Cardio", "Flexibility", "HIIT", "Recovery"]).default("Strength"),
+  category: z
+    .enum(["Strength", "Cardio", "Flexibility", "HIIT", "Recovery"])
+    .default("Strength"),
   exercises: z
     .array(
       z.object({
@@ -53,7 +59,9 @@ export default function CreateWorkoutPage() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [visibleExerciseDropdown, setVisibleExerciseDropdown] = useState<number | null>(null);
+  const [visibleExerciseDropdown, setVisibleExerciseDropdown] = useState<
+    number | null
+  >(null);
 
   const {
     register,
@@ -108,11 +116,11 @@ export default function CreateWorkoutPage() {
 
     try {
       // Get the exercise names for each selected exercise
-      const workoutExercises = data.exercises.map(ex => {
-        const exercise = exercises.find(e => e.id === ex.exerciseId);
+      const workoutExercises = data.exercises.map((ex) => {
+        const exercise = exercises.find((e) => e.id === ex.exerciseId);
         return {
           ...ex,
-          exerciseName: exercise?.name || "Unknown Exercise"
+          exerciseName: exercise?.name || "Unknown Exercise",
         };
       });
 
@@ -124,7 +132,9 @@ export default function CreateWorkoutPage() {
       const newWorkout = {
         id: generateId(),
         name: data.name,
-        description: data.description || `Custom workout with ${data.exercises.length} exercises`,
+        description:
+          data.description ||
+          `Custom workout with ${data.exercises.length} exercises`,
         intensity: data.intensity,
         category: data.category.toLowerCase(),
         isPublic: data.isPublic,
@@ -134,7 +144,7 @@ export default function CreateWorkoutPage() {
         exercises: data.exercises.length,
         createdAt: new Date().toISOString(),
         lastPerformed: new Date().toISOString(),
-        workoutExercises
+        workoutExercises,
       };
 
       // Add the workout to storage
@@ -199,7 +209,7 @@ export default function CreateWorkoutPage() {
               <FaInfoCircle className="mr-2" />
               Workout Information
             </h2>
-            
+
             <div className="grid grid-cols-1 gap-6">
               <div>
                 <label
@@ -216,7 +226,9 @@ export default function CreateWorkoutPage() {
                   placeholder="e.g., Upper Body Power"
                 />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+                  <p className="mt-1 text-sm text-red-400">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
 
@@ -359,7 +371,9 @@ export default function CreateWorkoutPage() {
                           </span>
                           <svg
                             className={`h-5 w-5 text-gray-400 transition-transform ${
-                              visibleExerciseDropdown === index ? "transform rotate-180" : ""
+                              visibleExerciseDropdown === index
+                                ? "transform rotate-180"
+                                : ""
                             }`}
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -375,9 +389,11 @@ export default function CreateWorkoutPage() {
                         </button>
                         <input
                           type="hidden"
-                          {...register(`exercises.${index}.exerciseId` as const)}
+                          {...register(
+                            `exercises.${index}.exerciseId` as const
+                          )}
                         />
-                        
+
                         {visibleExerciseDropdown === index && (
                           <div className="absolute z-10 mt-1 w-full bg-gray-800 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-gray-700">
                             {Object.entries(exercisesByMuscleGroup).map(
@@ -404,7 +420,9 @@ export default function CreateWorkoutPage() {
                                               value: exercise.id,
                                             },
                                           } as React.ChangeEvent<HTMLInputElement>;
-                                          register(`exercises.${index}.exerciseId`).onChange(event);
+                                          register(
+                                            `exercises.${index}.exerciseId`
+                                          ).onChange(event);
                                           toggleExerciseDropdown(index);
                                         }}
                                       >

@@ -1,8 +1,19 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useSession } from 'next-auth/react';
-import { UserProfile, loadUserProfile, saveUserProfile, createUserProfile } from '../utils/userStorage/profileUtils';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { useSession } from "next-auth/react";
+import {
+  UserProfile,
+  loadUserProfile,
+  saveUserProfile,
+  createUserProfile,
+} from "../utils/userStorage/profileUtils";
 
 interface UserProfileContextType {
   userProfile: UserProfile | null;
@@ -24,30 +35,32 @@ interface UserProfileProviderProps {
   children: ReactNode;
 }
 
-export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ children }) => {
+export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({
+  children,
+}) => {
   const { data: session, status } = useSession();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadProfile = async () => {
-    if (status === 'loading') return;
-    
+    if (status === "loading") return;
+
     setIsLoading(true);
     try {
-      if (status === 'authenticated' && session?.user?.email) {
+      if (status === "authenticated" && session?.user?.email) {
         const userId = session.user.email;
         // Try to load existing profile
         const profile = await loadUserProfile(userId);
-        
+
         if (profile) {
           setUserProfile(profile);
         } else {
           // Create new profile if none exists
           const newProfile = await createUserProfile(
             userId,
-            session.user.email || '',
+            session.user.email || "",
             {
-              name: session.user.name || 'Fitness Enthusiast',
+              name: session.user.name || "Fitness Enthusiast",
               image: session.user.image || null,
             }
           );
@@ -57,7 +70,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
         setUserProfile(null);
       }
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      console.error("Error loading user profile:", error);
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +87,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
       await saveUserProfile(profile);
       setUserProfile(profile);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
       throw error;
     }
   };
@@ -85,7 +98,9 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
   };
 
   return (
-    <UserProfileContext.Provider value={{ userProfile, isLoading, updateUserProfile, refreshUserProfile }}>
+    <UserProfileContext.Provider
+      value={{ userProfile, isLoading, updateUserProfile, refreshUserProfile }}
+    >
       {children}
     </UserProfileContext.Provider>
   );

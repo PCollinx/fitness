@@ -12,6 +12,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +24,10 @@ export default function SignIn() {
         redirect: false,
         email,
         password,
+        // Set the session max age based on remember me state
+        ...(rememberMe
+          ? { callbackUrl: "/dashboard" }
+          : { maxAge: 60 * 60 * 24 }),
       });
 
       if (result?.error) {
@@ -104,6 +109,8 @@ export default function SignIn() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 bg-gray-800 text-yellow-500 focus:ring-yellow-500"
               />
               <label
@@ -149,12 +156,35 @@ export default function SignIn() {
 
           <div className="mt-6">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="group relative flex w-full justify-center rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+              onClick={async () => {
+                try {
+                  setIsLoading(true);
+                  setError("");
+
+                  const result = await signIn("google", {
+                    callbackUrl: "/dashboard",
+                    redirect: false,
+                  });
+
+                  if (result?.error) {
+                    setError("Failed to authenticate with Google");
+                  } else if (result?.url) {
+                    window.location.href = result.url;
+                  }
+                } catch (error) {
+                  setError(
+                    "Failed to authenticate with Google. Please try again."
+                  );
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              disabled={isLoading}
+              className="group relative flex w-full justify-center rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
             >
               <span className="flex items-center">
                 <FaGoogle className="mr-2 h-5 w-5 text-red-500" />
-                Google
+                {isLoading ? "Signing in..." : "Google"}
               </span>
             </button>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef } from 'react';
-import { FaCamera, FaUser } from 'react-icons/fa';
+import React, { useRef } from "react";
+import { FaCamera, FaUser } from "react-icons/fa";
 
 interface ProfileImageUploadProps {
   image: string | null;
@@ -16,7 +16,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   tempImage,
   isEditing,
   onUpload,
-  userName
+  userName,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,10 +28,10 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
     <div className="relative flex justify-center">
       <div className="relative">
         {/* Profile Image */}
-        {(image || tempImage) ? (
+        {image || tempImage ? (
           <div className="h-32 w-32 rounded-full overflow-hidden border-4 border-gray-900">
-            <img 
-              src={tempImage || image || '/default-avatar.png'} 
+            <img
+              src={tempImage || image || "/default-avatar.png"}
               alt={userName}
               className="h-full w-full object-cover"
             />
@@ -41,10 +41,10 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
             <FaUser className="h-16 w-16 text-gray-500" />
           </div>
         )}
-        
+
         {/* Upload Button */}
         {isEditing && (
-          <button 
+          <button
             onClick={triggerFileInput}
             className="absolute bottom-0 right-0 bg-yellow-500 text-black p-2 rounded-full hover:bg-yellow-400 transition-colors shadow-lg"
             aria-label="Upload profile picture"
@@ -52,9 +52,9 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
             <FaCamera />
           </button>
         )}
-        
+
         {/* Hidden File Input */}
-        <input 
+        <input
           type="file"
           ref={fileInputRef}
           className="hidden"

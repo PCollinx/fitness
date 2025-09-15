@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 
 generator client {
   provider        = "prisma-client-js"
@@ -61,6 +60,7 @@ model User {
   followers     Follow[]   @relation("following")
   following     Follow[]   @relation("follower")
   posts         Post[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model VerificationToken {
@@ -202,5 +202,16 @@ model Comment {
   updatedAt   DateTime   @updatedAt
   
   @@index([postId])
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires   DateTime
+  createdAt DateTime @default(now())
+
   @@index([userId])
 }

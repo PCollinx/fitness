@@ -17,10 +17,10 @@ export const MAX_FILE_SIZE = 5 * 1024 * 1024;
  * Allowed image mime types
  */
 export const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
 ];
 
 /**
@@ -28,13 +28,18 @@ export const ALLOWED_IMAGE_TYPES = [
  * @param file The image file to validate and process
  * @returns Promise resolving to validation result with base64 data if valid
  */
-export const validateAndProcessImage = (file: File): Promise<ImageValidationResult> => {
+export const validateAndProcessImage = (
+  file: File
+): Promise<ImageValidationResult> => {
   return new Promise((resolve) => {
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
       resolve({
         isValid: false,
-        message: `File size exceeds the 5MB limit. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`,
+        message: `File size exceeds the 5MB limit. Your file is ${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)}MB.`,
       });
       return;
     }
@@ -50,30 +55,30 @@ export const validateAndProcessImage = (file: File): Promise<ImageValidationResu
 
     // Process the file
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       if (e.target?.result) {
         // Successfully processed image
         resolve({
           isValid: true,
-          message: 'Image validated successfully.',
+          message: "Image validated successfully.",
           imageData: e.target.result as string,
         });
       } else {
         resolve({
           isValid: false,
-          message: 'Failed to read image file.',
+          message: "Failed to read image file.",
         });
       }
     };
-    
+
     reader.onerror = () => {
       resolve({
         isValid: false,
-        message: 'Error reading file: ' + reader.error?.message,
+        message: "Error reading file: " + reader.error?.message,
       });
     };
-    
+
     // Read the file as data URL (base64)
     reader.readAsDataURL(file);
   });
@@ -87,48 +92,48 @@ export const validateAndProcessImage = (file: File): Promise<ImageValidationResu
  * @returns Promise resolving to compressed image data
  */
 export const compressImage = (
-  imageData: string, 
-  quality = 0.8, 
+  imageData: string,
+  quality = 0.8,
   maxWidth = 1200
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = imageData;
-    
+
     img.onload = () => {
       // Create a canvas element
-      const canvas = document.createElement('canvas');
-      
+      const canvas = document.createElement("canvas");
+
       // Calculate new dimensions while maintaining aspect ratio
       let width = img.width;
       let height = img.height;
-      
+
       if (width > maxWidth) {
         const ratio = maxWidth / width;
         width = maxWidth;
         height = height * ratio;
       }
-      
+
       canvas.width = width;
       canvas.height = height;
-      
+
       // Draw the image on canvas
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (!ctx) {
-        reject(new Error('Failed to get canvas context'));
+        reject(new Error("Failed to get canvas context"));
         return;
       }
-      
+
       ctx.drawImage(img, 0, 0, width, height);
-      
+
       // Get the compressed image data
-      const compressedImageData = canvas.toDataURL('image/jpeg', quality);
-      
+      const compressedImageData = canvas.toDataURL("image/jpeg", quality);
+
       resolve(compressedImageData);
     };
-    
+
     img.onerror = () => {
-      reject(new Error('Failed to load image for compression'));
+      reject(new Error("Failed to load image for compression"));
     };
   });
 };

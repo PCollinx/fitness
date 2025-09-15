@@ -20,7 +20,11 @@ import {
   FaInfoCircle,
   FaTimes,
 } from "react-icons/fa";
-import { loadWorkouts, Workout, WorkoutExercise } from "../../utils/workoutStorage";
+import {
+  loadWorkouts,
+  Workout,
+  WorkoutExercise,
+} from "../../utils/workoutStorage";
 
 type Exercise = {
   id: string;
@@ -61,7 +65,9 @@ export default function WorkoutDetailPage({
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null
+  );
 
   useEffect(() => {
     // Load workout from storage or mock data
@@ -69,13 +75,13 @@ export default function WorkoutDetailPage({
 
     // Try to find the workout in our storage
     const allWorkouts = loadWorkouts();
-    const foundWorkout = allWorkouts.find(w => w.id === params.id);
+    const foundWorkout = allWorkouts.find((w) => w.id === params.id);
 
     setTimeout(() => {
       if (foundWorkout) {
         // Convert the stored workout to our WorkoutDetail type
-        const exercises = foundWorkout.workoutExercises 
-          ? foundWorkout.workoutExercises.map(ex => ({
+        const exercises = foundWorkout.workoutExercises
+          ? foundWorkout.workoutExercises.map((ex) => ({
               id: ex.exerciseId,
               name: ex.exerciseName,
               sets: ex.sets,
@@ -136,12 +142,12 @@ export default function WorkoutDetailPage({
       weight: 60,
       muscleGroup: "Shoulders",
     },
-    { 
-      id: "3", 
-      name: "Pull-up", 
-      sets: 3, 
-      reps: 8, 
-      muscleGroup: "Back" 
+    {
+      id: "3",
+      name: "Pull-up",
+      sets: 3,
+      reps: 8,
+      muscleGroup: "Back",
     },
     {
       id: "4",
@@ -172,14 +178,45 @@ export default function WorkoutDetailPage({
   // Helper function to determine muscle group from exercise name
   const getMuscleGroupForExercise = (name: string): string => {
     const lowerName = name.toLowerCase();
-    if (lowerName.includes('bench') || lowerName.includes('chest') || lowerName.includes('fly')) return 'Chest';
-    if (lowerName.includes('shoulder') || lowerName.includes('press') || lowerName.includes('delt')) return 'Shoulders';
-    if (lowerName.includes('back') || lowerName.includes('row') || lowerName.includes('pull')) return 'Back';
-    if (lowerName.includes('bicep') || lowerName.includes('curl') || lowerName.includes('arm')) return 'Arms';
-    if (lowerName.includes('tricep') || lowerName.includes('extension')) return 'Arms';
-    if (lowerName.includes('leg') || lowerName.includes('squat') || lowerName.includes('lunge')) return 'Legs';
-    if (lowerName.includes('abs') || lowerName.includes('core') || lowerName.includes('plank')) return 'Core';
-    return 'Other';
+    if (
+      lowerName.includes("bench") ||
+      lowerName.includes("chest") ||
+      lowerName.includes("fly")
+    )
+      return "Chest";
+    if (
+      lowerName.includes("shoulder") ||
+      lowerName.includes("press") ||
+      lowerName.includes("delt")
+    )
+      return "Shoulders";
+    if (
+      lowerName.includes("back") ||
+      lowerName.includes("row") ||
+      lowerName.includes("pull")
+    )
+      return "Back";
+    if (
+      lowerName.includes("bicep") ||
+      lowerName.includes("curl") ||
+      lowerName.includes("arm")
+    )
+      return "Arms";
+    if (lowerName.includes("tricep") || lowerName.includes("extension"))
+      return "Arms";
+    if (
+      lowerName.includes("leg") ||
+      lowerName.includes("squat") ||
+      lowerName.includes("lunge")
+    )
+      return "Legs";
+    if (
+      lowerName.includes("abs") ||
+      lowerName.includes("core") ||
+      lowerName.includes("plank")
+    )
+      return "Core";
+    return "Other";
   };
 
   // Format date to be more readable
@@ -295,9 +332,9 @@ export default function WorkoutDetailPage({
       <div className="relative overflow-hidden rounded-xl mb-4 sm:mb-6 transition-all scale-in">
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/70 to-gray-900"></div>
         <div className="relative h-36 sm:h-48 md:h-64 lg:h-80">
-          <img 
-            src={workout.image} 
-            alt={workout.name} 
+          <img
+            src={workout.image}
+            alt={workout.name}
             className="w-full h-full object-cover"
           />
         </div>
@@ -315,9 +352,13 @@ export default function WorkoutDetailPage({
               <FaStar className="mr-1" /> {workout.rating}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{workout.name}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">
+            {workout.name}
+          </h1>
           {workout.description && (
-            <p className="text-sm sm:text-base text-gray-300 mb-2 sm:mb-4 max-w-3xl">{workout.description}</p>
+            <p className="text-sm sm:text-base text-gray-300 mb-2 sm:mb-4 max-w-3xl">
+              {workout.description}
+            </p>
           )}
         </div>
       </div>
@@ -331,11 +372,13 @@ export default function WorkoutDetailPage({
             </div>
             <div>
               <p className="text-gray-400 text-xs sm:text-sm">Duration</p>
-              <p className="text-white font-bold text-base sm:text-lg">{estimateWorkoutDuration()}</p>
+              <p className="text-white font-bold text-base sm:text-lg">
+                {estimateWorkoutDuration()}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
           <div className="flex items-center">
             <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
@@ -343,11 +386,13 @@ export default function WorkoutDetailPage({
             </div>
             <div>
               <p className="text-gray-400 text-xs sm:text-sm">Exercises</p>
-              <p className="text-white font-bold text-base sm:text-lg">{workout.exercises.length} exercises</p>
+              <p className="text-white font-bold text-base sm:text-lg">
+                {workout.exercises.length} exercises
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
           <div className="flex items-center">
             <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
@@ -355,11 +400,13 @@ export default function WorkoutDetailPage({
             </div>
             <div>
               <p className="text-gray-400 text-xs sm:text-sm">Completions</p>
-              <p className="text-white font-bold text-base sm:text-lg">{workout.completions} times</p>
+              <p className="text-white font-bold text-base sm:text-lg">
+                {workout.completions} times
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
           <div className="flex items-center">
             <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
@@ -367,7 +414,9 @@ export default function WorkoutDetailPage({
             </div>
             <div>
               <p className="text-gray-400 text-xs sm:text-sm">Created by</p>
-              <p className="text-white font-bold text-base sm:text-lg">{workout.userName}</p>
+              <p className="text-white font-bold text-base sm:text-lg">
+                {workout.userName}
+              </p>
             </div>
           </div>
         </div>
@@ -382,7 +431,7 @@ export default function WorkoutDetailPage({
           <FaPlay className="mr-2" />
           <span>Start Workout</span>
         </Link>
-        
+
         {!workout.isDefault && (
           <>
             <Link
@@ -392,7 +441,7 @@ export default function WorkoutDetailPage({
               <FaEdit className="mr-2" />
               <span>Edit</span>
             </Link>
-            
+
             <button
               onClick={handleDeleteWorkout}
               className={`w-full xs:flex-1 md:w-auto py-2 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center transition-all ${
@@ -412,7 +461,9 @@ export default function WorkoutDetailPage({
       <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden border border-gray-800 slide-up">
         <div className="p-3 sm:p-5 border-b border-gray-800 flex items-center">
           <FaClipboardList className="text-yellow-500 mr-2 sm:mr-3" />
-          <h2 className="text-lg sm:text-xl font-bold text-white">Workout Exercises</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-white">
+            Workout Exercises
+          </h2>
         </div>
 
         <div className="p-3 sm:p-5">
@@ -422,39 +473,47 @@ export default function WorkoutDetailPage({
                 <h3 className="font-semibold text-yellow-500 mb-2 sm:mb-4 flex items-center">
                   <FaLayerGroup className="mr-2" /> {muscleGroup}
                 </h3>
-                
+
                 <div className="grid gap-2 sm:gap-4">
                   {exercises.map((exercise) => (
-                    <div 
-                      key={exercise.id} 
+                    <div
+                      key={exercise.id}
                       className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 cursor-pointer transition-all"
                       onClick={() => openExerciseModal(exercise)}
                     >
                       <div className="flex flex-wrap sm:flex-nowrap justify-between items-center">
                         <div className="w-full sm:w-auto mb-2 sm:mb-0">
-                          <h4 className="text-white font-medium text-base sm:text-lg">{exercise.name}</h4>
+                          <h4 className="text-white font-medium text-base sm:text-lg">
+                            {exercise.name}
+                          </h4>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4">
                           <div className="bg-gray-700 rounded-lg px-2 sm:px-3 py-1 flex items-center text-sm">
                             <FaLayerGroup className="text-yellow-500 mr-1 sm:mr-2" />
-                            <span className="text-gray-200">{exercise.sets} sets</span>
+                            <span className="text-gray-200">
+                              {exercise.sets} sets
+                            </span>
                           </div>
-                          
+
                           <div className="bg-gray-700 rounded-lg px-2 sm:px-3 py-1 flex items-center text-sm">
                             <FaClipboardList className="text-yellow-500 mr-1 sm:mr-2" />
-                            <span className="text-gray-200">{exercise.reps} reps</span>
+                            <span className="text-gray-200">
+                              {exercise.reps} reps
+                            </span>
                           </div>
-                          
+
                           {exercise.weight && (
                             <div className="bg-gray-700 rounded-lg px-2 sm:px-3 py-1 flex items-center text-sm">
                               <FaWeightHanging className="text-yellow-500 mr-1 sm:mr-2" />
-                              <span className="text-gray-200">{exercise.weight} kg</span>
+                              <span className="text-gray-200">
+                                {exercise.weight} kg
+                              </span>
                             </div>
                           )}
                         </div>
                       </div>
-                      
+
                       {exercise.notes && (
                         <div className="mt-2 sm:mt-3 text-gray-400 text-xs sm:text-sm">
                           <span className="flex items-start">
@@ -503,20 +562,22 @@ export default function WorkoutDetailPage({
       {/* Exercise Detail Modal */}
       {modalOpen && selectedExercise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 fade-in">
-          <div 
+          <div
             className="bg-gray-800 rounded-lg shadow-xl w-full max-w-sm sm:max-w-lg mx-auto overflow-hidden border border-gray-700 scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center p-3 sm:p-5 border-b border-gray-700">
-              <h3 className="text-lg sm:text-xl font-bold text-white">{selectedExercise.name}</h3>
-              <button 
+              <h3 className="text-lg sm:text-xl font-bold text-white">
+                {selectedExercise.name}
+              </h3>
+              <button
                 onClick={closeModal}
                 className="text-gray-400 hover:text-white transition-all"
               >
                 <FaTimes className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="p-3 sm:p-5">
               <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
                 <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-center">
@@ -524,45 +585,55 @@ export default function WorkoutDetailPage({
                     <FaLayerGroup className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                   <div className="text-xs sm:text-sm text-gray-400">Sets</div>
-                  <div className="text-white font-bold text-sm sm:text-base">{selectedExercise.sets}</div>
+                  <div className="text-white font-bold text-sm sm:text-base">
+                    {selectedExercise.sets}
+                  </div>
                 </div>
-                
+
                 <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-center">
                   <div className="text-yellow-500 flex justify-center mb-1">
                     <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                   <div className="text-xs sm:text-sm text-gray-400">Reps</div>
-                  <div className="text-white font-bold text-sm sm:text-base">{selectedExercise.reps}</div>
+                  <div className="text-white font-bold text-sm sm:text-base">
+                    {selectedExercise.reps}
+                  </div>
                 </div>
-                
+
                 <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-center">
                   <div className="text-yellow-500 flex justify-center mb-1">
                     <FaWeightHanging className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                   <div className="text-xs sm:text-sm text-gray-400">Weight</div>
                   <div className="text-white font-bold text-sm sm:text-base">
-                    {selectedExercise.weight ? `${selectedExercise.weight} kg` : '-'}
+                    {selectedExercise.weight
+                      ? `${selectedExercise.weight} kg`
+                      : "-"}
                   </div>
                 </div>
               </div>
-              
+
               <div className="mb-3 sm:mb-4">
-                <div className="text-xs sm:text-sm text-gray-400 mb-1">Muscle Group</div>
+                <div className="text-xs sm:text-sm text-gray-400 mb-1">
+                  Muscle Group
+                </div>
                 <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-white text-sm sm:text-base">
                   {selectedExercise.muscleGroup || "Not specified"}
                 </div>
               </div>
-              
+
               {selectedExercise.notes && (
                 <div>
-                  <div className="text-xs sm:text-sm text-gray-400 mb-1">Notes</div>
+                  <div className="text-xs sm:text-sm text-gray-400 mb-1">
+                    Notes
+                  </div>
                   <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-gray-200 text-xs sm:text-sm">
                     {selectedExercise.notes}
                   </div>
                 </div>
               )}
             </div>
-            
+
             <div className="p-3 sm:p-5 border-t border-gray-700 flex justify-end">
               <button
                 onClick={closeModal}

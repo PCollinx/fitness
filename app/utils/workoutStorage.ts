@@ -41,7 +41,7 @@ export const defaultWorkouts: Workout[] = [
     lastPerformed: "2025-09-05",
     createdAt: "2025-09-01T12:00:00Z",
     isPublic: true,
-    isDefault: true
+    isDefault: true,
   },
   {
     id: "default-2",
@@ -57,7 +57,7 @@ export const defaultWorkouts: Workout[] = [
     lastPerformed: "2025-09-08",
     createdAt: "2025-09-02T12:00:00Z",
     isPublic: true,
-    isDefault: true
+    isDefault: true,
   },
   {
     id: "default-3",
@@ -73,7 +73,7 @@ export const defaultWorkouts: Workout[] = [
     lastPerformed: "2025-09-01",
     createdAt: "2025-09-03T12:00:00Z",
     isPublic: true,
-    isDefault: true
+    isDefault: true,
   },
   {
     id: "default-4",
@@ -89,7 +89,7 @@ export const defaultWorkouts: Workout[] = [
     lastPerformed: "2025-09-03",
     createdAt: "2025-09-04T12:00:00Z",
     isPublic: true,
-    isDefault: true
+    isDefault: true,
   },
   {
     id: "default-5",
@@ -105,7 +105,7 @@ export const defaultWorkouts: Workout[] = [
     lastPerformed: "2025-09-10",
     createdAt: "2025-09-05T12:00:00Z",
     isPublic: true,
-    isDefault: true
+    isDefault: true,
   },
   {
     id: "default-6",
@@ -120,31 +120,31 @@ export const defaultWorkouts: Workout[] = [
     exercises: 9,
     createdAt: "2025-09-06T12:00:00Z",
     isPublic: true,
-    isDefault: true
+    isDefault: true,
   },
 ];
 
 // Load custom workouts from localStorage
 export const loadCustomWorkouts = (): Workout[] => {
-  if (typeof window === 'undefined') return [];
-  
+  if (typeof window === "undefined") return [];
+
   try {
-    const savedWorkouts = localStorage.getItem('customWorkouts');
+    const savedWorkouts = localStorage.getItem("customWorkouts");
     return savedWorkouts ? JSON.parse(savedWorkouts) : [];
   } catch (error) {
-    console.error('Error loading custom workouts from localStorage:', error);
+    console.error("Error loading custom workouts from localStorage:", error);
     return [];
   }
 };
 
 // Save custom workouts to localStorage
 export const saveCustomWorkouts = (workouts: Workout[]): void => {
-  if (typeof window === 'undefined') return;
-  
+  if (typeof window === "undefined") return;
+
   try {
-    localStorage.setItem('customWorkouts', JSON.stringify(workouts));
+    localStorage.setItem("customWorkouts", JSON.stringify(workouts));
   } catch (error) {
-    console.error('Error saving custom workouts to localStorage:', error);
+    console.error("Error saving custom workouts to localStorage:", error);
   }
 };
 
@@ -168,7 +168,8 @@ export const generateId = (): string => {
 
 // Get random image for workout
 export const getRandomWorkoutImage = (): string => {
-  const categories = ['fitness', 'gym', 'workout', 'weights', 'strength'];
-  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  const categories = ["fitness", "gym", "workout", "weights", "strength"];
+  const randomCategory =
+    categories[Math.floor(Math.random() * categories.length)];
   return `https://source.unsplash.com/random/400x300/?${randomCategory}`;
 };
