@@ -11,12 +11,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Alternative configuration using SendGrid
-// import sgMail from '@sendgrid/mail';
-// if (process.env.SENDGRID_API_KEY) {
-//   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-// }
-
 /**
  * Send a password reset email
  * @param to Recipient email address
@@ -65,15 +59,6 @@ export async function sendPasswordResetEmail(
   try {
     // Using Nodemailer
     await transporter.sendMail(mailOptions);
-
-    // Alternative using SendGrid
-    // await sgMail.send({
-    //   to,
-    //   from: process.env.EMAIL_FROM || 'noreply@mytrainer.com',
-    //   subject: 'Reset Your Password - MyTrainer App',
-    //   text: mailOptions.text,
-    //   html: mailOptions.html,
-    // });
 
     return { success: true };
   } catch (error) {
