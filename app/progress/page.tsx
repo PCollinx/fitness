@@ -240,7 +240,7 @@ export default function ProgressPage() {
           Progress Tracking
         </h1>
         <Link
-          href="/progress/new"
+          href="/progress/new?from=progress"
           className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md flex items-center transition-colors font-medium fade-in w-full sm:w-auto justify-center sm:justify-start"
         >
           <FaPlus className="mr-2" />
@@ -263,7 +263,7 @@ export default function ProgressPage() {
             time
           </p>
           <Link
-            href="/progress/new"
+            href="/progress/new?from=progress"
             className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md inline-flex items-center transition-colors font-medium"
           >
             <FaPlus className="mr-2" />

@@ -10,7 +10,6 @@ export async function middleware(req: NextRequest) {
   const protectedRoutes = [
     "/dashboard",
     "/workouts",
-    "/nutrition",
     "/progress",
     "/social",
     "/profile",
@@ -55,7 +54,6 @@ export const config = {
     "/",
     "/dashboard/:path*",
     "/workouts/:path*",
-    "/nutrition/:path*",
     "/progress/:path*",
     "/social/:path*",
     "/profile/:path*",

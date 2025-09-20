@@ -24,6 +24,8 @@ import {
   loadWorkouts,
   Workout,
   WorkoutExercise,
+  deleteWorkout,
+  canDeleteWorkout,
 } from "../../utils/workoutStorage";
 
 type Exercise = {
@@ -253,20 +255,36 @@ export default function WorkoutDetailPage({
 
   // Handle workout deletion
   const handleDeleteWorkout = async () => {
+    if (!workout || !canDeleteWorkout(workout.id)) {
+      console.warn("Cannot delete this workout - it may be a default workout");
+      return;
+    }
+
     if (!deleteConfirm) {
       setDeleteConfirm(true);
       return;
     }
 
     try {
-      // In a real app, send a delete request to the API
-      // For now, we'll just simulate an API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      setIsLoading(true);
 
-      // Redirect to the workouts page
-      router.push("/workouts");
+      // Delete the workout from localStorage
+      const success = deleteWorkout(workout.id);
+
+      if (success) {
+        // Add a small delay for UX
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Redirect to the workouts page
+        router.push("/workouts");
+      } else {
+        console.error("Failed to delete workout");
+        setDeleteConfirm(false);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error("Error deleting workout:", error);
+      setDeleteConfirm(false);
+      setIsLoading(false);
     }
   };
 
@@ -317,46 +335,52 @@ export default function WorkoutDetailPage({
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 mt-4 sm:mt-16 fade-in">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 mt-2 sm:mt-16 fade-in max-w-6xl">
       <div className="mb-4 sm:mb-6 flex items-center">
         <button
           onClick={() => router.back()}
-          className="text-yellow-500 hover:text-yellow-400 flex items-center transition-all"
+          className="text-yellow-500 hover:text-yellow-400 flex items-center transition-all text-sm sm:text-base"
         >
-          <FaArrowLeft className="mr-2" />
-          <span>Back to Workouts</span>
+          <FaArrowLeft className="mr-2 text-xs sm:text-sm" />
+          <span className="hidden xs:inline">Back to Workouts</span>
+          <span className="xs:hidden">Back</span>
         </button>
       </div>
 
       {/* Workout Header */}
-      <div className="relative overflow-hidden rounded-xl mb-4 sm:mb-6 transition-all scale-in">
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/70 to-gray-900"></div>
-        <div className="relative h-36 sm:h-48 md:h-64 lg:h-80">
+      <div className="relative overflow-hidden rounded-lg sm:rounded-xl mb-4 sm:mb-6 transition-all scale-in">
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/70 to-gray-900/90"></div>
+        <div className="relative h-40 xs:h-48 sm:h-56 md:h-64 lg:h-72">
           <img
             src={workout.image}
             alt={workout.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src =
+                "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center&auto=format";
+            }}
           />
         </div>
-        <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-6">
-          <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
-            <span className="bg-yellow-500 text-gray-900 text-xs font-medium px-2 py-1 rounded capitalize">
+        <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className="bg-yellow-500 text-gray-900 text-xs sm:text-sm font-medium px-2.5 py-1 rounded capitalize">
               {workout.category}
             </span>
             {workout.isDefault && (
-              <span className="bg-gray-700 text-gray-200 text-xs font-medium px-2 py-1 rounded">
+              <span className="bg-gray-700 text-gray-200 text-xs sm:text-sm font-medium px-2.5 py-1 rounded">
                 Default
               </span>
             )}
-            <span className="bg-gray-800/80 text-yellow-500 text-xs font-medium px-2 py-1 rounded flex items-center">
-              <FaStar className="mr-1" /> {workout.rating}
+            <span className="bg-gray-800/90 text-yellow-500 text-xs sm:text-sm font-medium px-2.5 py-1 rounded flex items-center">
+              <FaStar className="mr-1 text-xs" /> {workout.rating}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">
+          <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-3 leading-tight">
             {workout.name}
           </h1>
           {workout.description && (
-            <p className="text-sm sm:text-base text-gray-300 mb-2 sm:mb-4 max-w-3xl">
+            <p className="text-xs xs:text-sm sm:text-base text-gray-200 mb-0 sm:mb-2 max-w-3xl leading-relaxed line-clamp-3 sm:line-clamp-none">
               {workout.description}
             </p>
           )}
@@ -364,57 +388,63 @@ export default function WorkoutDetailPage({
       </div>
 
       {/* Workout Info Cards */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8 slide-up">
-        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-8 slide-up">
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all">
           <div className="flex items-center">
-            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
-              <FaClock className="text-yellow-500 h-5 w-5 sm:h-6 sm:w-6" />
+            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
+              <FaClock className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-gray-400 text-xs sm:text-sm">Duration</p>
-              <p className="text-white font-bold text-base sm:text-lg">
+            <div className="min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm truncate">
+                Duration
+              </p>
+              <p className="text-white font-bold text-sm xs:text-base sm:text-lg truncate">
                 {estimateWorkoutDuration()}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all">
           <div className="flex items-center">
-            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
-              <FaDumbbell className="text-yellow-500 h-5 w-5 sm:h-6 sm:w-6" />
+            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
+              <FaDumbbell className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-gray-400 text-xs sm:text-sm">Exercises</p>
-              <p className="text-white font-bold text-base sm:text-lg">
-                {workout.exercises.length} exercises
+            <div className="min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm truncate">
+                Exercises
+              </p>
+              <p className="text-white font-bold text-sm xs:text-base sm:text-lg truncate">
+                {workout.exercises.length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all">
           <div className="flex items-center">
-            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
-              <FaHistory className="text-yellow-500 h-5 w-5 sm:h-6 sm:w-6" />
+            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
+              <FaHistory className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-gray-400 text-xs sm:text-sm">Completions</p>
-              <p className="text-white font-bold text-base sm:text-lg">
-                {workout.completions} times
+            <div className="min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm truncate">Times</p>
+              <p className="text-white font-bold text-sm xs:text-base sm:text-lg truncate">
+                {workout.completions}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all">
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all col-span-2 lg:col-span-1">
           <div className="flex items-center">
-            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-3 mr-3 sm:mr-4">
-              <FaUser className="text-yellow-500 h-5 w-5 sm:h-6 sm:w-6" />
+            <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
+              <FaUser className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-gray-400 text-xs sm:text-sm">Created by</p>
-              <p className="text-white font-bold text-base sm:text-lg">
+            <div className="min-w-0">
+              <p className="text-gray-400 text-xs sm:text-sm truncate">
+                Created by
+              </p>
+              <p className="text-white font-bold text-sm xs:text-base sm:text-lg truncate">
                 {workout.userName}
               </p>
             </div>
@@ -423,12 +453,12 @@ export default function WorkoutDetailPage({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 mb-4 sm:mb-8 slide-in-right">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-6 sm:mb-8 slide-in-right">
         <Link
           href={`/workouts/start/${workout.id}`}
-          className="w-full xs:flex-1 md:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center font-semibold transition-all"
+          className="w-full sm:flex-1 bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center font-semibold transition-all text-sm sm:text-base"
         >
-          <FaPlay className="mr-2" />
+          <FaPlay className="mr-2 text-xs sm:text-sm" />
           <span>Start Workout</span>
         </Link>
 
@@ -436,22 +466,29 @@ export default function WorkoutDetailPage({
           <>
             <Link
               href={`/workouts/edit/${workout.id}`}
-              className="w-full xs:flex-1 md:w-auto bg-gray-700 hover:bg-gray-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center transition-all"
+              className="w-full sm:flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center transition-all text-sm sm:text-base"
             >
-              <FaEdit className="mr-2" />
-              <span>Edit</span>
+              <FaEdit className="mr-2 text-xs sm:text-sm" />
+              <span className="hidden xs:inline">Edit Workout</span>
+              <span className="xs:hidden">Edit</span>
             </Link>
 
             <button
               onClick={handleDeleteWorkout}
-              className={`w-full xs:flex-1 md:w-auto py-2 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center transition-all ${
+              disabled={isLoading}
+              className={`w-full sm:flex-1 py-3 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed ${
                 deleteConfirm
                   ? "bg-red-600 hover:bg-red-700 text-white"
                   : "bg-gray-700 hover:bg-gray-600 text-white"
               }`}
             >
-              <FaTrash className="mr-2" />
-              <span>{deleteConfirm ? "Confirm Delete" : "Delete"}</span>
+              <FaTrash className="mr-2 text-xs sm:text-sm" />
+              <span className="hidden xs:inline">
+                {deleteConfirm ? "Confirm Delete" : "Delete Workout"}
+              </span>
+              <span className="xs:hidden">
+                {deleteConfirm ? "Confirm" : "Delete"}
+              </span>
             </button>
           </>
         )}
@@ -478,36 +515,36 @@ export default function WorkoutDetailPage({
                   {exercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 cursor-pointer transition-all"
+                      className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 cursor-pointer transition-all active:scale-95"
                       onClick={() => openExerciseModal(exercise)}
                     >
-                      <div className="flex flex-wrap sm:flex-nowrap justify-between items-center">
-                        <div className="w-full sm:w-auto mb-2 sm:mb-0">
-                          <h4 className="text-white font-medium text-base sm:text-lg">
+                      <div className="space-y-2 sm:space-y-0 sm:flex sm:justify-between sm:items-center">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white font-medium text-sm sm:text-base lg:text-lg truncate">
                             {exercise.name}
                           </h4>
                         </div>
 
-                        <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4">
-                          <div className="bg-gray-700 rounded-lg px-2 sm:px-3 py-1 flex items-center text-sm">
-                            <FaLayerGroup className="text-yellow-500 mr-1 sm:mr-2" />
-                            <span className="text-gray-200">
-                              {exercise.sets} sets
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3">
+                          <div className="bg-gray-700 rounded px-2 sm:px-2.5 py-1 flex items-center text-xs sm:text-sm">
+                            <FaLayerGroup className="text-yellow-500 mr-1 text-xs" />
+                            <span className="text-gray-200 font-medium">
+                              {exercise.sets}
                             </span>
                           </div>
 
-                          <div className="bg-gray-700 rounded-lg px-2 sm:px-3 py-1 flex items-center text-sm">
-                            <FaClipboardList className="text-yellow-500 mr-1 sm:mr-2" />
-                            <span className="text-gray-200">
-                              {exercise.reps} reps
+                          <div className="bg-gray-700 rounded px-2 sm:px-2.5 py-1 flex items-center text-xs sm:text-sm">
+                            <FaClipboardList className="text-yellow-500 mr-1 text-xs" />
+                            <span className="text-gray-200 font-medium">
+                              {exercise.reps}
                             </span>
                           </div>
 
                           {exercise.weight && (
-                            <div className="bg-gray-700 rounded-lg px-2 sm:px-3 py-1 flex items-center text-sm">
-                              <FaWeightHanging className="text-yellow-500 mr-1 sm:mr-2" />
-                              <span className="text-gray-200">
-                                {exercise.weight} kg
+                            <div className="bg-gray-700 rounded px-2 sm:px-2.5 py-1 flex items-center text-xs sm:text-sm">
+                              <FaWeightHanging className="text-yellow-500 mr-1 text-xs" />
+                              <span className="text-gray-200 font-medium">
+                                {exercise.weight}kg
                               </span>
                             </div>
                           )}
@@ -515,11 +552,13 @@ export default function WorkoutDetailPage({
                       </div>
 
                       {exercise.notes && (
-                        <div className="mt-2 sm:mt-3 text-gray-400 text-xs sm:text-sm">
-                          <span className="flex items-start">
-                            <FaInfoCircle className="text-yellow-500 mr-2 mt-1 flex-shrink-0" />
-                            {exercise.notes}
-                          </span>
+                        <div className="mt-2 text-gray-400 text-xs sm:text-sm">
+                          <div className="flex items-start">
+                            <FaInfoCircle className="text-yellow-500 mr-2 mt-0.5 flex-shrink-0 text-xs" />
+                            <span className="leading-relaxed">
+                              {exercise.notes}
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -561,83 +600,89 @@ export default function WorkoutDetailPage({
 
       {/* Exercise Detail Modal */}
       {modalOpen && selectedExercise && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 fade-in">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-gray-900/80 backdrop-blur-sm fade-in">
           <div
-            className="bg-gray-800 rounded-lg shadow-xl w-full max-w-sm sm:max-w-lg mx-auto overflow-hidden border border-gray-700 scale-in"
+            className="bg-gray-800 rounded-t-xl sm:rounded-lg shadow-xl w-full max-w-sm sm:max-w-lg mx-auto overflow-hidden border-t sm:border border-gray-700 scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center p-3 sm:p-5 border-b border-gray-700">
-              <h3 className="text-lg sm:text-xl font-bold text-white">
+            <div className="flex justify-between items-center p-4 sm:p-5 border-b border-gray-700">
+              <h3 className="text-base sm:text-lg font-bold text-white pr-4 truncate">
                 {selectedExercise.name}
               </h3>
               <button
                 onClick={closeModal}
-                className="text-gray-400 hover:text-white transition-all"
+                className="text-gray-400 hover:text-white transition-all p-1 rounded-full hover:bg-gray-700"
               >
-                <FaTimes className="h-5 w-5" />
+                <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
 
-            <div className="p-3 sm:p-5">
-              <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-center">
-                  <div className="text-yellow-500 flex justify-center mb-1">
+            <div className="p-4 sm:p-5 max-h-[70vh] sm:max-h-none overflow-y-auto">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="bg-gray-700 p-3 sm:p-3 rounded-lg text-center">
+                  <div className="text-yellow-500 flex justify-center mb-1.5">
                     <FaLayerGroup className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-400">Sets</div>
-                  <div className="text-white font-bold text-sm sm:text-base">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-1">
+                    Sets
+                  </div>
+                  <div className="text-white font-bold text-base sm:text-lg">
                     {selectedExercise.sets}
                   </div>
                 </div>
 
-                <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-center">
-                  <div className="text-yellow-500 flex justify-center mb-1">
+                <div className="bg-gray-700 p-3 sm:p-3 rounded-lg text-center">
+                  <div className="text-yellow-500 flex justify-center mb-1.5">
                     <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-400">Reps</div>
-                  <div className="text-white font-bold text-sm sm:text-base">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-1">
+                    Reps
+                  </div>
+                  <div className="text-white font-bold text-base sm:text-lg">
                     {selectedExercise.reps}
                   </div>
                 </div>
 
-                <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-center">
-                  <div className="text-yellow-500 flex justify-center mb-1">
+                <div className="bg-gray-700 p-3 sm:p-3 rounded-lg text-center">
+                  <div className="text-yellow-500 flex justify-center mb-1.5">
                     <FaWeightHanging className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-400">Weight</div>
-                  <div className="text-white font-bold text-sm sm:text-base">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-1">
+                    Weight
+                  </div>
+                  <div className="text-white font-bold text-base sm:text-lg">
                     {selectedExercise.weight
-                      ? `${selectedExercise.weight} kg`
+                      ? `${selectedExercise.weight}kg`
                       : "-"}
                   </div>
                 </div>
               </div>
 
-              <div className="mb-3 sm:mb-4">
-                <div className="text-xs sm:text-sm text-gray-400 mb-1">
+              <div className="mb-4 sm:mb-4">
+                <div className="text-xs sm:text-sm text-gray-400 mb-2">
                   Muscle Group
                 </div>
-                <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-white text-sm sm:text-base">
+                <div className="bg-gray-700 p-3 rounded-lg text-white text-sm sm:text-base">
                   {selectedExercise.muscleGroup || "Not specified"}
                 </div>
               </div>
 
               {selectedExercise.notes && (
                 <div>
-                  <div className="text-xs sm:text-sm text-gray-400 mb-1">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-2">
                     Notes
                   </div>
-                  <div className="bg-gray-700 p-2 sm:p-3 rounded-lg text-gray-200 text-xs sm:text-sm">
+                  <div className="bg-gray-700 p-3 rounded-lg text-gray-200 text-sm sm:text-sm leading-relaxed">
                     {selectedExercise.notes}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="p-3 sm:p-5 border-t border-gray-700 flex justify-end">
+            <div className="p-4 sm:p-5 border-t border-gray-700 bg-gray-850">
               <button
                 onClick={closeModal}
-                className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 sm:px-4 rounded-lg transition-all text-sm sm:text-base"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg transition-all text-sm sm:text-base font-medium"
               >
                 Close
               </button>

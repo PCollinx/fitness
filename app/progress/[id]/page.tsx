@@ -139,152 +139,172 @@ export default function ProgressDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+        <div className="container mx-auto px-4 py-8 max-w-7xl flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
+        </div>
       </div>
     );
   }
 
   if (!progressEntry) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Progress entry not found
-          </h3>
-          <Link
-            href="/progress/history"
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Return to Progress History
-          </Link>
+      <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="text-center py-16 bg-gray-800 border border-gray-700 rounded-xl">
+            <h3 className="text-xl font-semibold text-white mb-3">
+              Progress entry not found
+            </h3>
+            <p className="text-gray-400 mb-6">
+              The progress entry you're looking for doesn't exist or has been
+              deleted.
+            </p>
+            <Link
+              href="/progress/history"
+              className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
+            >
+              <FaArrowLeft className="mr-2" />
+              Return to Progress History
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-6">
-        <Link
-          href="/progress/history"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800"
-        >
-          <FaArrowLeft className="mr-2" />
-          <span>Back to Progress History</span>
-        </Link>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-6 bg-blue-600 text-white flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Progress Details</h1>
-            <p className="text-blue-100 mt-1">
-              {format(parseISO(progressEntry.date), "MMMM d, yyyy")}
-            </p>
-          </div>
-
-          <div className="flex space-x-2">
-            <Link
-              href={`/progress/edit/${progressEntry.id}`}
-              className="inline-flex items-center px-3 py-1.5 bg-blue-700 hover:bg-blue-800 rounded-md text-sm"
-            >
-              <FaEdit className="mr-1" />
-              <span>Edit</span>
-            </Link>
-
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-md text-sm"
-            >
-              <FaTrash className="mr-1" />
-              <span>Delete</span>
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-8">
+          <Link
+            href="/progress/history"
+            className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
+          >
+            <FaArrowLeft className="mr-2" />
+            <span>Back to Progress History</span>
+          </Link>
         </div>
 
-        <div className="p-6">
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {Object.entries(metricLabels).map(([key, label]) => {
-              const metricKey = key as MetricType;
-              const value = progressEntry.metrics[metricKey];
+        <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+          <div className="p-6 sm:p-8 bg-gray-900 border-b border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                Progress Details
+              </h1>
+              <p className="text-yellow-400 text-lg font-medium">
+                {format(parseISO(progressEntry.date), "MMMM d, yyyy")}
+              </p>
+            </div>
 
-              return value !== undefined ? (
-                <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-medium text-gray-700 mb-1">{label}</h3>
-                  <p className="text-2xl font-semibold">
-                    {value.toFixed(1)}
-                    <span className="text-sm font-normal text-gray-500 ml-1">
-                      {metricUnits[metricKey]}
-                    </span>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <Link
+                href={`/progress/edit/${progressEntry.id}`}
+                className="inline-flex items-center justify-center px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-lg text-sm font-semibold transition-all"
+              >
+                <FaEdit className="mr-2" />
+                <span>Edit Entry</span>
+              </Link>
+
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-semibold transition-all"
+              >
+                <FaTrash className="mr-2" />
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+              {Object.entries(metricLabels).map(([key, label]) => {
+                const metricKey = key as MetricType;
+                const value = progressEntry.metrics[metricKey];
+
+                return value !== undefined ? (
+                  <div
+                    key={key}
+                    className="bg-gray-700 border border-gray-600 p-4 sm:p-5 rounded-xl hover:bg-gray-650 transition-colors"
+                  >
+                    <h3 className="font-semibold text-gray-300 mb-2 text-sm uppercase tracking-wider">
+                      {label}
+                    </h3>
+                    <p className="text-2xl sm:text-3xl font-bold text-white">
+                      {value.toFixed(1)}
+                      <span className="text-sm sm:text-base font-normal text-yellow-400 ml-1">
+                        {metricUnits[metricKey]}
+                      </span>
+                    </p>
+                  </div>
+                ) : null;
+              })}
+            </div>
+
+            {/* Notes */}
+            {progressEntry.notes && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-white mb-4">Notes</h2>
+                <div className="bg-gray-700 border border-gray-600 p-4 sm:p-6 rounded-xl">
+                  <p className="text-gray-300 leading-relaxed">
+                    {progressEntry.notes}
                   </p>
                 </div>
-              ) : null;
-            })}
-          </div>
+              </div>
+            )}
 
-          {/* Notes */}
-          {progressEntry.notes && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-3">Notes</h2>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700">{progressEntry.notes}</p>
+            {/* Navigation Actions */}
+            <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 pt-6 border-t border-gray-700">
+              <Link
+                href="/progress"
+                className="inline-flex items-center justify-center px-6 py-3 border border-gray-600 rounded-lg text-sm font-semibold text-white bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
+              >
+                View Progress Charts
+              </Link>
+
+              <Link
+                href="/progress/new?from=progress"
+                className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-sm font-semibold text-gray-900 bg-yellow-400 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
+              >
+                Add New Entry
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-xl max-w-md w-full p-6">
+              <div className="flex items-center justify-center mb-6 text-red-400">
+                <FaTrash className="h-12 w-12" />
+              </div>
+              <h3 className="text-xl font-semibold text-center mb-3 text-white">
+                Delete Progress Entry
+              </h3>
+              <p className="text-gray-400 text-center mb-8 leading-relaxed">
+                Are you sure you want to delete this progress entry from{" "}
+                {format(parseISO(progressEntry.date), "MMMM d, yyyy")}? This
+                action cannot be undone.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-end gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-6 py-3 border border-gray-600 rounded-lg text-sm font-semibold text-white bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-6 py-3 border border-transparent rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
+                >
+                  Delete Entry
+                </button>
               </div>
             </div>
-          )}
-
-          {/* Previous & Next Entries Navigation - In a real app, you'd have links to navigate */}
-          <div className="flex justify-between mt-8">
-            <Link
-              href="/progress"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              View Progress Chart
-            </Link>
-
-            <Link
-              href="/progress/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Add New Entry
-            </Link>
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex items-center justify-center mb-4 text-red-600">
-              <FaTrash className="h-12 w-12" />
-            </div>
-            <h3 className="text-lg font-medium text-center mb-2">
-              Delete Progress Entry
-            </h3>
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to delete this progress entry from{" "}
-              {format(parseISO(progressEntry.date), "MMMM d, yyyy")}? This
-              action cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

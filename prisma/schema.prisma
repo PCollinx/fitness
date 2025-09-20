@@ -56,10 +56,6 @@ model User {
   workouts      Workout[]
   exercises     Exercise[]
   progress      Progress[]
-  meals         Meal[]
-  followers     Follow[]   @relation("following")
-  following     Follow[]   @relation("follower")
-  posts         Post[]
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -136,74 +132,6 @@ model Progress {
   @@index([date])
 }
 
-model Meal {
-  id          String     @id @default(cuid())
-  name        String
-  description String?
-  calories    Int?
-  protein     Float?     // in grams
-  carbs       Float?     // in grams
-  fat         Float?     // in grams
-  date        DateTime   @default(now())
-  mealType    String?    // breakfast, lunch, dinner, snack
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId])
-  @@index([date])
-}
-
-model Follow {
-  id          String     @id @default(cuid())
-  followerId  String
-  follower    User       @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
-  followingId String
-  following   User       @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  
-  @@unique([followerId, followingId])
-  @@index([followerId])
-  @@index([followingId])
-}
-
-model Post {
-  id          String     @id @default(cuid())
-  content     String
-  image       String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  likes       Like[]
-  comments    Comment[]
-  
-  @@index([userId])
-}
-
-model Like {
-  id          String     @id @default(cuid())
-  postId      String
-  post        Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId      String
-  createdAt   DateTime   @default(now())
-  
-  @@unique([postId, userId])
-  @@index([postId])
-  @@index([userId])
-}
-
-model Comment {
-  id          String     @id @default(cuid())
-  content     String
-  postId      String
-  post        Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId      String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  
-  @@index([postId])
-  @@index([userId])
-}
 
 model PasswordResetToken {
   id        String   @id @default(cuid())

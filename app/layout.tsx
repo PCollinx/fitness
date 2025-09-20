@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import MobileNav from "./components/MobileNav";
 import AuthProvider from "./providers/AuthProvider";
 import { UserProfileProvider } from "./context/UserProfileContext";
 
@@ -22,8 +23,9 @@ export default function RootLayout({
         <AuthProvider>
           <UserProfileProvider>
             <Navbar />
-            <main className="flex-grow pt-16">{children}</main>
+            <main className="flex-grow pt-8 pb-safe">{children}</main>
             <Footer />
+            <MobileNav />
           </UserProfileProvider>
         </AuthProvider>
       </body>

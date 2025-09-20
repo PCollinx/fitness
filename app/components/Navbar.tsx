@@ -6,7 +6,6 @@ import { signOut, useSession } from "next-auth/react";
 import {
   FaDumbbell,
   FaHome,
-  FaUtensils,
   FaChartLine,
   FaUser,
   FaMusic,
@@ -59,11 +58,6 @@ export default function Navbar() {
               {[
                 { href: "/", icon: <FaHome />, label: "Home" },
                 { href: "/workouts", icon: <FaDumbbell />, label: "Workouts" },
-                {
-                  href: "/nutrition",
-                  icon: <FaUtensils />,
-                  label: "Meal Prep",
-                },
                 { href: "/progress", icon: <FaChartLine />, label: "Progress" },
                 { href: "/music", icon: <FaMusic />, label: "Music" },
               ].map((item) => (
@@ -217,7 +211,6 @@ export default function Navbar() {
           {[
             { href: "/", icon: <FaHome />, label: "Home" },
             { href: "/workouts", icon: <FaDumbbell />, label: "Workouts" },
-            { href: "/nutrition", icon: <FaUtensils />, label: "Meal Prep" },
             { href: "/progress", icon: <FaChartLine />, label: "Progress" },
             { href: "/music", icon: <FaMusic />, label: "Music" },
           ].map((item) => (

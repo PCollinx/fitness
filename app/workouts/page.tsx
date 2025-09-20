@@ -11,7 +11,11 @@ import {
   FaStar,
   FaPlayCircle,
 } from "react-icons/fa";
-import { loadWorkouts, Workout } from "../utils/workoutStorage";
+import {
+  loadWorkouts,
+  Workout,
+  fixBrokenWorkoutImages,
+} from "../utils/workoutStorage";
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -24,6 +28,9 @@ export default function WorkoutsPage() {
     setIsLoading(true);
 
     setTimeout(() => {
+      // Fix any broken images in localStorage first
+      fixBrokenWorkoutImages();
+
       // Load both custom and default workouts
       const allWorkouts = loadWorkouts();
       setWorkouts(allWorkouts);
@@ -45,7 +52,7 @@ export default function WorkoutsPage() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 mt-8">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Workouts</h1>
           <p className="text-gray-400">
@@ -78,27 +85,21 @@ export default function WorkoutsPage() {
 
       {/* Categories */}
       <div className="flex space-x-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-        {[
-          "All",
-          "Strength",
-          "Cardio",
-          "Flexibility",
-          "Recovery",
-          "HIIT",
-          "Favorites",
-        ].map((category) => (
-          <button
-            key={category}
-            onClick={() => setActiveCategory(category)}
-            className={`px-4 py-2 rounded-full whitespace-nowrap ${
-              category === activeCategory
-                ? "bg-yellow-400 text-black font-medium"
-                : "bg-gray-800 text-white hover:bg-gray-700"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+        {["All", "Strength", "Cardio", "Flexibility", "Recovery", "HIIT"].map(
+          (category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                category === activeCategory
+                  ? "bg-yellow-400 text-black font-medium"
+                  : "bg-gray-800 text-white hover:bg-gray-700"
+              }`}
+            >
+              {category}
+            </button>
+          )
+        )}
       </div>
 
       {isLoading ? (

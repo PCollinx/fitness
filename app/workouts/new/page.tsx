@@ -22,6 +22,13 @@ import {
   generateId,
   getRandomWorkoutImage,
 } from "../../utils/workoutStorage";
+import {
+  fetchExercises,
+  fetchExerciseMetadata,
+  seedExercises,
+  type APIExercise,
+} from "../../utils/exerciseApi";
+import { getImageForWorkout } from "../../utils/workoutImageStorage";
 
 // Validation schema
 const workoutSchema = z.object({
@@ -47,21 +54,18 @@ const workoutSchema = z.object({
 
 type WorkoutFormValues = z.infer<typeof workoutSchema>;
 
-type Exercise = {
-  id: string;
-  name: string;
-  description?: string;
-  muscleGroup?: string;
-};
+type Exercise = APIExercise;
 
 export default function CreateWorkoutPage() {
   const router = useRouter();
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [visibleExerciseDropdown, setVisibleExerciseDropdown] = useState<
     number | null
   >(null);
+  const [needsSeeding, setNeedsSeeding] = useState(false);
 
   const {
     register,
@@ -86,30 +90,52 @@ export default function CreateWorkoutPage() {
   });
 
   useEffect(() => {
-    // In a real app, fetch exercises from the API
-    // For now, we'll use mock data
-    setIsLoading(true);
-    setTimeout(() => {
-      setExercises([
-        { id: "1", name: "Bench Press", muscleGroup: "Chest" },
-        { id: "2", name: "Squat", muscleGroup: "Legs" },
-        { id: "3", name: "Deadlift", muscleGroup: "Back" },
-        { id: "4", name: "Pull-up", muscleGroup: "Back" },
-        { id: "5", name: "Push-up", muscleGroup: "Chest" },
-        { id: "6", name: "Shoulder Press", muscleGroup: "Shoulders" },
-        { id: "7", name: "Bicep Curl", muscleGroup: "Arms" },
-        { id: "8", name: "Tricep Extension", muscleGroup: "Arms" },
-        { id: "9", name: "Leg Press", muscleGroup: "Legs" },
-        { id: "10", name: "Lat Pulldown", muscleGroup: "Back" },
-        { id: "11", name: "Leg Curl", muscleGroup: "Legs" },
-        { id: "12", name: "Leg Extension", muscleGroup: "Legs" },
-        { id: "13", name: "Dumbbell Fly", muscleGroup: "Chest" },
-        { id: "14", name: "Plank", muscleGroup: "Core" },
-        { id: "15", name: "Russian Twist", muscleGroup: "Core" },
-      ]);
+    const loadExercises = async () => {
+      setIsLoading(true);
+
+      try {
+        // First, fetch metadata to get muscle groups
+        const metadata = await fetchExerciseMetadata();
+        setMuscleGroups(metadata.muscleGroups);
+
+        // If no exercises exist, show option to seed
+        if (metadata.stats.totalExercises === 0) {
+          setNeedsSeeding(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch all exercises
+        const exerciseData = await fetchExercises({ limit: 100 });
+        setExercises(exerciseData);
+      } catch (error) {
+        console.error("Error loading exercises:", error);
+        setNeedsSeeding(true);
+      }
+
       setIsLoading(false);
-    }, 500);
+    };
+
+    loadExercises();
   }, []);
+
+  const handleSeedExercises = async () => {
+    setIsLoading(true);
+    const success = await seedExercises();
+
+    if (success) {
+      // Reload exercises after seeding
+      const exerciseData = await fetchExercises({ limit: 100 });
+      setExercises(exerciseData);
+
+      const metadata = await fetchExerciseMetadata();
+      setMuscleGroups(metadata.muscleGroups);
+
+      setNeedsSeeding(false);
+    }
+
+    setIsLoading(false);
+  };
 
   const onSubmit = async (data: WorkoutFormValues) => {
     setIsSubmitting(true);
@@ -128,6 +154,15 @@ export default function CreateWorkoutPage() {
       const totalSets = data.exercises.reduce((acc, ex) => acc + ex.sets, 0);
       const estimatedDuration = Math.round(totalSets * 2.5); // Rough estimate: 2.5 min per set
 
+      // Get exercise details for image selection
+      const exerciseDetails = data.exercises.map((ex) => {
+        const exercise = exercises.find((e) => e.id === ex.exerciseId);
+        return {
+          muscleGroup: exercise?.muscleGroup,
+          name: exercise?.name,
+        };
+      });
+
       // Create the new workout object
       const newWorkout = {
         id: generateId(),
@@ -140,7 +175,7 @@ export default function CreateWorkoutPage() {
         isPublic: data.isPublic,
         duration: estimatedDuration,
         rating: 5.0, // Default rating for new workouts
-        image: getRandomWorkoutImage(),
+        image: getImageForWorkout(exerciseDetails),
         exercises: data.exercises.length,
         createdAt: new Date().toISOString(),
         lastPerformed: new Date().toISOString(),
@@ -196,6 +231,30 @@ export default function CreateWorkoutPage() {
           <span>Back to Workouts</span>
         </button>
       </div>
+
+      {/* Exercise Seeding Component */}
+      {needsSeeding && (
+        <div className="bg-yellow-900 border border-yellow-600 rounded-lg p-6 mb-6">
+          <div className="flex items-center mb-4">
+            <FaInfoCircle className="text-yellow-400 h-6 w-6 mr-3" />
+            <h2 className="text-xl font-semibold text-yellow-100">
+              Setup Required
+            </h2>
+          </div>
+          <p className="text-yellow-200 mb-4">
+            No exercises found in the database. Click the button below to
+            populate the database with common exercises.
+          </p>
+          <button
+            onClick={handleSeedExercises}
+            disabled={isLoading}
+            className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-800 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center"
+          >
+            <FaDumbbell className="mr-2" />
+            {isLoading ? "Adding Exercises..." : "Add Default Exercises"}
+          </button>
+        </div>
+      )}
 
       <div className="bg-gray-900 rounded-lg shadow-lg p-6 border border-gray-800">
         <div className="flex items-center mb-6">
