@@ -190,16 +190,18 @@ function ResetPasswordContent() {
 
 export default function ResetPassword() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <div className="animate-pulse">
-            <div className="h-8 w-64 bg-gray-800 rounded mb-4 mx-auto"></div>
-            <div className="h-4 w-48 bg-gray-800 rounded mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 w-64 bg-gray-800 rounded mb-4 mx-auto"></div>
+              <div className="h-4 w-48 bg-gray-800 rounded mx-auto"></div>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );
