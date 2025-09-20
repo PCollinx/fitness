@@ -9,9 +9,6 @@ const WorkoutTimer = dynamic(() => import("../components/WorkoutTimer"), {
 const FitnessGoals = dynamic(() => import("../components/FitnessGoals"), {
   ssr: false,
 });
-const MealPrep = dynamic(() => import("../components/MealPrep"), {
-  ssr: false,
-});
 const MuscleTargeting = dynamic(() => import("../components/MuscleTargeting"), {
   ssr: false,
 });
@@ -22,9 +19,6 @@ const TimeSelection = dynamic(() => import("../components/TimeSelection"), {
   ssr: false,
 });
 const WorkoutMusic = dynamic(() => import("../components/WorkoutMusic"), {
-  ssr: false,
-});
-const MealPlans = dynamic(() => import("../components/MealPlans"), {
   ssr: false,
 });
 
@@ -66,13 +60,6 @@ export default function Mobile() {
               path: "/mobile/fitness-goals",
             },
             {
-              title: "Meal Preparation",
-              description:
-                "Detailed recipes and nutrition information for your meal prep",
-              component: <MealPrep />,
-              path: "/mobile/meal-prep",
-            },
-            {
               title: "Muscle Targeting",
               description:
                 "Specifically target the muscle groups you want to work on",
@@ -98,13 +85,6 @@ export default function Mobile() {
                 "Integrate your favorite music with your workout routine",
               component: <WorkoutMusic />,
               path: "/mobile/workout-music",
-            },
-            {
-              title: "Meal Plans",
-              description:
-                "Browse and select from curated meal plans tailored to your goals",
-              component: <MealPlans />,
-              path: "/mobile/meal-plans",
             },
           ].map((item, index) => (
             <div

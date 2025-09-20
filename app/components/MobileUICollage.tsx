@@ -7,14 +7,12 @@ import { FaExpand, FaCompress, FaPlus, FaMinus } from "react-icons/fa";
 // Load all components dynamically to avoid SSR issues with client components
 const WorkoutTimer = dynamic(() => import("./WorkoutTimer"), { ssr: false });
 const FitnessGoals = dynamic(() => import("./FitnessGoals"), { ssr: false });
-const MealPrep = dynamic(() => import("./MealPrep"), { ssr: false });
 const MuscleTargeting = dynamic(() => import("./MuscleTargeting"), {
   ssr: false,
 });
 const WorkoutStreak = dynamic(() => import("./WorkoutStreak"), { ssr: false });
 const TimeSelection = dynamic(() => import("./TimeSelection"), { ssr: false });
 const WorkoutMusic = dynamic(() => import("./WorkoutMusic"), { ssr: false });
-const MealPlans = dynamic(() => import("./MealPlans"), { ssr: false });
 
 export default function MobileUICollage() {
   const [zoomLevel, setZoomLevel] = useState(0.8);
@@ -108,16 +106,6 @@ export default function MobileUICollage() {
 
           <div className="component-frame">
             <div className="frame-header">
-              <div className="frame-title">Meal Prep</div>
-            </div>
-            <div className="component-container">
-              <MealPrep />
-            </div>
-            <div className="frame-label">meal-prep.tsx</div>
-          </div>
-
-          <div className="component-frame">
-            <div className="frame-header">
               <div className="frame-title">Muscle Targeting</div>
             </div>
             <div className="component-container">
@@ -154,16 +142,6 @@ export default function MobileUICollage() {
               <WorkoutMusic />
             </div>
             <div className="frame-label">workout-music.tsx</div>
-          </div>
-
-          <div className="component-frame">
-            <div className="frame-header">
-              <div className="frame-title">Meal Plans</div>
-            </div>
-            <div className="component-container">
-              <MealPlans />
-            </div>
-            <div className="frame-label">meal-plans.tsx</div>
           </div>
         </div>
       </div>

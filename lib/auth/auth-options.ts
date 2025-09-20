@@ -65,6 +65,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      },
     }),
   ],
   pages: {
@@ -94,7 +101,22 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user, account, profile }) {
+      // Allow sign in from both credentials and OAuth providers
+      if (account?.provider === "google") {
+        // Additional validation for Google sign-in can be added here
+        return true;
+      }
+      if (account?.provider === "credentials") {
+        return true;
+      }
       return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   session: {
@@ -102,4 +124,6 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days by default
   },
   secret: process.env.NEXTAUTH_SECRET,
+  // Ensure debug logging in development
+  debug: process.env.NODE_ENV === "development",
 };

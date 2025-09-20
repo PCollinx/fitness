@@ -1,8 +1,5 @@
 import dynamic from "next/dynamic";
 
-const MealPrep = dynamic(() => import("../../components/MealPrep"), {
-  ssr: false,
-});
 const BackNavigation = dynamic(
   () => import("../../components/BackNavigation"),
   { ssr: false }
@@ -12,7 +9,14 @@ export default function MealPrepPage() {
   return (
     <>
       <BackNavigation title="Back to Mobile UI" />
-      <MealPrep />
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Meal Prep</h1>
+          <p className="text-gray-600">
+            This component is currently under development. Stay tuned for meal prep features!
+          </p>
+        </div>
+      </div>
     </>
   );
 }

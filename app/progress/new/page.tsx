@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,7 +39,7 @@ const progressSchema = z.object({
 
 type ProgressFormData = z.infer<typeof progressSchema>;
 
-export default function NewProgressPage() {
+function NewProgressContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -360,5 +360,28 @@ export default function NewProgressPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NewProgressPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="animate-pulse">
+            <div className="h-6 w-32 bg-gray-800 rounded mb-6"></div>
+            <div className="bg-gray-800 rounded-xl p-8">
+              <div className="h-8 w-64 bg-gray-700 rounded mb-4"></div>
+              <div className="space-y-4">
+                <div className="h-4 w-full bg-gray-700 rounded"></div>
+                <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <NewProgressContent />
+    </Suspense>
   );
 }

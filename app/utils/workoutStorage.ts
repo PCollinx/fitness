@@ -228,22 +228,92 @@ export const generateId = (): string => {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
 };
 
-// Get random image for workout based on exercises or category
+// Get random image for workout based on exercises or category using getImageForExercise
 export const getRandomWorkoutImage = (
   category: string = "strength",
   exercises?: WorkoutExercise[]
 ): string => {
-  // If exercises are provided, use exercise-based image generation
+  // If exercises are provided, use getImageForExercise for precise matching
   if (exercises && exercises.length > 0) {
-    const exerciseDetails = exercises.map((ex) => ({
-      name: ex.exerciseName,
-      muscleGroup: undefined, // Will be enhanced when we have muscle group data
-    }));
-    return getImageForWorkout(exerciseDetails);
+    // Try to determine muscle group from exercise name patterns
+    const firstExercise = exercises[0];
+    const exerciseName = firstExercise.exerciseName.toLowerCase();
+
+    // Map exercise names to muscle groups for getImageForExercise
+    let muscleGroup = "full_body"; // default
+
+    if (
+      exerciseName.includes("chest") ||
+      exerciseName.includes("bench") ||
+      exerciseName.includes("push")
+    ) {
+      muscleGroup = "chest";
+    } else if (
+      exerciseName.includes("back") ||
+      exerciseName.includes("pull") ||
+      exerciseName.includes("row") ||
+      exerciseName.includes("lat")
+    ) {
+      muscleGroup = "back";
+    } else if (
+      exerciseName.includes("shoulder") ||
+      exerciseName.includes("press") ||
+      exerciseName.includes("raise")
+    ) {
+      muscleGroup = "shoulders";
+    } else if (
+      exerciseName.includes("arm") ||
+      exerciseName.includes("bicep") ||
+      exerciseName.includes("tricep") ||
+      exerciseName.includes("curl")
+    ) {
+      muscleGroup = "arms";
+    } else if (
+      exerciseName.includes("leg") ||
+      exerciseName.includes("squat") ||
+      exerciseName.includes("lunge") ||
+      exerciseName.includes("quad") ||
+      exerciseName.includes("hamstring")
+    ) {
+      muscleGroup = "legs";
+    } else if (
+      exerciseName.includes("glute") ||
+      exerciseName.includes("hip") ||
+      exerciseName.includes("bridge")
+    ) {
+      muscleGroup = "glutes";
+    } else if (
+      exerciseName.includes("core") ||
+      exerciseName.includes("ab") ||
+      exerciseName.includes("plank") ||
+      exerciseName.includes("crunch")
+    ) {
+      muscleGroup = "core";
+    } else if (
+      exerciseName.includes("cardio") ||
+      exerciseName.includes("run") ||
+      exerciseName.includes("bike") ||
+      exerciseName.includes("jump") ||
+      exerciseName.includes("burpee")
+    ) {
+      muscleGroup = "cardio";
+    }
+
+    return getImageForExercise(muscleGroup, firstExercise.exerciseName);
   }
 
-  // Fallback to category-based selection
-  return getImageByCategory(category);
+  // Fallback: map category to muscle group for getImageForExercise
+  const categoryMuscleMap: Record<string, string> = {
+    strength: "full_body",
+    cardio: "cardio",
+    flexibility: "core",
+    hiit: "cardio",
+    bodyweight: "full_body",
+    yoga: "core",
+  };
+
+  const muscleGroup = categoryMuscleMap[category.toLowerCase()] || "full_body";
+  return getImageForExercise(muscleGroup);
 };
 
 // Legacy function for backwards compatibility
@@ -251,7 +321,7 @@ export const getRandomWorkoutImageLegacy = (): string => {
   return getImageByCategory("strength");
 };
 
-// Enhanced image generation with API exercise data
+// Enhanced image generation with API exercise data using getImageForExercise
 export const getImageForWorkoutWithExerciseData = async (
   workoutExercises: WorkoutExercise[]
 ): Promise<string> => {
@@ -277,7 +347,25 @@ export const getImageForWorkoutWithExerciseData = async (
     });
 
     const exerciseDetails = await Promise.all(exercisePromises);
-    return getImageForWorkout(exerciseDetails);
+
+    // Use getImageForExercise for the primary muscle group
+    if (exerciseDetails.length > 0) {
+      // Find the first exercise with a muscle group, or use the first exercise name
+      const primaryExercise =
+        exerciseDetails.find((ex) => ex.muscleGroup) || exerciseDetails[0];
+
+      if (primaryExercise.muscleGroup) {
+        return getImageForExercise(
+          primaryExercise.muscleGroup,
+          primaryExercise.name
+        );
+      } else {
+        // Use name-based matching through getImageForWorkout as fallback
+        return getImageForWorkout(exerciseDetails);
+      }
+    }
+
+    return getImageForExercise("full_body"); // Ultimate fallback
   } catch (error) {
     console.error("Error fetching exercise data for image generation:", error);
     // Fallback to name-based matching
