@@ -35,23 +35,6 @@ export type Workout = {
 // Default workouts that come with the app
 export const defaultWorkouts: Workout[] = [
   {
-    id: "default-0",
-    name: "Lower Body Power",
-    description:
-      "Transform your legs and glutes with this powerful lower body workout targeting quads, hamstrings, and calves.",
-    duration: 45,
-    intensity: "High",
-    category: "strength",
-    rating: 4.9,
-    image:
-      "https://images.unsplash.com/photo-1583500178690-f7660a6b8050?w=400&h=300&fit=crop&crop=center",
-    exercises: 8,
-    lastPerformed: "2025-09-15",
-    createdAt: "2025-08-30T12:00:00Z",
-    isPublic: true,
-    isDefault: true,
-  },
-  {
     id: "default-1",
     name: "Upper Body Focus",
     description:
@@ -189,22 +172,46 @@ export const loadWorkouts = (): Workout[] => {
 export const addWorkout = (workout: Workout): void => {
   const customWorkouts = loadCustomWorkouts();
 
-  // Auto-assign category-appropriate image if not provided
+  // Auto-assign exercise-based image if not provided
   if (!workout.image || workout.image === "") {
-    workout.image = getImageByCategory(workout.category);
+    // Try to use exercise data for smarter image selection
+    if (workout.workoutExercises && workout.workoutExercises.length > 0) {
+      const exerciseDetails = workout.workoutExercises.map((ex) => ({
+        name: ex.exerciseName,
+        muscleGroup: undefined, // Will be enhanced when we have muscle group data
+      }));
+      workout.image = getImageForWorkout(exerciseDetails);
+    } else {
+      // Fallback to category-based selection
+      workout.image = getImageByCategory(workout.category);
+    }
   }
 
   saveCustomWorkouts([workout, ...customWorkouts]);
 };
 
-// Create a new workout with auto-generated image based on category
-export const createWorkoutWithCategoryImage = (
+// Create a new workout with auto-generated image based on exercises
+export const createWorkoutWithExerciseImage = (
   workoutData: Omit<Workout, "id" | "image" | "createdAt" | "isDefault">
 ): Workout => {
+  let image: string;
+
+  // Generate image based on exercises if available
+  if (workoutData.workoutExercises && workoutData.workoutExercises.length > 0) {
+    const exerciseDetails = workoutData.workoutExercises.map((ex) => ({
+      name: ex.exerciseName,
+      muscleGroup: undefined, // Will be enhanced when we have muscle group data
+    }));
+    image = getImageForWorkout(exerciseDetails);
+  } else {
+    // Fallback to category-based selection
+    image = getImageByCategory(workoutData.category);
+  }
+
   const workout: Workout = {
     ...workoutData,
     id: generateId(),
-    image: getImageByCategory(workoutData.category),
+    image,
     createdAt: new Date().toISOString(),
     isDefault: false,
   };
@@ -213,15 +220,29 @@ export const createWorkoutWithCategoryImage = (
   return workout;
 };
 
+// Legacy function for backwards compatibility
+export const createWorkoutWithCategoryImage = createWorkoutWithExerciseImage;
+
 // Generate a unique ID
 export const generateId = (): string => {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
 };
 
-// Get random image for workout based on category
+// Get random image for workout based on exercises or category
 export const getRandomWorkoutImage = (
-  category: string = "strength"
+  category: string = "strength",
+  exercises?: WorkoutExercise[]
 ): string => {
+  // If exercises are provided, use exercise-based image generation
+  if (exercises && exercises.length > 0) {
+    const exerciseDetails = exercises.map((ex) => ({
+      name: ex.exerciseName,
+      muscleGroup: undefined, // Will be enhanced when we have muscle group data
+    }));
+    return getImageForWorkout(exerciseDetails);
+  }
+
+  // Fallback to category-based selection
   return getImageByCategory(category);
 };
 
@@ -230,8 +251,110 @@ export const getRandomWorkoutImageLegacy = (): string => {
   return getImageByCategory("strength");
 };
 
-// Fix broken images in localStorage workouts
-export const fixBrokenWorkoutImages = (): void => {
+// Enhanced image generation with API exercise data
+export const getImageForWorkoutWithExerciseData = async (
+  workoutExercises: WorkoutExercise[]
+): Promise<string> => {
+  try {
+    // Fetch exercise data from API to get muscle groups
+    const exercisePromises = workoutExercises.map(async (ex) => {
+      const response = await fetch(
+        `/api/exercises?search=${encodeURIComponent(ex.exerciseName)}&limit=1`
+      );
+      if (response.ok) {
+        const exercises = await response.json();
+        if (exercises.length > 0) {
+          return {
+            name: ex.exerciseName,
+            muscleGroup: exercises[0].muscleGroup,
+          };
+        }
+      }
+      return {
+        name: ex.exerciseName,
+        muscleGroup: undefined,
+      };
+    });
+
+    const exerciseDetails = await Promise.all(exercisePromises);
+    return getImageForWorkout(exerciseDetails);
+  } catch (error) {
+    console.error("Error fetching exercise data for image generation:", error);
+    // Fallback to name-based matching
+    const exerciseDetails = workoutExercises.map((ex) => ({
+      name: ex.exerciseName,
+      muscleGroup: undefined,
+    }));
+    return getImageForWorkout(exerciseDetails);
+  }
+};
+
+// Fix broken images in localStorage workouts with exercise-based approach
+export const fixBrokenWorkoutImages = async (): Promise<void> => {
+  if (typeof window === "undefined") return;
+
+  try {
+    const customWorkouts = loadCustomWorkouts();
+    let hasChanges = false;
+
+    const fixedWorkouts = await Promise.all(
+      customWorkouts.map(async (workout) => {
+        // Check if image URL is broken or empty
+        if (
+          !workout.image ||
+          workout.image === "" ||
+          workout.image === "undefined"
+        ) {
+          hasChanges = true;
+
+          // Try to use exercise data with API lookup for smarter image selection
+          if (workout.workoutExercises && workout.workoutExercises.length > 0) {
+            try {
+              const image = await getImageForWorkoutWithExerciseData(
+                workout.workoutExercises
+              );
+              return {
+                ...workout,
+                image,
+              };
+            } catch (error) {
+              console.error(
+                "Error getting exercise-based image, falling back to category:",
+                error
+              );
+              // Fallback to exercise name-based matching without API
+              const exerciseDetails = workout.workoutExercises.map((ex) => ({
+                name: ex.exerciseName,
+                muscleGroup: undefined,
+              }));
+              return {
+                ...workout,
+                image: getImageForWorkout(exerciseDetails),
+              };
+            }
+          }
+
+          // Fallback to category-based selection
+          return {
+            ...workout,
+            image: getImageByCategory(workout.category),
+          };
+        }
+        return workout;
+      })
+    );
+
+    if (hasChanges) {
+      saveCustomWorkouts(fixedWorkouts);
+      console.log("Fixed broken workout images with exercise-based selection");
+    }
+  } catch (error) {
+    console.error("Error fixing broken workout images:", error);
+  }
+};
+
+// Synchronous version for backwards compatibility
+export const fixBrokenWorkoutImagesSync = (): void => {
   if (typeof window === "undefined") return;
 
   try {
@@ -239,7 +362,6 @@ export const fixBrokenWorkoutImages = (): void => {
     let hasChanges = false;
 
     const fixedWorkouts = customWorkouts.map((workout) => {
-      // Check if image URL is broken or empty
       if (
         !workout.image ||
         workout.image === "" ||
@@ -247,11 +369,10 @@ export const fixBrokenWorkoutImages = (): void => {
       ) {
         hasChanges = true;
 
-        // Try to use exercise data if available for smarter image selection
         if (workout.workoutExercises && workout.workoutExercises.length > 0) {
           const exerciseDetails = workout.workoutExercises.map((ex) => ({
             name: ex.exerciseName,
-            muscleGroup: undefined, // We don't have muscle group data in stored workouts yet
+            muscleGroup: undefined,
           }));
           return {
             ...workout,
@@ -259,7 +380,6 @@ export const fixBrokenWorkoutImages = (): void => {
           };
         }
 
-        // Fallback to category-based selection
         return {
           ...workout,
           image: getImageByCategory(workout.category),
@@ -270,7 +390,9 @@ export const fixBrokenWorkoutImages = (): void => {
 
     if (hasChanges) {
       saveCustomWorkouts(fixedWorkouts);
-      console.log("Fixed broken workout images in localStorage");
+      console.log(
+        "Fixed broken workout images with exercise-based selection (sync)"
+      );
     }
   } catch (error) {
     console.error("Error fixing broken workout images:", error);
