@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
   FaArrowLeft,
@@ -10,10 +10,21 @@ import {
   FaDumbbell,
   FaPlay,
   FaPause,
+  FaStop,
   FaRedo,
   FaHistory,
   FaTimes,
+  FaPlus,
+  FaMinus,
+  FaClock,
+  FaLayerGroup,
+  FaWeightHanging,
 } from "react-icons/fa";
+import {
+  getWorkoutById,
+  type Workout,
+  type WorkoutExercise,
+} from "../../../utils/workoutStorage";
 
 type Exercise = {
   id: string;
@@ -38,13 +49,11 @@ type SetTracker = {
   notes?: string;
 };
 
-export default function WorkoutSessionPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function WorkoutSessionPage() {
   const router = useRouter();
-  const [workout, setWorkout] = useState<WorkoutSession | null>(null);
+  const params = useParams();
+  const workoutId = params.id as string;
+  const [workout, setWorkout] = useState<Workout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -53,6 +62,7 @@ export default function WorkoutSessionPage({
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sessionStart, setSessionStart] = useState<Date | null>(null);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   // Track the progress of each set for each exercise
   const [setTrackers, setSetTrackers] = useState<Record<string, SetTracker[]>>(
@@ -60,76 +70,37 @@ export default function WorkoutSessionPage({
   );
 
   useEffect(() => {
-    // In a real app, fetch workout details from the API
-    // For now, we'll use mock data
+    // Load real workout from storage
     setIsLoading(true);
 
-    setTimeout(() => {
-      // Mock data for the specific workout
-      const mockWorkout = {
-        id: params.id,
-        name: "Upper Body Power",
-        exercises: [
-          {
-            id: "1",
-            name: "Bench Press",
-            sets: 4,
-            reps: 8,
-            weight: 80,
-            muscleGroup: "Chest",
-          },
-          {
-            id: "2",
-            name: "Shoulder Press",
-            sets: 3,
-            reps: 10,
-            weight: 60,
-            muscleGroup: "Shoulders",
-          },
-          { id: "3", name: "Pull-up", sets: 3, reps: 8, muscleGroup: "Back" },
-          {
-            id: "4",
-            name: "Bicep Curl",
-            sets: 3,
-            reps: 12,
-            weight: 15,
-            muscleGroup: "Arms",
-          },
-          {
-            id: "5",
-            name: "Tricep Extension",
-            sets: 3,
-            reps: 12,
-            weight: 25,
-            muscleGroup: "Arms",
-          },
-          {
-            id: "6",
-            name: "Dumbbell Fly",
-            sets: 3,
-            reps: 15,
-            weight: 12,
-            muscleGroup: "Chest",
-          },
-        ],
-      };
+    const loadWorkout = () => {
+      const foundWorkout = getWorkoutById(workoutId);
 
-      setWorkout(mockWorkout);
+      if (!foundWorkout) {
+        router.push("/workouts");
+        return;
+      }
 
-      // Initialize set trackers
+      setWorkout(foundWorkout);
+
+      // Initialize set trackers based on workout exercises
       const initialSetTrackers: Record<string, SetTracker[]> = {};
-      mockWorkout.exercises.forEach((exercise) => {
-        initialSetTrackers[exercise.id] = Array(exercise.sets)
-          .fill(null)
-          .map(() => ({
-            completed: false,
-          }));
-      });
+      if (foundWorkout.workoutExercises) {
+        foundWorkout.workoutExercises.forEach((exercise) => {
+          initialSetTrackers[exercise.exerciseId] = Array(exercise.sets)
+            .fill(null)
+            .map(() => ({
+              completed: false,
+            }));
+        });
+      }
 
       setSetTrackers(initialSetTrackers);
       setIsLoading(false);
-    }, 500);
-  }, [params.id]);
+    };
+
+    loadWorkout();
+  }, [workoutId, router]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -196,14 +167,16 @@ export default function WorkoutSessionPage({
 
   // Move to the next exercise
   const nextExercise = () => {
-    if (workout && currentExerciseIndex < workout.exercises.length - 1) {
+    if (
+      workout &&
+      workout.workoutExercises &&
+      currentExerciseIndex < workout.workoutExercises.length - 1
+    ) {
       setCurrentExerciseIndex((prev) => prev + 1);
       resetTimer();
     } else {
-      // Ask for confirmation before completing
-      if (window.confirm("Are you sure you want to complete this workout?")) {
-        completeSession();
-      }
+      // Show confirmation modal before completing
+      setShowCompleteModal(true);
     }
   };
 
@@ -212,6 +185,17 @@ export default function WorkoutSessionPage({
     if (currentExerciseIndex > 0) {
       setCurrentExerciseIndex((prev) => prev - 1);
     }
+  };
+
+  // Handle confirm completion
+  const handleConfirmComplete = () => {
+    setShowCompleteModal(false);
+    completeSession();
+  };
+
+  // Handle cancel completion
+  const handleCancelComplete = () => {
+    setShowCompleteModal(false);
   };
 
   // Complete the workout session
@@ -230,21 +214,23 @@ export default function WorkoutSessionPage({
       elapsedTime: Math.floor(
         (new Date().getTime() - (sessionStart?.getTime() || 0)) / 1000
       ),
-      exercises: workout?.exercises.map((exercise) => ({
-        exerciseId: exercise.id,
-        sets: setTrackers[exercise.id],
+      exercises: workout?.workoutExercises?.map((exercise) => ({
+        exerciseId: exercise.exerciseId,
+        sets: setTrackers[exercise.exerciseId],
       })),
     });
   };
 
   // Get the current exercise
-  const currentExercise = workout?.exercises[currentExerciseIndex];
+  const currentExercise = workout?.workoutExercises?.[currentExerciseIndex];
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent"></div>
+          </div>
         </div>
       </div>
     );
@@ -252,22 +238,24 @@ export default function WorkoutSessionPage({
 
   if (!workout) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Workout not found
-          </h3>
-          <p className="text-gray-500 mb-6">
-            The workout you&apos;re looking for doesn&apos;t exist or has been
-            deleted.
-          </p>
-          <Link
-            href="/workouts"
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md inline-flex items-center"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back to Workouts</span>
-          </Link>
+      <div className="min-h-screen bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+          <div className="text-center py-12 bg-gray-800 rounded-lg">
+            <h3 className="text-lg font-medium text-white mb-2">
+              Workout not found
+            </h3>
+            <p className="text-gray-400 mb-6">
+              The workout you&apos;re looking for doesn&apos;t exist or has been
+              deleted.
+            </p>
+            <Link
+              href="/workouts"
+              className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md inline-flex items-center font-medium"
+            >
+              <FaArrowLeft className="mr-2" />
+              <span>Back to Workouts</span>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -275,57 +263,67 @@ export default function WorkoutSessionPage({
 
   if (sessionCompleted) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="mb-6">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-4">
-              <FaCheck className="h-12 w-12 text-green-600" />
-            </div>
-            <h1 className="text-3xl font-bold mb-2">Workout Completed!</h1>
-            <p className="text-xl text-gray-600">
-              Great job on completing {workout.name}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Elapsed Time</h3>
-              <p className="text-2xl font-bold">{formatTime(elapsedTime)}</p>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Exercises</h3>
-              <p className="text-2xl font-bold">{workout.exercises.length}</p>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Sets Completed</h3>
-              <p className="text-2xl font-bold">
-                {Object.values(setTrackers).reduce(
-                  (acc, sets) =>
-                    acc + sets.filter((set) => set.completed).length,
-                  0
-                )}
+      <div className="min-h-screen bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+          <div className="bg-gray-800 rounded-lg shadow-xl p-6 text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-yellow-500 rounded-full mb-4">
+                <FaCheck className="h-12 w-12 text-gray-900" />
+              </div>
+              <h1 className="text-3xl font-bold mb-2 text-white">
+                Workout Completed!
+              </h1>
+              <p className="text-xl text-gray-300">
+                Great job on completing {workout.name}
               </p>
             </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              href="/workouts"
-              className="bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-6 rounded-md flex items-center justify-center"
-            >
-              <FaDumbbell className="mr-2" />
-              <span>Back to Workouts</span>
-            </Link>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <h3 className="font-medium mb-2 text-gray-300">Elapsed Time</h3>
+                <p className="text-2xl font-bold text-white">
+                  {formatTime(elapsedTime)}
+                </p>
+              </div>
 
-            <Link
-              href="/progress"
-              className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md flex items-center justify-center"
-            >
-              <FaHistory className="mr-2" />
-              <span>View Progress</span>
-            </Link>
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <h3 className="font-medium mb-2 text-gray-300">Exercises</h3>
+                <p className="text-2xl font-bold text-white">
+                  {workout.workoutExercises?.length || 0}
+                </p>
+              </div>
+
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <h3 className="font-medium mb-2 text-gray-300">
+                  Sets Completed
+                </h3>
+                <p className="text-2xl font-bold text-white">
+                  {Object.values(setTrackers).reduce(
+                    (acc, sets) =>
+                      acc + sets.filter((set) => set.completed).length,
+                    0
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                href="/workouts"
+                className="bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-md flex items-center justify-center border border-gray-600"
+              >
+                <FaDumbbell className="mr-2" />
+                <span>Back to Workouts</span>
+              </Link>
+
+              <Link
+                href="/progress"
+                className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-6 rounded-md flex items-center justify-center font-medium"
+              >
+                <FaHistory className="mr-2" />
+                <span>View Progress</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -333,253 +331,310 @@ export default function WorkoutSessionPage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {!sessionStarted ? (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="mb-6">
-            <Link
-              href={`/workouts/${workout.id}`}
-              className="text-gray-600 hover:text-gray-900 flex items-center"
-            >
-              <FaArrowLeft className="mr-2" />
-              <span>Back to Workout Details</span>
-            </Link>
-          </div>
-
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-4">{workout.name}</h1>
-            <p className="text-gray-600">
-              {workout.exercises.length} exercises |{" "}
-              {workout.exercises.reduce((acc, ex) => acc + ex.sets, 0)} total
-              sets
-            </p>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Workout Overview</h2>
-            <div className="space-y-4">
-              {workout.exercises.map((exercise, index) => (
-                <div
-                  key={exercise.id}
-                  className="flex justify-between items-center"
-                >
-                  <div>
-                    <div className="font-medium">{exercise.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {exercise.sets} sets × {exercise.reps} reps{" "}
-                      {exercise.weight ? `@ ${exercise.weight} kg` : ""}
-                    </div>
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    Exercise {index + 1} of {workout.exercises.length}
-                  </div>
-                </div>
-              ))}
+    <div className="min-h-screen bg-gray-900">
+      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+        {!sessionStarted ? (
+          <div className="bg-gray-800 rounded-lg shadow-xl p-6">
+            <div className="mb-6">
+              <Link
+                href={`/workouts/${workout.id}`}
+                className="text-gray-400 hover:text-white flex items-center transition-colors"
+              >
+                <FaArrowLeft className="mr-2" />
+                <span>Back to Workout Details</span>
+              </Link>
             </div>
-          </div>
 
-          <div className="text-center">
-            <button
-              onClick={startSession}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-md text-lg font-medium flex items-center justify-center mx-auto"
-            >
-              <FaPlay className="mr-2" />
-              <span>Start Workout</span>
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="p-6 border-b">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold">{workout.name}</h1>
-              <div className="flex items-center">
-                <FaStopwatch className="mr-2 text-gray-600" />
-                <span className="text-lg font-medium">
-                  {formatTime(
-                    Math.floor(
-                      (new Date().getTime() - (sessionStart?.getTime() || 0)) /
-                        1000
-                    )
-                  )}
-                </span>
-              </div>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-4 text-white">
+                {workout.name}
+              </h1>
+              <p className="text-gray-300">
+                {workout.workoutExercises?.length || 0} exercises |{" "}
+                {workout.workoutExercises?.reduce(
+                  (acc, ex) => acc + ex.sets,
+                  0
+                ) || 0}{" "}
+                total sets
+              </p>
             </div>
-          </div>
 
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  Exercise {currentExerciseIndex + 1} of{" "}
-                  {workout.exercises.length}
-                </h2>
-                <p className="text-gray-600">{currentExercise?.muscleGroup}</p>
-              </div>
-
-              <div className="flex gap-2">
-                {currentExerciseIndex > 0 && (
-                  <button
-                    onClick={prevExercise}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md"
+            <div className="bg-gray-700 rounded-lg p-6 mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-white">
+                Workout Overview
+              </h2>
+              <div className="space-y-4">
+                {workout.workoutExercises?.map((exercise, index) => (
+                  <div
+                    key={exercise.exerciseId}
+                    className="flex justify-between items-center py-3 border-b border-gray-600 last:border-0"
                   >
-                    Previous
-                  </button>
-                )}
-                <button
-                  onClick={nextExercise}
-                  className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"
-                >
-                  {currentExerciseIndex === workout.exercises.length - 1
-                    ? "Finish"
-                    : "Next"}
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold">
-                    {currentExercise?.name}
-                  </h3>
-                  {currentExercise?.notes && (
-                    <p className="text-gray-600 mt-1">
-                      {currentExercise.notes}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-500">Target</div>
-                    <div className="font-medium">
-                      {currentExercise?.sets} sets × {currentExercise?.reps}{" "}
-                      reps
-                    </div>
-                  </div>
-
-                  {currentExercise?.weight && (
-                    <div className="text-center">
-                      <div className="text-sm text-gray-500">Weight</div>
-                      <div className="font-medium">
-                        {currentExercise.weight} kg
+                    <div>
+                      <div className="font-medium text-white">
+                        {exercise.exerciseName}
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        {exercise.sets} sets × {exercise.reps} reps{" "}
+                        {exercise.weight ? `@ ${exercise.weight} kg` : ""}
                       </div>
                     </div>
-                  )}
-                </div>
+                    <div className="text-yellow-400 text-sm font-medium">
+                      Exercise {index + 1} of{" "}
+                      {workout.workoutExercises?.length || 0}
+                    </div>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              <div className="border-t border-gray-200 pt-6">
-                <h4 className="font-medium mb-4">Sets</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {currentExercise &&
-                    Array.from({ length: currentExercise.sets }).map(
-                      (_, setIndex) => {
-                        const isCompleted =
-                          setTrackers[currentExercise.id][setIndex]?.completed;
-
-                        return (
-                          <div
-                            key={setIndex}
-                            className={`border rounded-lg p-4 ${
-                              isCompleted
-                                ? "border-green-500 bg-green-50"
-                                : "border-gray-200"
-                            }`}
-                          >
-                            <div className="flex justify-between items-center mb-2">
-                              <div className="font-medium">
-                                Set {setIndex + 1}
-                              </div>
-                              <button
-                                onClick={() =>
-                                  toggleSetCompletion(
-                                    currentExercise.id,
-                                    setIndex,
-                                    !isCompleted
-                                  )
-                                }
-                                className={`flex items-center justify-center w-6 h-6 rounded-full ${
-                                  isCompleted
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-200"
-                                }`}
-                              >
-                                {isCompleted ? (
-                                  <FaCheck size={10} />
-                                ) : (
-                                  <FaTimes size={10} />
-                                )}
-                              </button>
-                            </div>
-
-                            <div className="flex justify-between">
-                              <div className="text-sm text-gray-500">
-                                <span className="font-medium">
-                                  {currentExercise.reps}
-                                </span>{" "}
-                                reps
-                              </div>
-                              {currentExercise.weight && (
-                                <div className="text-sm text-gray-500">
-                                  <span className="font-medium">
-                                    {currentExercise.weight}
-                                  </span>{" "}
-                                  kg
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      }
+            <div className="text-center">
+              <button
+                onClick={startSession}
+                className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-8 rounded-md text-lg font-medium flex items-center justify-center mx-auto transition-colors"
+              >
+                <FaPlay className="mr-2" />
+                <span>Start Workout</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl mx-auto">
+            <div className="p-6 border-b border-gray-700">
+              <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-white">
+                  {workout.name}
+                </h1>
+                <div className="flex items-center bg-gray-700 px-3 py-2 rounded-lg">
+                  <FaStopwatch className="mr-2 text-yellow-500" />
+                  <span className="text-lg font-medium text-white">
+                    {formatTime(
+                      Math.floor(
+                        (new Date().getTime() -
+                          (sessionStart?.getTime() || 0)) /
+                          1000
+                      )
                     )}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="font-medium mb-4">Rest Timer</h4>
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-4xl font-bold">
-                  {formatTime(timerSeconds)}
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">
+                    Exercise {currentExerciseIndex + 1} of{" "}
+                    {workout.workoutExercises?.length || 0}
+                  </h2>
+                  <p className="text-yellow-400 font-medium">
+                    Exercise {currentExerciseIndex + 1}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
+                  {currentExerciseIndex > 0 && (
+                    <button
+                      onClick={prevExercise}
+                      className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md border border-gray-600 transition-colors"
+                    >
+                      Previous
+                    </button>
+                  )}
                   <button
-                    onClick={toggleTimer}
-                    className={`${
-                      timerRunning
-                        ? "bg-yellow-500 hover:bg-yellow-600"
-                        : "bg-green-500 hover:bg-green-600"
-                    } text-white py-2 px-4 rounded-md flex items-center`}
+                    onClick={nextExercise}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md font-medium transition-colors"
                   >
-                    {timerRunning ? (
-                      <>
-                        <FaPause className="mr-2" />
-                        <span>Pause</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaPlay className="mr-2" />
-                        <span>Resume</span>
-                      </>
+                    {currentExerciseIndex ===
+                    (workout.workoutExercises?.length || 1) - 1
+                      ? "Finish"
+                      : "Next"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-gray-700 rounded-lg p-6 mb-6">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">
+                      {currentExercise?.exerciseName}
+                    </h3>
+                    {currentExercise?.notes && (
+                      <p className="text-gray-300 mt-1">
+                        {currentExercise.notes}
+                      </p>
                     )}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-400">Target</div>
+                      <div className="font-medium text-yellow-400">
+                        {currentExercise?.sets} sets × {currentExercise?.reps}{" "}
+                        reps
+                      </div>
+                    </div>
+
+                    {currentExercise?.weight && (
+                      <div className="text-center">
+                        <div className="text-sm text-gray-400">Weight</div>
+                        <div className="font-medium text-yellow-400">
+                          {currentExercise.weight} kg
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-600 pt-6">
+                  <h4 className="font-medium mb-4 text-white">Sets</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {currentExercise &&
+                      Array.from({ length: currentExercise.sets }).map(
+                        (_, setIndex) => {
+                          const isCompleted =
+                            setTrackers[currentExercise.exerciseId][setIndex]
+                              ?.completed;
+
+                          return (
+                            <div
+                              key={setIndex}
+                              className={`border rounded-lg p-4 transition-colors ${
+                                isCompleted
+                                  ? "border-yellow-500 bg-yellow-500/10"
+                                  : "border-gray-600 bg-gray-800"
+                              }`}
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <div className="font-medium text-white">
+                                  Set {setIndex + 1}
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    toggleSetCompletion(
+                                      currentExercise.exerciseId,
+                                      setIndex,
+                                      !isCompleted
+                                    )
+                                  }
+                                  className={`flex items-center justify-center w-6 h-6 rounded-full transition-colors ${
+                                    isCompleted
+                                      ? "bg-yellow-500 text-gray-900"
+                                      : "bg-gray-600 text-gray-400"
+                                  }`}
+                                >
+                                  {isCompleted ? (
+                                    <FaCheck size={10} />
+                                  ) : (
+                                    <FaTimes size={10} />
+                                  )}
+                                </button>
+                              </div>
+
+                              <div className="flex justify-between">
+                                <div className="text-sm text-gray-400">
+                                  <span className="font-medium text-white">
+                                    {currentExercise.reps}
+                                  </span>{" "}
+                                  reps
+                                </div>
+                                {currentExercise.weight && (
+                                  <div className="text-sm text-gray-400">
+                                    <span className="font-medium text-white">
+                                      {currentExercise.weight}
+                                    </span>{" "}
+                                    kg
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                      )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-700 rounded-lg p-6">
+                <h4 className="font-medium mb-4 text-white">Rest Timer</h4>
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="text-4xl font-bold text-yellow-500">
+                    {formatTime(timerSeconds)}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={toggleTimer}
+                      className={`${
+                        timerRunning
+                          ? "bg-orange-500 hover:bg-orange-600"
+                          : "bg-yellow-500 hover:bg-yellow-600"
+                      } text-gray-900 py-2 px-4 rounded-md flex items-center font-medium transition-colors`}
+                    >
+                      {timerRunning ? (
+                        <>
+                          <FaPause className="mr-2" />
+                          <span>Pause</span>
+                        </>
+                      ) : (
+                        <>
+                          <FaPlay className="mr-2" />
+                          <span>Resume</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={resetTimer}
+                      className="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-md flex items-center transition-colors"
+                    >
+                      <FaRedo className="mr-2" />
+                      <span>Reset</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Completion Confirmation Modal */}
+        {showCompleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-500 rounded-full mb-4">
+                  <FaCheck className="h-8 w-8 text-gray-900" />
+                </div>
+
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Complete Workout?
+                </h3>
+
+                <p className="text-gray-300 mb-6">
+                  Are you sure you want to finish this workout? This action
+                  cannot be undone.
+                </p>
+
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={handleCancelComplete}
+                    className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md border border-gray-600 transition-colors"
+                  >
+                    Cancel
                   </button>
 
                   <button
-                    onClick={resetTimer}
-                    className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center"
+                    onClick={handleConfirmComplete}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md font-medium transition-colors"
                   >
-                    <FaRedo className="mr-2" />
-                    <span>Reset</span>
+                    Complete Workout
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
