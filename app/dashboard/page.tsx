@@ -167,7 +167,7 @@ export default function Dashboard() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
-              href="/workouts/new"
+              href="/workouts"
               className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
             >
               <FaDumbbell className="text-2xl text-yellow-500 mb-2" />

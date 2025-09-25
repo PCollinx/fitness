@@ -72,7 +72,7 @@ export default function WorkoutDetailPage({
   );
 
   useEffect(() => {
-    // Load workout from storage or mock data
+    // Load workout from storage
     setIsLoading(true);
 
     // Try to find the workout in our storage
@@ -303,7 +303,7 @@ export default function WorkoutDetailPage({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
           </div>
@@ -315,7 +315,7 @@ export default function WorkoutDetailPage({
   if (!workout) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
           <div className="text-center py-12 bg-gray-800 rounded-lg">
             <FaDumbbell className="mx-auto h-16 w-16 text-yellow-500 mb-4" />
             <h3 className="text-xl font-medium text-white mb-2">
@@ -340,7 +340,7 @@ export default function WorkoutDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl fade-in">
+      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl fade-in">
         <div className="mb-4 sm:mb-6 flex items-center">
           <button
             onClick={() => router.back()}
@@ -353,7 +353,6 @@ export default function WorkoutDetailPage({
 
         {/* Workout Header */}
         <div className="relative overflow-hidden rounded-lg sm:rounded-xl mb-4 sm:mb-6 transition-all scale-in">
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/70 to-gray-900/90"></div>
           <div className="relative h-40 xs:h-48 sm:h-56 md:h-64 lg:h-72">
             <img
               src={workout.image}
@@ -365,34 +364,55 @@ export default function WorkoutDetailPage({
                   "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center&auto=format";
               }}
             />
+            {/* Strong gradient overlay focused on text area */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+            {/* Additional solid overlay for extra contrast */}
+            <div className="absolute bottom-0 left-0 right-0 h-3/4 bg-gradient-to-t from-black/60 via-black/40 to-transparent"></div>
           </div>
-          <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <span className="bg-yellow-500 text-gray-900 text-xs sm:text-sm font-medium px-2.5 py-1 rounded capitalize">
-                {workout.category}
-              </span>
-              {workout.isDefault && (
-                <span className="bg-gray-700 text-gray-200 text-xs sm:text-sm font-medium px-2.5 py-1 rounded">
-                  Default
+          {/* Text container with background for maximum readability */}
+          <div className="absolute inset-0 flex flex-col justify-end">
+            <div className="bg-gradient-to-t from-black/75 via-black/65 to-transparent p-4 sm:p-6">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                <span className="bg-yellow-500 text-gray-900 text-xs sm:text-sm font-black px-3 py-1.5 rounded-full capitalize shadow-xl border-2 border-yellow-400">
+                  {workout.category}
                 </span>
+                {workout.isDefault && (
+                  <span className="bg-white/95 backdrop-blur text-gray-900 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-xl border-2 border-gray-300">
+                    Default
+                  </span>
+                )}
+                <span className="bg-black/90 backdrop-blur text-yellow-400 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full flex items-center shadow-xl border-2 border-yellow-500/30">
+                  <FaStar className="mr-1 text-xs" /> {workout.rating}
+                </span>
+              </div>
+              <h1
+                className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2 sm:mb-3 leading-tight"
+                style={{
+                  textShadow:
+                    "0 0 10px rgba(0,0,0,1), 2px 2px 8px rgba(0,0,0,0.9), -1px -1px 4px rgba(0,0,0,0.8)",
+                  WebkitTextStroke: "1px rgba(0,0,0,0.3)",
+                }}
+              >
+                {workout.name}
+              </h1>
+              {workout.description && (
+                <p
+                  className="text-xs xs:text-sm sm:text-base text-white mb-0 sm:mb-2 max-w-3xl leading-relaxed line-clamp-3 sm:line-clamp-none font-medium"
+                  style={{
+                    textShadow:
+                      "0 0 8px rgba(0,0,0,1), 1px 1px 6px rgba(0,0,0,0.9)",
+                    WebkitTextStroke: "0.5px rgba(0,0,0,0.4)",
+                  }}
+                >
+                  {workout.description}
+                </p>
               )}
-              <span className="bg-gray-800/90 text-yellow-500 text-xs sm:text-sm font-medium px-2.5 py-1 rounded flex items-center">
-                <FaStar className="mr-1 text-xs" /> {workout.rating}
-              </span>
             </div>
-            <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-3 leading-tight">
-              {workout.name}
-            </h1>
-            {workout.description && (
-              <p className="text-xs xs:text-sm sm:text-base text-gray-200 mb-0 sm:mb-2 max-w-3xl leading-relaxed line-clamp-3 sm:line-clamp-none">
-                {workout.description}
-              </p>
-            )}
           </div>
         </div>
 
         {/* Workout Info Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-8 slide-up">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-8 slide-up">
           <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all">
             <div className="flex items-center">
               <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
@@ -441,7 +461,7 @@ export default function WorkoutDetailPage({
             </div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all col-span-2 lg:col-span-1">
+          <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all">
             <div className="flex items-center">
               <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
                 <FaUser className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
@@ -475,8 +495,7 @@ export default function WorkoutDetailPage({
                 className="w-full sm:flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center justify-center transition-all text-sm sm:text-base"
               >
                 <FaEdit className="mr-2 text-xs sm:text-sm" />
-                <span className="hidden xs:inline">Edit Workout</span>
-                <span className="xs:hidden">Edit</span>
+                <span className="inline">Edit Workout</span>
               </Link>
 
               <button
@@ -489,11 +508,8 @@ export default function WorkoutDetailPage({
                 }`}
               >
                 <FaTrash className="mr-2 text-xs sm:text-sm" />
-                <span className="hidden xs:inline">
+                <span className="inline">
                   {deleteConfirm ? "Confirm Delete" : "Delete Workout"}
-                </span>
-                <span className="xs:hidden">
-                  {deleteConfirm ? "Confirm" : "Delete"}
                 </span>
               </button>
             </>
@@ -606,9 +622,12 @@ export default function WorkoutDetailPage({
 
         {/* Exercise Detail Modal */}
         {modalOpen && selectedExercise && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-gray-900/80 backdrop-blur-sm fade-in">
+          <div
+            className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-gray-900/80 backdrop-blur-sm fade-in"
+            onClick={closeModal}
+          >
             <div
-              className="bg-gray-800 rounded-t-xl sm:rounded-lg shadow-xl w-full max-w-sm sm:max-w-lg mx-auto overflow-hidden border-t sm:border border-gray-700 scale-in"
+              className="bg-gray-800 rounded-t-xl sm:rounded-lg shadow-xl w-full max-w-sm sm:max-w-lg mx-auto overflow-hidden border-t sm:border border-gray-700 scale-in mb-16 sm:mb-0"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center p-4 sm:p-5 border-b border-gray-700">
@@ -623,7 +642,7 @@ export default function WorkoutDetailPage({
                 </button>
               </div>
 
-              <div className="p-4 sm:p-5 max-h-[70vh] sm:max-h-none overflow-y-auto">
+              <div className="p-4 sm:p-5 max-h-[60vh] sm:max-h-none overflow-y-auto">
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="bg-gray-700 p-3 sm:p-3 rounded-lg text-center">
                     <div className="text-yellow-500 flex justify-center mb-1.5">
@@ -685,7 +704,7 @@ export default function WorkoutDetailPage({
                 )}
               </div>
 
-              <div className="p-4 sm:p-5 border-t border-gray-700 bg-gray-850">
+              <div className="p-4 sm:p-5 border-t border-gray-700 bg-gray-850 safe-area-pb">
                 <button
                   onClick={closeModal}
                   className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-4 rounded-lg transition-all text-sm sm:text-base font-medium"

@@ -394,7 +394,7 @@ export default function EditWorkoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
           <button

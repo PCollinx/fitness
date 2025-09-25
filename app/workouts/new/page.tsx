@@ -297,7 +297,7 @@ export default function CreateWorkoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl fade-in">
+      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl fade-in">
         <div className="mb-6 flex items-center">
           <button
             onClick={() => router.back()}

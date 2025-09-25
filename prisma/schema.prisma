@@ -49,11 +49,12 @@ model User {
   height        Float?     // in cm
   weight        Float?     // in kg
   
-  accounts      Account[]
-  sessions      Session[]
-  workouts      Workout[]
-  exercises     Exercise[]
-  progress      Progress[]
+  accounts         Account[]
+  sessions         Session[]
+  workouts         Workout[]
+  exercises        Exercise[]
+  progress         Progress[]
+  workoutSessions  WorkoutSession[]
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -72,6 +73,7 @@ model Workout {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   exercises   WorkoutExercise[]
+  sessions    WorkoutSession[]
   userId      String
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   public      Boolean    @default(false)
@@ -91,6 +93,7 @@ model Exercise {
   userId      String?
   user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   workouts    WorkoutExercise[]
+  sessionExercises WorkoutSessionExercise[]
   
   @@index([userId])
 }
@@ -140,4 +143,54 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model WorkoutSession {
+  id          String     @id @default(cuid())
+  workoutId   String
+  workout     Workout    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startTime   DateTime
+  endTime     DateTime
+  duration    Int        // Total duration in seconds
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  exercises   WorkoutSessionExercise[]
+  
+  @@index([userId])
+  @@index([workoutId])
+  @@index([startTime])
+}
+
+model WorkoutSessionExercise {
+  id                String               @id @default(cuid())
+  sessionId         String
+  session           WorkoutSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId        String
+  exercise          Exercise             @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  order             Int
+  
+  sets              WorkoutSessionSet[]
+  
+  @@index([sessionId])
+  @@index([exerciseId])
+}
+
+model WorkoutSessionSet {
+  id                      String                    @id @default(cuid())
+  sessionExerciseId       String
+  sessionExercise         WorkoutSessionExercise    @relation(fields: [sessionExerciseId], references: [id], onDelete: Cascade)
+  setNumber               Int
+  targetReps              Int
+  actualReps              Int?
+  targetWeight            Float?
+  actualWeight            Float?
+  completed               Boolean                   @default(false)
+  notes                   String?
+  restTime                Int?                      // Rest time in seconds before this set
+  
+  @@index([sessionExerciseId])
 }

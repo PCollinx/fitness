@@ -25,6 +25,11 @@ import {
   type Workout,
   type WorkoutExercise,
 } from "../../../utils/workoutStorage";
+import {
+  submitWorkoutSession,
+  formatWorkoutSessionData,
+  type WorkoutSessionData,
+} from "../../../utils/workoutSessionApi";
 
 type Exercise = {
   id: string;
@@ -63,6 +68,9 @@ export default function WorkoutSessionPage() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sessionStart, setSessionStart] = useState<Date | null>(null);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [isSubmittingSession, setIsSubmittingSession] = useState(false);
+  const [sessionSubmitted, setSessionSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Track the progress of each set for each exercise
   const [setTrackers, setSetTrackers] = useState<Record<string, SetTracker[]>>(
@@ -188,9 +196,9 @@ export default function WorkoutSessionPage() {
   };
 
   // Handle confirm completion
-  const handleConfirmComplete = () => {
+  const handleConfirmComplete = async () => {
     setShowCompleteModal(false);
-    completeSession();
+    await completeSession();
   };
 
   // Handle cancel completion
@@ -199,22 +207,63 @@ export default function WorkoutSessionPage() {
   };
 
   // Complete the workout session
-  const completeSession = () => {
-    setSessionCompleted(true);
-    setTimerRunning(false);
-    setElapsedTime(
-      Math.floor((new Date().getTime() - (sessionStart?.getTime() || 0)) / 1000)
+  const completeSession = async () => {
+    if (!workout || !sessionStart) return;
+
+    // If already completed, only retry the API call
+    if (!sessionCompleted) {
+      setSessionCompleted(true);
+      setTimerRunning(false);
+      const endTime = new Date();
+      const duration = Math.floor(
+        (endTime.getTime() - sessionStart.getTime()) / 1000
+      );
+      setElapsedTime(duration);
+    }
+
+    // Don't submit again if already successfully submitted
+    if (sessionSubmitted) return;
+
+    const endTime = sessionCompleted
+      ? new Date(sessionStart.getTime() + elapsedTime * 1000)
+      : new Date();
+
+    // Prepare session data for API
+    const sessionData = formatWorkoutSessionData(
+      workout.id,
+      sessionStart,
+      endTime,
+      setTrackers
     );
 
-    // In a real app, send the session data to the API
+    // Submit session to API
+    setIsSubmittingSession(true);
+    setSubmitError(null);
+
+    try {
+      const response = await submitWorkoutSession(sessionData);
+      console.log("Workout session saved successfully:", response);
+      setSessionSubmitted(true);
+    } catch (error) {
+      console.error("Failed to save workout session:", error);
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Failed to save workout session"
+      );
+    } finally {
+      setIsSubmittingSession(false);
+    }
+
+    // Log session completion
     console.log("Workout completed:", {
-      workoutId: workout?.id,
+      workoutId: workout.id,
       startTime: sessionStart,
-      endTime: new Date(),
-      elapsedTime: Math.floor(
-        (new Date().getTime() - (sessionStart?.getTime() || 0)) / 1000
-      ),
-      exercises: workout?.workoutExercises?.map((exercise) => ({
+      endTime: endTime,
+      elapsedTime: sessionCompleted
+        ? elapsedTime
+        : Math.floor((endTime.getTime() - sessionStart.getTime()) / 1000),
+      exercises: workout.workoutExercises?.map((exercise) => ({
         exerciseId: exercise.exerciseId,
         sets: setTrackers[exercise.exerciseId],
       })),
@@ -227,7 +276,7 @@ export default function WorkoutSessionPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent"></div>
           </div>
@@ -239,7 +288,7 @@ export default function WorkoutSessionPage() {
   if (!workout) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
           <div className="text-center py-12 bg-gray-800 rounded-lg">
             <h3 className="text-lg font-medium text-white mb-2">
               Workout not found
@@ -264,7 +313,7 @@ export default function WorkoutSessionPage() {
   if (sessionCompleted) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
           <div className="bg-gray-800 rounded-lg shadow-xl p-6 text-center">
             <div className="mb-6">
               <div className="inline-flex items-center justify-center w-24 h-24 bg-yellow-500 rounded-full mb-4">
@@ -276,6 +325,38 @@ export default function WorkoutSessionPage() {
               <p className="text-xl text-gray-300">
                 Great job on completing {workout.name}
               </p>
+
+              {/* Session submission status */}
+              <div className="mt-4">
+                {isSubmittingSession && (
+                  <div className="flex items-center justify-center text-yellow-500">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-500 border-t-transparent mr-2"></div>
+                    <span className="text-sm">Saving workout session...</span>
+                  </div>
+                )}
+
+                {sessionSubmitted && !isSubmittingSession && (
+                  <div className="flex items-center justify-center text-green-500">
+                    <FaCheck className="mr-2" />
+                    <span className="text-sm">
+                      Workout session saved successfully!
+                    </span>
+                  </div>
+                )}
+
+                {submitError && !isSubmittingSession && (
+                  <div className="text-red-400 text-sm mb-4">
+                    <p>Failed to save workout session:</p>
+                    <p className="text-xs mt-1">{submitError}</p>
+                    <button
+                      onClick={() => completeSession()}
+                      className="mt-2 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-xs transition-colors"
+                    >
+                      Retry Save
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
@@ -332,7 +413,7 @@ export default function WorkoutSessionPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pb-8 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
         {!sessionStarted ? (
           <div className="bg-gray-800 rounded-lg shadow-xl p-6">
             <div className="mb-6">
@@ -359,11 +440,11 @@ export default function WorkoutSessionPage() {
               </p>
             </div>
 
-            <div className="bg-gray-700 rounded-lg p-6 mb-8">
+            <div className="bg-gray-700 rounded-lg p-4 mb-8">
               <h2 className="text-xl font-semibold mb-4 text-white">
                 Workout Overview
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 {workout.workoutExercises?.map((exercise, index) => (
                   <div
                     key={exercise.exerciseId}
