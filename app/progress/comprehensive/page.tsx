@@ -5,17 +5,21 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  FaChartLine,
-  FaWeight,
-  FaDumbbell,
   FaPlus,
+  FaWeight,
+  FaRuler,
+  FaHeartbeat,
+  FaCalendarAlt,
+  FaTrophy,
+  FaFire,
+  FaChartLine,
+  FaClock,
+  FaDumbbell,
   FaArrowUp,
   FaArrowDown,
+  FaMinus,
   FaHistory,
   FaBullseye,
-  FaTrophy,
-  FaRuler,
-  FaMinus,
 } from "react-icons/fa";
 
 // Types for comprehensive progress data
@@ -113,9 +117,7 @@ export default function ProgressPage() {
       }
     };
 
-    if (status === "authenticated") {
-      fetchProgressData();
-    }
+    fetchProgressData();
   }, [status, router]);
 
   // Helper function to render trend indicator
@@ -239,14 +241,14 @@ export default function ProgressPage() {
         </div>
       </div>
 
-      {/* Simple Workout Metrics */}
+      {/* Workout Metrics */}
       <div className="bg-gray-800 rounded-lg p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">Workout Performance</h2>
           <FaDumbbell className="text-yellow-500" />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="text-center">
             <div className="text-2xl font-bold text-yellow-500 mb-1">
               {progressData.workoutMetrics.totalSessions}
@@ -275,6 +277,182 @@ export default function ProgressPage() {
             <div className="text-sm text-gray-400">Avg Duration</div>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-900 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-300">Total Weight Lifted</span>
+              <FaWeight className="text-yellow-500" />
+            </div>
+            <div className="text-xl font-bold text-white">
+              {progressData.workoutMetrics.totalWeightLifted.toLocaleString()}{" "}
+              kg
+            </div>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-300">Total Reps</span>
+              <FaFire className="text-yellow-500" />
+            </div>
+            <div className="text-xl font-bold text-white">
+              {progressData.workoutMetrics.totalReps.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-300">Strength Progress</span>
+              <FaTrophy className="text-yellow-500" />
+            </div>
+            <div className="text-xl font-bold text-white flex items-center">
+              {progressData.workoutMetrics.strengthProgress > 0 && "+"}
+              {progressData.workoutMetrics.strengthProgress}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Body Metrics */}
+      {progressData.bodyMetrics.current && (
+        <div className="bg-gray-800 rounded-lg p-6 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Body Metrics</h2>
+            <FaRuler className="text-yellow-500" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Weight Tracking
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">Current Weight</span>
+                  <span className="text-xl font-bold text-white">
+                    {progressData.bodyMetrics.trends.weight.current || "N/A"} kg
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">30-Day Trend</span>
+                  {renderTrend(
+                    progressData.bodyMetrics.trends.weight.trend30d,
+                    true
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">7-Day Trend</span>
+                  {renderTrend(
+                    progressData.bodyMetrics.trends.weight.trend7d,
+                    true
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Body Composition
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">Body Fat %</span>
+                  <span className="text-xl font-bold text-white">
+                    {progressData.bodyMetrics.trends.bodyFat.current || "N/A"}%
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">30-Day Trend</span>
+                  {renderTrend(
+                    progressData.bodyMetrics.trends.bodyFat.trend30d,
+                    true
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  {progressData.bodyMetrics.current.chest && (
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-yellow-500">
+                        {progressData.bodyMetrics.current.chest}cm
+                      </div>
+                      <div className="text-sm text-gray-400">Chest</div>
+                    </div>
+                  )}
+                  {progressData.bodyMetrics.current.waist && (
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-yellow-500">
+                        {progressData.bodyMetrics.current.waist}cm
+                      </div>
+                      <div className="text-sm text-gray-400">Waist</div>
+                    </div>
+                  )}
+                  {progressData.bodyMetrics.current.arms && (
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-yellow-500">
+                        {progressData.bodyMetrics.current.arms}cm
+                      </div>
+                      <div className="text-sm text-gray-400">Arms</div>
+                    </div>
+                  )}
+                  {progressData.bodyMetrics.current.thighs && (
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-yellow-500">
+                        {progressData.bodyMetrics.current.thighs}cm
+                      </div>
+                      <div className="text-sm text-gray-400">Thighs</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Activity */}
+      <div className="bg-gray-800 rounded-lg p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+          <FaHistory className="text-yellow-500" />
+        </div>
+
+        {progressData.recentActivity.length > 0 ? (
+          <div className="space-y-3">
+            {progressData.recentActivity.slice(0, 5).map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-center justify-between p-3 bg-gray-900 rounded-lg"
+              >
+                <div className="flex-1">
+                  <h4 className="font-medium text-white">
+                    {activity.workoutName}
+                  </h4>
+                  <p className="text-sm text-gray-400">
+                    {new Date(activity.date).toLocaleDateString()} •
+                    {activity.duration ? ` ${activity.duration}m • ` : " "}
+                    {activity.setsCompleted}/{activity.totalSets} sets completed
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-yellow-500">
+                    {Math.round(
+                      (activity.setsCompleted / activity.totalSets) * 100
+                    )}
+                    %
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <FaDumbbell className="mx-auto h-12 w-12 text-gray-600 mb-3" />
+            <p className="text-gray-400">No recent workout activity</p>
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}

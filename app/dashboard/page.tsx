@@ -10,6 +10,8 @@ import {
   FaRunning,
   FaCalendar,
   FaUsers,
+  FaFire,
+  FaWeight,
 } from "react-icons/fa";
 
 type WorkoutSummary = {
@@ -24,12 +26,39 @@ type ProgressSummary = {
   weight: number;
 };
 
+type ComprehensiveProgress = {
+  overallScores: {
+    consistency: number;
+    improvement: number;
+  };
+  workoutMetrics: {
+    totalSessions: number;
+    sessionsLast30Days: number;
+    completionRate: number;
+    averageDuration: number;
+  };
+  bodyMetrics: {
+    current: {
+      weight?: number;
+      bodyFat?: number;
+    } | null;
+    trends: {
+      weight: {
+        current?: number;
+        trend30d: number;
+        trend7d: number;
+      };
+    };
+  };
+};
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [recentWorkouts, setRecentWorkouts] = useState<WorkoutSummary[]>([]);
   const [progressData, setProgressData] = useState<ProgressSummary[]>([]);
+  const [comprehensiveProgress, setComprehensiveProgress] = useState<ComprehensiveProgress | null>(null);
 
   // Chart utility functions
   const calculateChartData = (data: ProgressSummary[]) => {
@@ -114,6 +143,16 @@ export default function Dashboard() {
           setProgressData([]);
         }
 
+        // Fetch comprehensive progress data
+        const comprehensiveResponse = await fetch("/api/progress/comprehensive");
+        if (comprehensiveResponse.ok) {
+          const comprehensiveData = await comprehensiveResponse.json();
+          setComprehensiveProgress(comprehensiveData);
+        } else {
+          console.error("Error fetching comprehensive progress:", comprehensiveResponse.statusText);
+          setComprehensiveProgress(null);
+        }
+
         // Always set loading to false, even if data is empty
         setIsLoading(false);
       } catch (error) {
@@ -136,6 +175,30 @@ export default function Dashboard() {
       day: "numeric",
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  // Helper function to get score color
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-400";
+    if (score >= 60) return "text-yellow-400";
+    if (score >= 40) return "text-orange-400";
+    return "text-red-400";
+  };
+
+  // Helper function to render weight trend
+  const renderWeightTrend = (trend: number) => {
+    if (Math.abs(trend) < 0.1) {
+      return <span className="text-gray-400 text-xs">No change</span>;
+    }
+    
+    const isPositive = trend < 0; // For weight, decrease is positive
+    const color = isPositive ? "text-green-400" : "text-red-400";
+    
+    return (
+      <span className={`${color} text-xs flex items-center`}>
+        {isPositive ? "↓" : "↑"} {Math.abs(trend).toFixed(1)}%
+      </span>
+    );
   };
 
   if (status === "loading") {
@@ -212,10 +275,10 @@ export default function Dashboard() {
         <div className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-yellow-500">
-              Recent Workouts
+              Recent Sessions
             </h2>
             <Link
-              href="/workouts"
+              href="/workouts/recent"
               className="text-yellow-400 text-sm font-medium hover:underline"
             >
               View All
@@ -280,196 +343,117 @@ export default function Dashboard() {
               View All
             </Link>
           </div>
+          
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-yellow-500 border-t-transparent"></div>
             </div>
-          ) : progressData.length > 0 ? (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium text-white">Weight</h3>
-                <span className="text-sm font-medium text-yellow-400">
-                  {progressData[0].weight} kg
-                </span>
-              </div>
-
-              <div className="relative h-32 sm:h-36 bg-gray-700/50 rounded-xl p-4 overflow-hidden border border-gray-600/50">
-                {/* Chart Container */}
-                <div className="h-full flex items-end justify-between relative">
-                  {/* Progress Chart Visualization */}
-                  {(() => {
-                    const {
-                      positions: barPositions,
-                      range,
-                      chartHeight,
-                    } = calculateChartData(progressData);
-
-                    return (
-                      <>
-                        {/* Connecting Line */}
-                        <svg
-                          className="absolute inset-0 w-full h-full pointer-events-none"
-                          preserveAspectRatio="none"
-                        >
-                          <polyline
-                            fill="none"
-                            stroke="rgba(250, 204, 21, 0.6)"
-                            strokeWidth="2"
-                            points={barPositions
-                              .map(
-                                (pos) =>
-                                  `${pos.x}%,${(pos.y / chartHeight) * 100}%`
-                              )
-                              .join(" ")}
-                          />
-                          {/* Gradient fill under the line */}
-                          <defs>
-                            <linearGradient
-                              id="chartGradient"
-                              x1="0%"
-                              y1="0%"
-                              x2="0%"
-                              y2="100%"
-                            >
-                              <stop
-                                offset="0%"
-                                stopColor="rgba(250, 204, 21, 0.2)"
-                              />
-                              <stop
-                                offset="100%"
-                                stopColor="rgba(250, 204, 21, 0.05)"
-                              />
-                            </linearGradient>
-                          </defs>
-                          <polygon
-                            fill="url(#chartGradient)"
-                            points={`${barPositions
-                              .map(
-                                (pos) =>
-                                  `${pos.x}%,${(pos.y / chartHeight) * 100}%`
-                              )
-                              .join(" ")} ${
-                              barPositions[barPositions.length - 1]?.x || 0
-                            }%,100% 0%,100%`}
-                          />
-                        </svg>
-
-                        {/* Data Points and Labels */}
-                        {progressData.map((point, index) => {
-                          const position = barPositions[index];
-                          const isFirst = index === 0;
-                          const isLast = index === progressData.length - 1;
-                          const isMostRecent = index === 0; // Assuming first is most recent
-
-                          return (
-                            <div
-                              key={index}
-                              className="relative flex flex-col items-center group"
-                              style={{ flex: "1 1 0%" }}
-                            >
-                              {/* Weight Value Tooltip */}
-                              <div
-                                className={`absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-yellow-400 text-xs font-semibold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-10 ${
-                                  isMostRecent ? "opacity-100" : ""
-                                }`}
-                              >
-                                {point.weight}kg
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-800"></div>
-                              </div>
-
-                              {/* Data Point Circle */}
-                              <div
-                                className={`relative w-3 h-3 rounded-full border-2 transition-all duration-300 cursor-pointer ${
-                                  isMostRecent
-                                    ? "bg-yellow-400 border-yellow-300 shadow-lg shadow-yellow-400/50 scale-125"
-                                    : "bg-yellow-500 border-yellow-400 hover:scale-110 group-hover:shadow-md"
-                                }`}
-                                style={{
-                                  marginBottom: `${position.height - 6}px`,
-                                }}
-                              >
-                                {/* Pulse animation for most recent point */}
-                                {isMostRecent && (
-                                  <div className="absolute inset-0 w-full h-full bg-yellow-400 rounded-full animate-ping opacity-75"></div>
-                                )}
-                              </div>
-
-                              {/* Date Label */}
-                              <div className="text-xs font-medium text-gray-400 group-hover:text-gray-200 transition-colors mt-1 text-center leading-tight">
-                                <div className="truncate max-w-[3rem] sm:max-w-none">
-                                  {formatDate(point.date).split(" ")[0]}
-                                </div>
-                                <div className="text-[10px] text-gray-500 sm:hidden">
-                                  {formatDate(point.date).split(" ")[1]}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </>
-                    );
-                  })()}
+          ) : comprehensiveProgress ? (
+            <div className="space-y-4">
+              {/* Overall Scores */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-700 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-gray-300">Consistency</span>
+                    <FaFire className="text-orange-500 w-3 h-3" />
+                  </div>
+                  <div className="flex items-end gap-1">
+                    <span className={`text-xl font-bold ${getScoreColor(comprehensiveProgress.overallScores.consistency)}`}>
+                      {comprehensiveProgress.overallScores.consistency}
+                    </span>
+                    <span className="text-gray-400 text-sm mb-0.5">/100</span>
+                  </div>
                 </div>
-
-                {/* Chart Info */}
-                <div className="absolute top-2 right-2 flex items-center space-x-2 text-xs text-gray-400">
-                  <span className="flex items-center">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full mr-1"></div>
-                    Weight (kg)
-                  </span>
+                
+                <div className="bg-gray-700 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-gray-300">Improvement</span>
+                    <FaChartLine className="text-green-500 w-3 h-3" />
+                  </div>
+                  <div className="flex items-end gap-1">
+                    <span className={`text-xl font-bold ${getScoreColor(comprehensiveProgress.overallScores.improvement)}`}>
+                      {comprehensiveProgress.overallScores.improvement}
+                    </span>
+                    <span className="text-gray-400 text-sm mb-0.5">/100</span>
+                  </div>
                 </div>
               </div>
-
-              {progressData.length >= 3 && (
-                <div className="mt-4">
-                  <h3 className="font-medium mb-2 text-white">
-                    Recent Changes
-                  </h3>
+              
+              {/* Workout Stats */}
+              <div className="bg-gray-700 rounded-lg p-3">
+                <h3 className="font-medium text-white mb-2 flex items-center">
+                  <FaDumbbell className="mr-2 text-yellow-500 w-4 h-4" />
+                  Workout Performance
+                </h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex justify-between">
-                    <div>
-                      <p className="text-xs text-gray-400 font-medium">
-                        1 Week
-                      </p>
-                      <p
-                        className={`font-medium ${
-                          progressData[0].weight < progressData[1].weight
-                            ? "text-green-400"
-                            : progressData[0].weight > progressData[1].weight
-                            ? "text-red-400"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {(
-                          progressData[0].weight - progressData[1].weight
-                        ).toFixed(1)}{" "}
-                        kg
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400 font-medium">
-                        1 Month
-                      </p>
-                      <p
-                        className={`font-medium ${
-                          progressData[0].weight <
-                          progressData[progressData.length - 1].weight
-                            ? "text-green-400"
-                            : progressData[0].weight >
-                              progressData[progressData.length - 1].weight
-                            ? "text-red-400"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {(
-                          progressData[0].weight -
-                          progressData[progressData.length - 1].weight
-                        ).toFixed(1)}{" "}
-                        kg
-                      </p>
-                    </div>
+                    <span className="text-gray-300">Sessions (30d)</span>
+                    <span className="font-medium text-white">
+                      {comprehensiveProgress.workoutMetrics.sessionsLast30Days}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Completion</span>
+                    <span className="font-medium text-white">
+                      {comprehensiveProgress.workoutMetrics.completionRate}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Total Sessions</span>
+                    <span className="font-medium text-white">
+                      {comprehensiveProgress.workoutMetrics.totalSessions}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Avg Duration</span>
+                    <span className="font-medium text-white">
+                      {comprehensiveProgress.workoutMetrics.averageDuration}m
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body Metrics */}
+              {comprehensiveProgress.bodyMetrics.current && (
+                <div className="bg-gray-700 rounded-lg p-3">
+                  <h3 className="font-medium text-white mb-2 flex items-center">
+                    <FaWeight className="mr-2 text-yellow-500 w-4 h-4" />
+                    Body Metrics
+                  </h3>
+                  <div className="space-y-2">
+                    {comprehensiveProgress.bodyMetrics.current.weight && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Weight</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">
+                            {comprehensiveProgress.bodyMetrics.current.weight} kg
+                          </span>
+                          {renderWeightTrend(comprehensiveProgress.bodyMetrics.trends.weight.trend30d)}
+                        </div>
+                      </div>
+                    )}
+                    {comprehensiveProgress.bodyMetrics.current.bodyFat && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-300 text-sm">Body Fat</span>
+                        <span className="font-medium text-white">
+                          {comprehensiveProgress.bodyMetrics.current.bodyFat}%
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
+
+              {/* Quick Action */}
+              <div className="pt-2">
+                <Link
+                  href="/progress/new?from=dashboard"
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-lg text-sm font-medium transition flex items-center justify-center"
+                >
+                  <FaChartLine className="mr-2 w-4 h-4" />
+                  Log Progress
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-6">

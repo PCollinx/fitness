@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
 
-// Force dynamic rendering for this API route
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -14,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch the recent workout sessions for the current user
+    // Fetch all recent workout sessions for the current user (last 20)
     const recentSessions = await prisma.workoutSession.findMany({
       where: {
         userId: session.user.id as string,
@@ -22,10 +21,11 @@ export async function GET() {
       orderBy: {
         startTime: "desc",
       },
-      take: 3, // Limit to 3 most recent sessions
+      take: 20, // Get more sessions for the dedicated page
       select: {
         id: true,
         startTime: true,
+        endTime: true,
         workout: {
           select: {
             id: true,
@@ -39,21 +39,25 @@ export async function GET() {
                 name: true,
               },
             },
+            sets: {
+              select: {
+                id: true,
+                completed: true,
+                actualReps: true,
+                actualWeight: true,
+                targetReps: true,
+                targetWeight: true,
+              },
+            },
+          },
+          orderBy: {
+            order: "asc",
           },
         },
       },
     });
 
-    // Format the sessions to match the WorkoutSummary type expected by dashboard
-    const formattedWorkouts = recentSessions.map((session) => ({
-      id: session.workout.id,
-      name: session.workout.name,
-      date: session.startTime.toISOString(),
-      exercises: session.exercises.length,
-    }));
-
-    // Return an empty array if no sessions found, but with 200 status
-    return NextResponse.json(formattedWorkouts);
+    return NextResponse.json(recentSessions);
   } catch (error) {
     console.error("Error fetching recent workout sessions:", error);
     return NextResponse.json(

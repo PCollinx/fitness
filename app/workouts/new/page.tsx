@@ -300,7 +300,7 @@ export default function CreateWorkoutPage() {
       <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl fade-in">
         <div className="mb-6 flex items-center">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/workouts")}
             className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
           >
             <FaArrowLeft className="mr-2" />
@@ -721,7 +721,7 @@ export default function CreateWorkoutPage() {
             <div className="mt-8 flex flex-col sm:flex-row justify-end gap-4 slide-in-right">
               <button
                 type="button"
-                onClick={() => router.back()}
+                onClick={() => router.push("/workouts")}
                 className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 py-3 px-6 rounded-md flex items-center justify-center transition-colors"
               >
                 Cancel

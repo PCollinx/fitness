@@ -45,8 +45,6 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  console.log("=== POST METHOD ENTRY ===");
-
   try {
     // Get authentication
     const session = await getServerSession(authOptions);
@@ -54,20 +52,59 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("=== USER AUTHENTICATED ===", session.user.email);
-
     // Parse request body
     const body = await request.json();
     const { workoutId, startTime, endTime, elapsedTime, exercises, notes } =
       body;
 
-    console.log("=== CREATING WORKOUT SESSION ===", {
-      workoutId,
-      exerciseCount: exercises?.length,
+    // First, ensure user exists in database
+    await prisma.user.upsert({
+      where: { id: session.user.id as string },
+      update: {},
+      create: {
+        id: session.user.id as string,
+        email: session.user.email!,
+        name: session.user.name || session.user.email!,
+      },
     });
 
-    // Create workout session directly without validating workout exists
-    // This allows us to save sessions for any workout ID
+    // Check if workout exists, create if not
+    let workout = await prisma.workout.findUnique({
+      where: { id: workoutId },
+    });
+
+    if (!workout) {
+      // Create a basic workout record to satisfy foreign key constraint
+      workout = await prisma.workout.create({
+        data: {
+          id: workoutId,
+          name: "Completed Workout",
+          description: "Auto-generated workout from session",
+          userId: session.user.id as string,
+        },
+      });
+    } else {
+      console.log("=== WORKOUT EXISTS ===", workout.name);
+    }
+
+    // Ensure all exercises exist in database
+    for (const exercise of exercises || []) {
+      if (exercise.exerciseId) {
+        await prisma.exercise.upsert({
+          where: { id: exercise.exerciseId },
+          update: {},
+          create: {
+            id: exercise.exerciseId,
+            name: exercise.name || "Unknown Exercise",
+            description: "Auto-generated exercise from session",
+            muscleGroup: "OTHER",
+            difficulty: "BEGINNER",
+          },
+        });
+      }
+    }
+
+    // Now create workout session
     const workoutSession = await prisma.workoutSession.create({
       data: {
         userId: session.user.id as string,
@@ -104,8 +141,6 @@ export async function POST(request: Request) {
         },
       },
     });
-
-    console.log("=== WORKOUT SESSION CREATED ===", workoutSession.id);
 
     return NextResponse.json({
       success: true,

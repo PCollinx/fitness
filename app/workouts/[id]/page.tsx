@@ -57,6 +57,14 @@ type WorkoutDetail = {
   workoutExercises?: WorkoutExercise[];
 };
 
+type SessionStats = {
+  totalSessions: number;
+  completionRate: number;
+  totalCompletedSets: number;
+  totalSets: number;
+  lastPerformed?: string;
+};
+
 export default function WorkoutDetailPage({
   params,
 }: {
@@ -64,12 +72,59 @@ export default function WorkoutDetailPage({
 }) {
   const router = useRouter();
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
+  const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null
   );
+
+  // Fetch session statistics from API
+  const fetchSessionStats = async (workoutId: string) => {
+    try {
+      const response = await fetch(`/api/workouts/${workoutId}/sessions`);
+      if (response.ok) {
+        const data = await response.json();
+        // The API returns stats in a nested structure
+        if (data.stats) {
+          setSessionStats({
+            totalSessions: data.stats.totalSessions || 0,
+            completionRate: data.stats.completionRate || 0,
+            totalCompletedSets: data.stats.totalCompletedSets || 0,
+            totalSets: data.stats.totalSets || 0,
+            lastPerformed: data.stats.lastPerformed || undefined,
+          });
+        } else {
+          setSessionStats({
+            totalSessions: 0,
+            completionRate: 0,
+            totalCompletedSets: 0,
+            totalSets: 0,
+            lastPerformed: undefined,
+          });
+        }
+      } else {
+        console.log("No session stats available yet");
+        setSessionStats({
+          totalSessions: 0,
+          completionRate: 0,
+          totalCompletedSets: 0,
+          totalSets: 0,
+          lastPerformed: undefined,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch session stats:", error);
+      setSessionStats({
+        totalSessions: 0,
+        completionRate: 0,
+        totalCompletedSets: 0,
+        totalSets: 0,
+        lastPerformed: undefined,
+      });
+    }
+  };
 
   useEffect(() => {
     // Load workout from storage
@@ -121,6 +176,9 @@ export default function WorkoutDetailPage({
           image: "https://source.unsplash.com/random/400x300/?workout,gym",
         });
       }
+
+      // Fetch session statistics
+      fetchSessionStats(params.id);
 
       setIsLoading(false);
     }, 500);
@@ -343,7 +401,7 @@ export default function WorkoutDetailPage({
       <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl fade-in">
         <div className="mb-4 sm:mb-6 flex items-center">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/workouts")}
             className="text-yellow-500 hover:text-yellow-400 flex items-center transition-all text-sm sm:text-base"
           >
             <FaArrowLeft className="mr-2 text-xs sm:text-sm" />
@@ -452,10 +510,10 @@ export default function WorkoutDetailPage({
               </div>
               <div className="min-w-0">
                 <p className="text-gray-400 text-xs sm:text-sm truncate">
-                  Times
+                  Sessions
                 </p>
                 <p className="text-white font-bold text-sm xs:text-base sm:text-lg truncate">
-                  {workout.completions}
+                  {sessionStats?.totalSessions ?? 0}
                 </p>
               </div>
             </div>
@@ -464,14 +522,16 @@ export default function WorkoutDetailPage({
           <div className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-750 transition-all">
             <div className="flex items-center">
               <div className="rounded-full bg-yellow-500/20 p-2 sm:p-2.5 mr-2 sm:mr-3 flex-shrink-0">
-                <FaUser className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
+                <FaWeightHanging className="text-yellow-500 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
               </div>
               <div className="min-w-0">
                 <p className="text-gray-400 text-xs sm:text-sm truncate">
-                  Created by
+                  Completed Sets
                 </p>
                 <p className="text-white font-bold text-sm xs:text-base sm:text-lg truncate">
-                  {workout.userName}
+                  {`${sessionStats?.totalCompletedSets ?? 0}/${
+                    sessionStats?.totalSets ?? 0
+                  }`}
                 </p>
               </div>
             </div>
@@ -515,6 +575,43 @@ export default function WorkoutDetailPage({
             </>
           )}
         </div>
+
+        {/* Session Statistics */}
+        {sessionStats && sessionStats.totalSessions > 0 && (
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 slide-up border border-gray-700">
+            <div className="flex items-center mb-4">
+              <FaHistory className="text-yellow-500 mr-2 sm:mr-3" />
+              <h2 className="text-lg sm:text-xl font-bold text-white">
+                Workout Progress
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="text-center sm:text-left">
+                <p className="text-2xl sm:text-3xl font-bold text-yellow-500">
+                  {sessionStats?.completionRate ?? 0}%
+                </p>
+                <p className="text-gray-400 text-sm">Completion Rate</p>
+              </div>
+
+              {sessionStats?.lastPerformed && (
+                <div className="text-center sm:text-left">
+                  <p className="text-lg sm:text-xl font-bold text-white">
+                    {new Date(sessionStats.lastPerformed).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-400 text-sm">Last Performed</p>
+                </div>
+              )}
+
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-xl font-bold text-white">
+                  {sessionStats?.totalCompletedSets ?? 0} Sets
+                </p>
+                <p className="text-gray-400 text-sm">Total Completed</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Exercises Section */}
         <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden border border-gray-800 slide-up">
