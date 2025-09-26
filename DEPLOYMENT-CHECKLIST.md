@@ -15,6 +15,7 @@
 - [x] **Fixed Prisma Build Issue:** Updated vercel.json
 - [x] **Fixed Import Path Issues:** Added webpack alias configuration to next.config.js
 - [x] **Fixed PostCSS Configuration:** Added proper PostCSS config for Tailwind CSS
+- [x] **Fixed Domain Assignment Issue:** Removed autoAlias: false from vercel.json
 - [ ] **Set Environment Variables in Vercel:**
 
 1. **Go to Vercel Dashboard:**
