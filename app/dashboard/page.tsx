@@ -58,7 +58,8 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [recentWorkouts, setRecentWorkouts] = useState<WorkoutSummary[]>([]);
   const [progressData, setProgressData] = useState<ProgressSummary[]>([]);
-  const [comprehensiveProgress, setComprehensiveProgress] = useState<ComprehensiveProgress | null>(null);
+  const [comprehensiveProgress, setComprehensiveProgress] =
+    useState<ComprehensiveProgress | null>(null);
 
   // Chart utility functions
   const calculateChartData = (data: ProgressSummary[]) => {
@@ -144,12 +145,17 @@ export default function Dashboard() {
         }
 
         // Fetch comprehensive progress data
-        const comprehensiveResponse = await fetch("/api/progress/comprehensive");
+        const comprehensiveResponse = await fetch(
+          "/api/progress/comprehensive"
+        );
         if (comprehensiveResponse.ok) {
           const comprehensiveData = await comprehensiveResponse.json();
           setComprehensiveProgress(comprehensiveData);
         } else {
-          console.error("Error fetching comprehensive progress:", comprehensiveResponse.statusText);
+          console.error(
+            "Error fetching comprehensive progress:",
+            comprehensiveResponse.statusText
+          );
           setComprehensiveProgress(null);
         }
 
@@ -190,10 +196,10 @@ export default function Dashboard() {
     if (Math.abs(trend) < 0.1) {
       return <span className="text-gray-400 text-xs">No change</span>;
     }
-    
+
     const isPositive = trend < 0; // For weight, decrease is positive
     const color = isPositive ? "text-green-400" : "text-red-400";
-    
+
     return (
       <span className={`${color} text-xs flex items-center`}>
         {isPositive ? "↓" : "↑"} {Math.abs(trend).toFixed(1)}%
@@ -343,7 +349,7 @@ export default function Dashboard() {
               View All
             </Link>
           </div>
-          
+
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-yellow-500 border-t-transparent"></div>
@@ -358,27 +364,35 @@ export default function Dashboard() {
                     <FaFire className="text-orange-500 w-3 h-3" />
                   </div>
                   <div className="flex items-end gap-1">
-                    <span className={`text-xl font-bold ${getScoreColor(comprehensiveProgress.overallScores.consistency)}`}>
+                    <span
+                      className={`text-xl font-bold ${getScoreColor(
+                        comprehensiveProgress.overallScores.consistency
+                      )}`}
+                    >
                       {comprehensiveProgress.overallScores.consistency}
                     </span>
                     <span className="text-gray-400 text-sm mb-0.5">/100</span>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-700 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-gray-300">Improvement</span>
                     <FaChartLine className="text-green-500 w-3 h-3" />
                   </div>
                   <div className="flex items-end gap-1">
-                    <span className={`text-xl font-bold ${getScoreColor(comprehensiveProgress.overallScores.improvement)}`}>
+                    <span
+                      className={`text-xl font-bold ${getScoreColor(
+                        comprehensiveProgress.overallScores.improvement
+                      )}`}
+                    >
                       {comprehensiveProgress.overallScores.improvement}
                     </span>
                     <span className="text-gray-400 text-sm mb-0.5">/100</span>
                   </div>
                 </div>
               </div>
-              
+
               {/* Workout Stats */}
               <div className="bg-gray-700 rounded-lg p-3">
                 <h3 className="font-medium text-white mb-2 flex items-center">
@@ -426,9 +440,13 @@ export default function Dashboard() {
                         <span className="text-gray-300 text-sm">Weight</span>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-white">
-                            {comprehensiveProgress.bodyMetrics.current.weight} kg
+                            {comprehensiveProgress.bodyMetrics.current.weight}{" "}
+                            kg
                           </span>
-                          {renderWeightTrend(comprehensiveProgress.bodyMetrics.trends.weight.trend30d)}
+                          {renderWeightTrend(
+                            comprehensiveProgress.bodyMetrics.trends.weight
+                              .trend30d
+                          )}
                         </div>
                       </div>
                     )}
