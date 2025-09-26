@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import prisma from "../../../../../lib/prisma";
 import bcrypt from "bcrypt";
-import { sendPasswordChangeConfirmationEmail } from "@/lib/email";
+import { sendPasswordChangeConfirmationEmail } from "../../../../../lib/email";
 
 export async function POST(req: NextRequest) {
   try {
