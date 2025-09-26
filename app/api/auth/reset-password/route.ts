@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "../../../../lib/prisma";
+import prisma from "@/lib/prisma";
 import { randomBytes } from "crypto";
-import { sendPasswordResetEmail } from "../../../../lib/email";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +23,10 @@ export async function POST(req: NextRequest) {
       // For security reasons, we still return a success response
       // even if the email doesn't exist in our database
       return NextResponse.json(
-        { message: "If your email exists in our system, you will receive a reset link" },
+        {
+          message:
+            "If your email exists in our system, you will receive a reset link",
+        },
         { status: 200 }
       );
     }
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
           },
         }),
       ]);
-      
+
       console.log(`[Password Reset] Created token for user ${user.id}`);
     } catch (error) {
       console.error("Error storing reset token:", error);
@@ -58,10 +61,12 @@ export async function POST(req: NextRequest) {
     try {
       // Send the actual email
       await sendPasswordResetEmail(user.email, token, user.name || user.email);
-      
+
       // Also log it for debugging
       console.log(`[Password Reset] Sending reset email to: ${user.email}`);
-      console.log(`Reset link: ${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`);
+      console.log(
+        `Reset link: ${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`
+      );
     } catch (emailError) {
       console.error("Error sending reset email:", emailError);
       // We still return success to the user even if email fails
@@ -70,7 +75,10 @@ export async function POST(req: NextRequest) {
 
     // Return success response
     return NextResponse.json(
-      { message: "If your email exists in our system, you will receive a reset link" },
+      {
+        message:
+          "If your email exists in our system, you will receive a reset link",
+      },
       { status: 200 }
     );
   } catch (error) {

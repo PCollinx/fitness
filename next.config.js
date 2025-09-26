@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
@@ -19,6 +21,14 @@ const nextConfig = {
   eslint: {
     // Handle ESLint errors during build for production
     ignoreDuringBuilds: process.env.NODE_ENV === 'production',
+  },
+  // Configure webpack to resolve path aliases
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    };
+    return config;
   },
 };
 

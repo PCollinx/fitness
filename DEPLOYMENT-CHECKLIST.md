@@ -13,7 +13,7 @@
 ### Production Deployment
 
 - [x] **Fixed Prisma Build Issue:** Updated vercel.json
-- [x] **Fixed Import Path Issues:** Changed @/ aliases to relative paths in API routes
+- [x] **Fixed Import Path Issues:** Added webpack alias configuration to next.config.js
 - [ ] **Set Environment Variables in Vercel:**
 
 1. **Go to Vercel Dashboard:**
