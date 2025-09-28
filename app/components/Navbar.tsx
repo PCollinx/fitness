@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
+import { useIsAdmin } from "@/lib/hooks/useIsAdmin";
 import {
   FaDumbbell,
   FaHome,
   FaChartLine,
   FaUser,
+  FaUsers,
   FaMusic,
   FaSignOutAlt,
   FaSignInAlt,
@@ -18,6 +20,7 @@ import { useUserProfile } from "../context/UserProfileContext";
 export default function Navbar() {
   const { data: session, status } = useSession();
   const { userProfile } = useUserProfile();
+  const { isAdmin } = useIsAdmin();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -133,6 +136,15 @@ export default function Navbar() {
                       >
                         <FaChartLine className="mr-2" /> Dashboard
                       </Link>
+                      {isAdmin && (
+                        <Link
+                          href="/admin/users"
+                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          <FaUsers className="mr-2" /> Manage Users
+                        </Link>
+                      )}
                       <button
                         onClick={() => {
                           signOut({ callbackUrl: "/" });

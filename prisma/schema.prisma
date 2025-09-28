@@ -48,6 +48,7 @@ model User {
   bio           String?
   height        Float?     // in cm
   weight        Float?     // in kg
+  role          String     @default("user") // "user" or "admin"
   
   accounts         Account[]
   sessions         Session[]

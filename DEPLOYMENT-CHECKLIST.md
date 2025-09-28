@@ -26,7 +26,7 @@
 2. **Add These Variables:**
 
    ```
-   NEXTAUTH_URL=https://YOUR-APP-NAME.vercel.app
+   NEXTAUTH_URL=https://fitness-jet-five.vercel.app
    NEXTAUTH_SECRET=54ad303d88d44e9dece9106af1b0363e4eb1df0ffde2f07bb8fd311a572a510b
    DATABASE_URL=[copy from .env.local]
    GOOGLE_CLIENT_ID=[copy from .env.local]
@@ -51,19 +51,19 @@
 
    ```
    http://localhost:3000                    (existing - keep this)
-   https://YOUR-APP-NAME.vercel.app         (add for production)
+   https://fitness-jet-five.vercel.app      (add for production)
    ```
 
    **Authorized redirect URIs:**
 
    ```
    http://localhost:3000/api/auth/callback/google                    (existing - keep this)
-   https://YOUR-APP-NAME.vercel.app/api/auth/callback/google         (add for production)
+   https://fitness-jet-five.vercel.app/api/auth/callback/google      (add for production)
    ```
 
    **⚠️ Important Notes:**
 
-   - Replace `YOUR-APP-NAME` with your actual Vercel app name
+   - Replace `YOUR-APP-NAME` with your actual Vercel app name: `fitness-jet-five`
    - No trailing slashes in URLs
    - Must use `https://` for production (not `http://`)
    - The redirect URI must exactly match NextAuth's callback pattern
@@ -144,13 +144,13 @@ Your setup is now clean and secure! 🎉
 ### **Example Configuration:**
 
 ```
-Project: fitness-app-12345.vercel.app
+Project: fitness-jet-five.vercel.app
 
 Authorized JavaScript origins:
 ✅ http://localhost:3000
-✅ https://fitness-app-12345.vercel.app
+✅ https://fitness-jet-five.vercel.app
 
 Authorized redirect URIs:
 ✅ http://localhost:3000/api/auth/callback/google
-✅ https://fitness-app-12345.vercel.app/api/auth/callback/google
+✅ https://fitness-jet-five.vercel.app/api/auth/callback/google
 ```

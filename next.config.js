@@ -12,6 +12,29 @@ const nextConfig = {
     // Ensure Prisma works correctly during build
     serverComponentsExternalPackages: ["@prisma/client", "bcrypt"],
   },
+  // Configure external image domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   // Disable static optimization for routes that use API
   staticPageGenerationTimeout: 120,
   typescript: {
