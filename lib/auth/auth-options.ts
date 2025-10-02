@@ -101,15 +101,29 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user, account, profile }) {
-      // Allow sign in from both credentials and OAuth providers
-      if (account?.provider === "google") {
-        // Additional validation for Google sign-in can be added here
+      console.log("SignIn callback:", { 
+        provider: account?.provider, 
+        userId: user?.id, 
+        userEmail: user?.email,
+        accountId: account?.providerAccountId 
+      });
+      
+      try {
+        // Allow sign in from both credentials and OAuth providers
+        if (account?.provider === "google") {
+          console.log("Google sign-in attempt for:", user?.email);
+          return true;
+        }
+        if (account?.provider === "credentials") {
+          console.log("Credentials sign-in attempt for:", user?.email);
+          return true;
+        }
+        console.log("Unknown provider:", account?.provider);
         return true;
+      } catch (error) {
+        console.error("SignIn callback error:", error);
+        return false;
       }
-      if (account?.provider === "credentials") {
-        return true;
-      }
-      return true;
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
@@ -124,6 +138,6 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days by default
   },
   secret: process.env.NEXTAUTH_SECRET,
-  // Ensure debug logging in development
-  debug: process.env.NODE_ENV === "development",
+  // Enable debug logging to help troubleshoot
+  debug: true,
 };
