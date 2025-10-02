@@ -112,19 +112,11 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async redirect({ url, baseUrl }) {
-      // Get the current environment's base URL (ngrok or localhost)
-      const currentBaseUrl = process.env.NEXTAUTH_URL || baseUrl;
-
       // Allows relative callback URLs
-      if (url.startsWith("/")) return `${currentBaseUrl}${url}`;
-      // Allows callback URLs on the same origin or localhost
-      if (url.includes("localhost:3000") || url.includes("ngrok")) {
-        const urlObj = new URL(url);
-        return `${currentBaseUrl}${urlObj.pathname}${urlObj.search}`;
-      }
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
       // Allows callback URLs on the same origin
-      else if (new URL(url).origin === currentBaseUrl) return url;
-      return currentBaseUrl;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   session: {
