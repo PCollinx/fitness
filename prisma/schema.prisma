@@ -50,6 +50,11 @@ model User {
   weight        Float?     // in kg
   role          String     @default("user") // "user" or "admin"
   
+  // Spotify integration
+  spotifyAccessToken  String?
+  spotifyRefreshToken String?
+  spotifyTokenExpiry  DateTime?
+  
   accounts         Account[]
   sessions         Session[]
   workouts         Workout[]

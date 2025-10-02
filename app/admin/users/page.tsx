@@ -72,7 +72,9 @@ export default function AdminUsersPage() {
     pages: 0,
   });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(
+    null
+  );
 
   const fetchUsers = async () => {
     try {
@@ -139,8 +141,10 @@ export default function AdminUsersPage() {
       (Date.now() - new Date(lastActivity).getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    if (daysSinceActivity <= 7) return { status: "active", color: "text-green-500" };
-    if (daysSinceActivity <= 30) return { status: "moderate", color: "text-yellow-500" };
+    if (daysSinceActivity <= 7)
+      return { status: "active", color: "text-green-500" };
+    if (daysSinceActivity <= 30)
+      return { status: "moderate", color: "text-yellow-500" };
     return { status: "inactive", color: "text-red-500" };
   };
 
@@ -148,7 +152,15 @@ export default function AdminUsersPage() {
     if (isAuthenticated && isAdmin && !isAdminLoading) {
       fetchUsers();
     }
-  }, [isAuthenticated, isAdmin, isAdminLoading, currentPage, search, sortBy, sortOrder]);
+  }, [
+    isAuthenticated,
+    isAdmin,
+    isAdminLoading,
+    currentPage,
+    search,
+    sortBy,
+    sortOrder,
+  ]);
 
   if (status === "loading" || isAdminLoading) {
     return (
@@ -185,9 +197,7 @@ export default function AdminUsersPage() {
       <div className="max-w-3xl mx-auto px-4 py-12 mt-16">
         <div className="bg-gray-800 rounded-xl p-8 text-center">
           <FaUsers className="mx-auto text-red-500 text-5xl mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-4">
-            Access Denied
-          </h1>
+          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
           <p className="text-gray-300 mb-6">
             You don't have admin privileges to access this page.
           </p>
@@ -213,13 +223,17 @@ export default function AdminUsersPage() {
           <FaArrowLeft className="mr-2" />
           <span>Back to Dashboard</span>
         </Link>
-        
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">User Management</h1>
-            <p className="text-gray-400">View and manage all registered users</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              User Management
+            </h1>
+            <p className="text-gray-400">
+              View and manage all registered users
+            </p>
           </div>
-          
+
           <div className="flex gap-2">
             <button
               onClick={fetchUsers}
@@ -277,24 +291,29 @@ export default function AdminUsersPage() {
         {/* Stats */}
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gray-700 rounded-lg p-3 text-center">
-            <div className="text-yellow-500 text-2xl font-bold">{pagination.total}</div>
+            <div className="text-yellow-500 text-2xl font-bold">
+              {pagination.total}
+            </div>
             <div className="text-gray-400 text-sm">Total Users</div>
           </div>
           <div className="bg-gray-700 rounded-lg p-3 text-center">
             <div className="text-green-500 text-2xl font-bold">
-              {users.filter(u => getActivityStatus(u).status === "active").length}
+              {
+                users.filter((u) => getActivityStatus(u).status === "active")
+                  .length
+              }
             </div>
             <div className="text-gray-400 text-sm">Active</div>
           </div>
           <div className="bg-gray-700 rounded-lg p-3 text-center">
             <div className="text-blue-500 text-2xl font-bold">
-              {users.filter(u => u.emailVerified).length}
+              {users.filter((u) => u.emailVerified).length}
             </div>
             <div className="text-gray-400 text-sm">Verified</div>
           </div>
           <div className="bg-gray-700 rounded-lg p-3 text-center">
             <div className="text-purple-500 text-2xl font-bold">
-              {users.filter(u => u.providers.includes("google")).length}
+              {users.filter((u) => u.providers.includes("google")).length}
             </div>
             <div className="text-gray-400 text-sm">Google Auth</div>
           </div>
@@ -338,7 +357,10 @@ export default function AdminUsersPage() {
                 users.map((user) => {
                   const activityStatus = getActivityStatus(user);
                   return (
-                    <tr key={user.id} className="border-t border-gray-700 hover:bg-gray-750">
+                    <tr
+                      key={user.id}
+                      className="border-t border-gray-700 hover:bg-gray-750"
+                    >
                       {/* User Info */}
                       <td className="py-4 px-6">
                         <div className="flex items-center">
@@ -359,7 +381,9 @@ export default function AdminUsersPage() {
                             <div className="text-white font-medium">
                               {user.name || "No Name"}
                             </div>
-                            <div className="text-gray-400 text-sm">{user.email}</div>
+                            <div className="text-gray-400 text-sm">
+                              {user.email}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -441,8 +465,8 @@ export default function AdminUsersPage() {
           <div className="bg-gray-700 px-6 py-4 flex items-center justify-between">
             <div className="text-gray-400 text-sm">
               Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-              {pagination.total} users
+              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+              of {pagination.total} users
             </div>
             <div className="flex gap-2">
               <button
@@ -452,19 +476,21 @@ export default function AdminUsersPage() {
               >
                 Previous
               </button>
-              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded transition-colors ${ 
-                    page === currentPage
-                      ? "bg-yellow-500 text-black"
-                      : "bg-gray-600 hover:bg-gray-500 text-white"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded transition-colors ${
+                      page === currentPage
+                        ? "bg-yellow-500 text-black"
+                        : "bg-gray-600 hover:bg-gray-500 text-white"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
               <button
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage >= pagination.pages}
@@ -494,49 +520,69 @@ export default function AdminUsersPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Profile</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Profile
+                  </h3>
                   <div className="space-y-3">
                     <div>
                       <span className="text-gray-400">Name:</span>
-                      <span className="text-white ml-2">{selectedUser.name || "N/A"}</span>
+                      <span className="text-white ml-2">
+                        {selectedUser.name || "N/A"}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Email:</span>
-                      <span className="text-white ml-2">{selectedUser.email}</span>
+                      <span className="text-white ml-2">
+                        {selectedUser.email}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Bio:</span>
-                      <span className="text-white ml-2">{selectedUser.bio || "N/A"}</span>
+                      <span className="text-white ml-2">
+                        {selectedUser.bio || "N/A"}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Height:</span>
                       <span className="text-white ml-2">
-                        {selectedUser.height ? `${selectedUser.height} cm` : "N/A"}
+                        {selectedUser.height
+                          ? `${selectedUser.height} cm`
+                          : "N/A"}
                       </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Weight:</span>
                       <span className="text-white ml-2">
-                        {selectedUser.weight ? `${selectedUser.weight} kg` : "N/A"}
+                        {selectedUser.weight
+                          ? `${selectedUser.weight} kg`
+                          : "N/A"}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Activity</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Activity
+                  </h3>
                   <div className="space-y-3">
                     <div>
                       <span className="text-gray-400">Workouts:</span>
-                      <span className="text-white ml-2">{selectedUser.totalWorkouts}</span>
+                      <span className="text-white ml-2">
+                        {selectedUser.totalWorkouts}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Sessions:</span>
-                      <span className="text-white ml-2">{selectedUser.totalSessions}</span>
+                      <span className="text-white ml-2">
+                        {selectedUser.totalSessions}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Progress Entries:</span>
-                      <span className="text-white ml-2">{selectedUser.totalProgressEntries}</span>
+                      <span className="text-white ml-2">
+                        {selectedUser.totalProgressEntries}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">Last Workout:</span>
@@ -555,12 +601,20 @@ export default function AdminUsersPage() {
               </div>
 
               <div className="mt-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Account Info</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Account Info
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <span className="text-gray-400">Email Verified:</span>
-                    <span className={`ml-2 ${selectedUser.emailVerified ? 'text-green-500' : 'text-red-500'}`}>
-                      {selectedUser.emailVerified ? 'Yes' : 'No'}
+                    <span
+                      className={`ml-2 ${
+                        selectedUser.emailVerified
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {selectedUser.emailVerified ? "Yes" : "No"}
                     </span>
                   </div>
                   <div>
@@ -571,11 +625,15 @@ export default function AdminUsersPage() {
                   </div>
                   <div>
                     <span className="text-gray-400">Created:</span>
-                    <span className="text-white ml-2">{formatDate(selectedUser.createdAt)}</span>
+                    <span className="text-white ml-2">
+                      {formatDate(selectedUser.createdAt)}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-400">Updated:</span>
-                    <span className="text-white ml-2">{formatDate(selectedUser.updatedAt)}</span>
+                    <span className="text-white ml-2">
+                      {formatDate(selectedUser.updatedAt)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -588,10 +646,12 @@ export default function AdminUsersPage() {
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-4">Confirm Deletion</h3>
+            <h3 className="text-xl font-bold text-white mb-4">
+              Confirm Deletion
+            </h3>
             <p className="text-gray-300 mb-6">
-              Are you sure you want to delete this user? This action cannot be undone and will
-              remove all associated data.
+              Are you sure you want to delete this user? This action cannot be
+              undone and will remove all associated data.
             </p>
             <div className="flex gap-4">
               <button

@@ -9,9 +9,12 @@ export async function GET(
   try {
     // Check if user is admin
     const session = await requireAdmin();
-    
+
     if (!session) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
 
     const { id } = params;
@@ -123,20 +126,24 @@ export async function GET(
       0
     );
 
-    const recentActivity = user.workoutSessions.length > 0
-      ? user.workoutSessions[0].startTime
-      : null;
+    const recentActivity =
+      user.workoutSessions.length > 0
+        ? user.workoutSessions[0].startTime
+        : null;
 
-    const progressTrend = user.progress.length >= 2
-      ? {
-          weightChange: user.progress[0].weight && user.progress[1].weight
-            ? user.progress[0].weight - user.progress[1].weight
-            : null,
-          bodyFatChange: user.progress[0].bodyFat && user.progress[1].bodyFat
-            ? user.progress[0].bodyFat - user.progress[1].bodyFat
-            : null,
-        }
-      : null;
+    const progressTrend =
+      user.progress.length >= 2
+        ? {
+            weightChange:
+              user.progress[0].weight && user.progress[1].weight
+                ? user.progress[0].weight - user.progress[1].weight
+                : null,
+            bodyFatChange:
+              user.progress[0].bodyFat && user.progress[1].bodyFat
+                ? user.progress[0].bodyFat - user.progress[1].bodyFat
+                : null,
+          }
+        : null;
 
     return NextResponse.json({
       ...user,
@@ -144,9 +151,10 @@ export async function GET(
         totalWorkoutTime,
         recentActivity,
         progressTrend,
-        averageSessionDuration: user.workoutSessions.length > 0
-          ? totalWorkoutTime / user.workoutSessions.length
-          : 0,
+        averageSessionDuration:
+          user.workoutSessions.length > 0
+            ? totalWorkoutTime / user.workoutSessions.length
+            : 0,
       },
     });
   } catch (error) {
@@ -165,15 +173,18 @@ export async function PATCH(
   try {
     // Check if user is admin
     const session = await requireAdmin();
-    
+
     if (!session) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
 
     const { id } = params;
     const body = await request.json();
 
-    const allowedFields = ['name', 'bio', 'height', 'weight'];
+    const allowedFields = ["name", "bio", "height", "weight"];
     const updateData: any = {};
 
     for (const field of allowedFields) {

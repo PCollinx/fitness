@@ -16,10 +16,14 @@ export async function POST(request: NextRequest) {
 
     // Use a secret key to prevent unauthorized admin creation
     // You should set this in your environment variables
-    const ADMIN_SETUP_SECRET = process.env.ADMIN_SETUP_SECRET || "setup-admin-2024";
-    
+    const ADMIN_SETUP_SECRET =
+      process.env.ADMIN_SETUP_SECRET || "setup-admin-2024";
+
     if (secretKey !== ADMIN_SETUP_SECRET) {
-      return NextResponse.json({ error: "Invalid secret key" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Invalid secret key" },
+        { status: 403 }
+      );
     }
 
     // Update the user to admin using type assertion
@@ -28,13 +32,13 @@ export async function POST(request: NextRequest) {
       data: { role: "admin" } as any,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: "User promoted to admin successfully",
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
         role: (updatedUser as any).role,
-      }
+      },
     });
   } catch (error) {
     console.error("Error promoting user to admin:", error);
