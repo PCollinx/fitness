@@ -10,7 +10,7 @@ interface BackNavigationProps {
 
 export default function BackNavigation({
   title = "Back",
-  href = "/mobile",
+  href = "/dashboard",
 }: BackNavigationProps) {
   return (
     <div className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-sm z-50 p-4">

@@ -52,7 +52,7 @@ export default function WorkoutsPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-6xl">
+      <div className="container mx-auto px-4 sm:px-6 mt-12 sm:pb-8 max-w-6xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>
