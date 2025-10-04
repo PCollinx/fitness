@@ -14,13 +14,34 @@ export async function middleware(req: NextRequest) {
       "/progress",
       "/social",
       "/profile",
+      "/music",
+      "/admin",
     ];
 
-    // Handle root path - redirect to login if not authenticated, dashboard if authenticated
+    // Define API routes that should bypass authentication
+    const publicAPIRoutes = [
+      "/api/workouts/seed",
+    ];
+
+    // Check if this is a public API route
+    const isPublicAPI = publicAPIRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    // Allow public API routes to bypass authentication
+    if (isPublicAPI) {
+      return NextResponse.next();
+    }
+
+    // Handle root path - redirect based on authentication and onboarding status
     if (pathname === "/") {
       if (!token) {
         return NextResponse.redirect(new URL("/auth/signin", req.url));
       } else {
+        // Only send to onboarding if user is truly new (no fitness goals)
+        if (!token.onboardingCompleted && (!token.fitnessGoals || token.fitnessGoals.length === 0)) {
+          return NextResponse.redirect(new URL("/onboarding", req.url));
+        }
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
@@ -37,13 +58,32 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Only redirect to onboarding for new users (those without any fitness goals)
+    // Existing users can access the app even if onboardingCompleted is false
+    if (
+      token &&
+      isProtectedRoute &&
+      !token.onboardingCompleted &&
+      pathname !== "/onboarding" &&
+      token.fitnessGoals?.length === 0 // Only new users with no fitness goals
+    ) {
+      return NextResponse.redirect(new URL("/onboarding", req.url));
+    }
+
+    // If user has completed onboarding but trying to access onboarding page
+    if (token && pathname === "/onboarding" && token.onboardingCompleted) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
     // If already authenticated and trying to access auth routes
     if (
       token &&
       (pathname.startsWith("/auth/signin") ||
         pathname.startsWith("/auth/signup"))
     ) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      // Redirect based on onboarding status
+      const redirectPath = token.onboardingCompleted ? "/dashboard" : "/onboarding";
+      return NextResponse.redirect(new URL(redirectPath, req.url));
     }
 
     return NextResponse.next();
@@ -64,6 +104,10 @@ export const config = {
     "/progress/:path*",
     "/social/:path*",
     "/profile/:path*",
+    "/music/:path*",
+    "/admin/:path*",
+    "/onboarding/:path*",
     "/auth/:path*",
+    "/api/:path*",
   ],
 };

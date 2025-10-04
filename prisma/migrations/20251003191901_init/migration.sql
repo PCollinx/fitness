@@ -39,6 +39,11 @@ CREATE TABLE "User" (
     "bio" TEXT,
     "height" DOUBLE PRECISION,
     "weight" DOUBLE PRECISION,
+    "role" TEXT NOT NULL DEFAULT 'user',
+    "onboardingCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "spotifyAccessToken" TEXT,
+    "spotifyRefreshToken" TEXT,
+    "spotifyTokenExpiry" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -162,6 +167,17 @@ CREATE TABLE "WorkoutSessionSet" (
     CONSTRAINT "WorkoutSessionSet_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "UserFitnessGoal" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "goalType" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserFitnessGoal_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
@@ -219,6 +235,12 @@ CREATE INDEX "WorkoutSessionExercise_exerciseId_idx" ON "WorkoutSessionExercise"
 -- CreateIndex
 CREATE INDEX "WorkoutSessionSet_sessionExerciseId_idx" ON "WorkoutSessionSet"("sessionExerciseId");
 
+-- CreateIndex
+CREATE INDEX "UserFitnessGoal_userId_idx" ON "UserFitnessGoal"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserFitnessGoal_userId_goalType_key" ON "UserFitnessGoal"("userId", "goalType");
+
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -257,3 +279,6 @@ ALTER TABLE "WorkoutSessionExercise" ADD CONSTRAINT "WorkoutSessionExercise_exer
 
 -- AddForeignKey
 ALTER TABLE "WorkoutSessionSet" ADD CONSTRAINT "WorkoutSessionSet_sessionExerciseId_fkey" FOREIGN KEY ("sessionExerciseId") REFERENCES "WorkoutSessionExercise"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserFitnessGoal" ADD CONSTRAINT "UserFitnessGoal_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

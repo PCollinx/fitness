@@ -68,7 +68,7 @@ export default function SignupPage() {
         password: data.password,
       });
 
-      router.push("/dashboard");
+      router.push("/onboarding");
       router.refresh();
     } catch (err) {
       console.error("Signup error:", err);
@@ -206,7 +206,7 @@ export default function SignupPage() {
 
           <div className="mt-6">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl: "/onboarding" })}
               className="group relative flex w-full justify-center rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
             >
               <span className="flex items-center">

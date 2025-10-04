@@ -1,5 +1,3 @@
-
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,15 +13,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -37,31 +34,30 @@ model Session {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String     @unique
-  password      String?
-  emailVerified DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  image         String?
-  bio           String?
-  height        Float?     // in cm
-  weight        Float?     // in kg
-  role          String     @default("user") // "user" or "admin"
-  
-  // Spotify integration
+  id                  String               @id @default(cuid())
+  name                String?
+  email               String               @unique
+  password            String?
+  emailVerified       DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  image               String?
+  bio                 String?
+  height              Float?
+  weight              Float?
+  role                String               @default("user")
+  onboardingCompleted Boolean              @default(false)
   spotifyAccessToken  String?
   spotifyRefreshToken String?
   spotifyTokenExpiry  DateTime?
-  
-  accounts         Account[]
-  sessions         Session[]
-  workouts         Workout[]
-  exercises        Exercise[]
-  progress         Progress[]
-  workoutSessions  WorkoutSession[]
+  accounts            Account[]
+  exercises           Exercise[]
   passwordResetTokens PasswordResetToken[]
+  progress            Progress[]
+  sessions            Session[]
+  fitnessGoals        UserFitnessGoal[]
+  workouts            Workout[]
+  workoutSessions     WorkoutSession[]
 }
 
 model VerificationToken {
@@ -73,130 +69,140 @@ model VerificationToken {
 }
 
 model Workout {
-  id          String     @id @default(cuid())
+  id          String            @id @default(cuid())
   name        String
   description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  userId      String
+  public      Boolean           @default(false)
+  image       String?
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercises   WorkoutExercise[]
   sessions    WorkoutSession[]
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  public      Boolean    @default(false)
-  
+
   @@index([userId])
 }
 
 model Exercise {
-  id          String     @id @default(cuid())
-  name        String
-  description String?
-  muscleGroup String?
-  difficulty  String?
-  instructions String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  userId      String?
-  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  workouts    WorkoutExercise[]
+  id               String                   @id @default(cuid())
+  name             String
+  description      String?
+  muscleGroup      String?
+  difficulty       String?
+  instructions     String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  userId           String?
+  user             User?                    @relation(fields: [userId], references: [id])
+  workouts         WorkoutExercise[]
   sessionExercises WorkoutSessionExercise[]
-  
+
   @@index([userId])
 }
 
 model WorkoutExercise {
-  id          String     @id @default(cuid())
-  workoutId   String
-  workout     Workout    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  exerciseId  String
-  exercise    Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  sets        Int
-  reps        Int
-  weight      Float?
-  duration    Int?       // in seconds
-  notes       String?
-  order       Int
-  
+  id         String   @id @default(cuid())
+  workoutId  String
+  exerciseId String
+  sets       Int
+  reps       Int
+  weight     Float?
+  duration   Int?
+  notes      String?
+  order      Int
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
   @@index([workoutId])
   @@index([exerciseId])
 }
 
 model Progress {
-  id          String     @id @default(cuid())
-  date        DateTime   @default(now())
-  weight      Float?     // in kg
-  bodyFat     Float?     // percentage
-  chest       Float?     // in cm
-  waist       Float?     // in cm
-  hips        Float?     // in cm
-  arms        Float?     // in cm
-  thighs      Float?     // in cm
-  notes       String?
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id      String   @id @default(cuid())
+  date    DateTime @default(now())
+  weight  Float?
+  bodyFat Float?
+  chest   Float?
+  waist   Float?
+  hips    Float?
+  arms    Float?
+  thighs  Float?
+  notes   String?
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([date])
 }
-
 
 model PasswordResetToken {
   id        String   @id @default(cuid())
   token     String   @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expires   DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model WorkoutSession {
-  id          String     @id @default(cuid())
-  workoutId   String
-  workout     Workout    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  startTime   DateTime
-  endTime     DateTime
-  duration    Int        // Total duration in seconds
-  notes       String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  
-  exercises   WorkoutSessionExercise[]
-  
+  id        String                   @id @default(cuid())
+  workoutId String
+  userId    String
+  startTime DateTime
+  endTime   DateTime
+  duration  Int
+  notes     String?
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  user      User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workout   Workout                  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercises WorkoutSessionExercise[]
+
   @@index([userId])
   @@index([workoutId])
   @@index([startTime])
 }
 
 model WorkoutSessionExercise {
-  id                String               @id @default(cuid())
-  sessionId         String
-  session           WorkoutSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  exerciseId        String
-  exercise          Exercise             @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  order             Int
-  
-  sets              WorkoutSessionSet[]
-  
+  id         String              @id @default(cuid())
+  sessionId  String
+  exerciseId String
+  order      Int
+  exercise   Exercise            @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  session    WorkoutSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sets       WorkoutSessionSet[]
+
   @@index([sessionId])
   @@index([exerciseId])
 }
 
 model WorkoutSessionSet {
-  id                      String                    @id @default(cuid())
-  sessionExerciseId       String
-  sessionExercise         WorkoutSessionExercise    @relation(fields: [sessionExerciseId], references: [id], onDelete: Cascade)
-  setNumber               Int
-  targetReps              Int
-  actualReps              Int?
-  targetWeight            Float?
-  actualWeight            Float?
-  completed               Boolean                   @default(false)
-  notes                   String?
-  restTime                Int?                      // Rest time in seconds before this set
-  
+  id                String                 @id @default(cuid())
+  sessionExerciseId String
+  setNumber         Int
+  targetReps        Int
+  actualReps        Int?
+  targetWeight      Float?
+  actualWeight      Float?
+  completed         Boolean                @default(false)
+  notes             String?
+  restTime          Int?
+  sessionExercise   WorkoutSessionExercise @relation(fields: [sessionExerciseId], references: [id], onDelete: Cascade)
+
   @@index([sessionExerciseId])
+}
+
+model UserFitnessGoal {
+  id        String   @id @default(cuid())
+  userId    String
+  goalType  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, goalType])
+  @@index([userId])
 }

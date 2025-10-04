@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   FaPlus,
@@ -12,32 +14,83 @@ import {
   FaPlayCircle,
   FaHistory,
 } from "react-icons/fa";
-import {
-  loadWorkouts,
-  Workout,
-  fixBrokenWorkoutImages,
-} from "../utils/workoutStorage";
 
-export default function WorkoutsPage() {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
+interface ApiWorkout {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  isOwner: boolean;
+  author: string;
+  exerciseCount: number;
+  muscleGroups: string[];
+  difficulty: string;
+  timesCompleted: number;
+  createdAt: string;
+  exercises: Array<{
+    id: string;
+    name: string;
+    muscleGroup: string;
+    sets: number;
+    reps: number;
+    weight?: number;
+    order: number;
+  }>;
+}
+
+// Component that uses searchParams (needs to be in Suspense)
+function WorkoutsContent() {
+  const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const [workouts, setWorkouts] = useState<ApiWorkout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
-    // Set loading state
-    setIsLoading(true);
-
-    setTimeout(() => {
-      // Fix any broken images in localStorage first
-      fixBrokenWorkoutImages();
-
-      // Load both custom and default workouts
-      const allWorkouts = loadWorkouts();
-      setWorkouts(allWorkouts);
-      setIsLoading(false);
-    }, 500);
+    // Load workouts immediately - public workouts are accessible without authentication
+    loadWorkouts();
   }, []);
+
+  // Check for refresh parameter
+  useEffect(() => {
+    const refresh = searchParams.get("refresh");
+    if (refresh === "true") {
+      loadWorkouts();
+    }
+  }, [searchParams]);
+
+  // Auto-refresh when coming back to the page
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!isLoading) {
+        loadWorkouts();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [isLoading]);
+
+  const loadWorkouts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/workouts?limit=50");
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Workout data received:", data.workouts?.slice(0, 2)); // Debug first 2 workouts
+        setWorkouts(data.workouts || []);
+      } else {
+        console.error("Failed to load workouts");
+        setWorkouts([]);
+      }
+    } catch (error) {
+      console.error("Error loading workouts:", error);
+      setWorkouts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter workouts based on search query and category
   const filteredWorkouts = workouts.filter((workout) => {
@@ -46,7 +99,9 @@ export default function WorkoutsPage() {
       workout.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       activeCategory === "All" ||
-      workout.category.toLowerCase() === activeCategory.toLowerCase();
+      workout.muscleGroups.some((group) =>
+        group.toLowerCase().includes(activeCategory.toLowerCase())
+      );
     return matchesSearch && matchesCategory;
   });
 
@@ -61,19 +116,32 @@ export default function WorkoutsPage() {
               Find the perfect workout for your goals
             </p>
           </div>
-          <div className="mt-4 sm:mt-0 flex gap-3">
+          <div className="mt-4 sm:mt-0 flex gap-2">
             <Link
               href="/workouts/history"
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center font-medium transition-colors"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg flex items-center font-medium transition-colors"
             >
               <FaHistory className="mr-2" /> History
             </Link>
-            <Link
-              href="/workouts/new"
-              className="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded-lg flex items-center font-medium"
-            >
-              <FaPlus className="mr-2" /> Create
-            </Link>
+            <div className="flex gap-2">
+              <button
+                onClick={loadWorkouts}
+                disabled={isLoading}
+                className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center font-medium transition-colors"
+                title="Refresh workouts"
+              >
+                <FaHistory
+                  className={`mr-2 ${isLoading ? "animate-spin" : ""}`}
+                />
+                {isLoading ? "Loading" : "Refresh"}
+              </button>
+              <Link
+                href="/workouts/create"
+                className="bg-yellow-400 hover:bg-yellow-300 text-black px-3 py-2 rounded-lg flex items-center font-medium"
+              >
+                <FaPlus className="mr-2" /> Create
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -121,28 +189,53 @@ export default function WorkoutsPage() {
                 key={workout.id}
                 className="bg-gray-800 rounded-xl overflow-hidden shadow-lg"
               >
-                <div className="h-48 relative">
-                  <img
-                    src={workout.image}
-                    alt={workout.name}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="h-48 relative bg-gradient-to-br from-yellow-500/20 to-gray-900 overflow-hidden">
+                  {workout.image ? (
+                    <img
+                      src={workout.image}
+                      alt={workout.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        e.currentTarget.style.display = "none";
+                        const fallback = e.currentTarget
+                          .nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="w-full h-full flex items-center justify-center text-center"
+                    style={{ display: workout.image ? "none" : "flex" }}
+                  >
+                    <div>
+                      <FaDumbbell className="text-4xl text-yellow-500 mx-auto mb-2" />
+                      <div className="text-yellow-400 font-bold text-lg">
+                        {workout.exerciseCount} Exercises
+                      </div>
+                    </div>
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                     <div className="p-4 w-full">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
-                          <span className="bg-yellow-400 text-black text-xs font-medium px-2 py-1 rounded capitalize">
-                            {workout.category}
-                          </span>
-                          {workout.isDefault && (
+                          {workout.muscleGroups.slice(0, 2).map((muscle) => (
+                            <span
+                              key={muscle}
+                              className="bg-yellow-400 text-black text-xs font-medium px-2 py-1 rounded capitalize"
+                            >
+                              {muscle}
+                            </span>
+                          ))}
+                          {workout.muscleGroups.length > 2 && (
                             <span className="bg-gray-700 text-gray-300 text-xs font-medium px-2 py-1 rounded">
-                              Default
+                              +{workout.muscleGroups.length - 2}
                             </span>
                           )}
                         </div>
                         <span className="flex items-center text-white">
                           <FaStar className="text-yellow-400 mr-1" />{" "}
-                          {workout.rating}
+                          {workout.difficulty}
                         </span>
                       </div>
                     </div>
@@ -153,9 +246,9 @@ export default function WorkoutsPage() {
                     {workout.name}
                   </h3>
                   <div className="flex items-center text-gray-400 mt-2 mb-3">
-                    <FaClock className="mr-1" /> {workout.duration} min •{" "}
-                    <FaDumbbell className="mx-1" /> {workout.intensity}{" "}
-                    intensity
+                    <FaDumbbell className="mr-1" /> {workout.exerciseCount}{" "}
+                    exercises • <FaHistory className="mx-1" />{" "}
+                    {workout.timesCompleted} completed
                   </div>
                   <p className="text-gray-300 text-sm">{workout.description}</p>
                   <div className="mt-4">
@@ -166,7 +259,7 @@ export default function WorkoutsPage() {
                       View Workout
                     </Link>
                     <Link
-                      href={`/workouts/start/${workout.id}`}
+                      href={`/workouts/${workout.id}/session`}
                       className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-2 px-4 rounded-lg flex items-center justify-center mt-2 font-medium transition"
                     >
                       <FaPlayCircle className="mr-2" /> Start Workout
@@ -188,7 +281,7 @@ export default function WorkoutsPage() {
                 : "No workouts available in this category yet"}
             </p>
             <Link
-              href="/workouts/new"
+              href="/workouts/create"
               className="bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-3 rounded-lg flex items-center font-medium transition"
             >
               <FaPlus className="mr-2" />
@@ -198,5 +291,32 @@ export default function WorkoutsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function WorkoutsLoading() {
+  return (
+    <div className="min-h-screen bg-black text-white p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-800 rounded w-1/4 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-gray-800 rounded-lg p-6 h-48"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main export wrapped in Suspense
+export default function WorkoutsPage() {
+  return (
+    <Suspense fallback={<WorkoutsLoading />}>
+      <WorkoutsContent />
+    </Suspense>
   );
 }

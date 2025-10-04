@@ -284,7 +284,7 @@ export default function Dashboard() {
               Recent Sessions
             </h2>
             <Link
-              href="/workouts/recent"
+              href="/workouts/history"
               className="text-yellow-400 text-sm font-medium hover:underline"
             >
               View All
@@ -325,7 +325,7 @@ export default function Dashboard() {
                     Track your fitness journey by logging your first workout
                   </p>
                   <Link
-                    href="/workouts/new"
+                    href="/workouts/create"
                     className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg text-sm font-medium transition flex items-center"
                   >
                     <FaDumbbell className="mr-2" /> Create Your First Workout
