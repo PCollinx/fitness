@@ -95,21 +95,21 @@ export default function WorkoutDetailPage() {
 
   const handleDeleteWorkout = async () => {
     if (!workout || !workout.isOwner) return;
-    
+
     setIsDeleting(true);
-    
+
     try {
       const response = await fetch(`/api/workouts/${workout.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to delete workout');
+        throw new Error("Failed to delete workout");
       }
-      
-      router.push('/workouts');
+
+      router.push("/workouts");
     } catch (err) {
-      console.error('Error deleting workout:', err);
+      console.error("Error deleting workout:", err);
       setIsDeleting(false);
     }
   };
@@ -338,11 +338,12 @@ export default function WorkoutDetailPage() {
               <FaExclamationTriangle className="mr-3 text-xl" />
               <h3 className="text-lg font-bold">Delete Workout</h3>
             </div>
-            
+
             <p className="text-gray-300 mb-6">
-              Are you sure you want to delete "{workout?.name}"? This action cannot be undone.
+              Are you sure you want to delete "{workout?.name}"? This action
+              cannot be undone.
             </p>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -356,7 +357,7 @@ export default function WorkoutDetailPage() {
                 disabled={isDeleting}
                 className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition flex items-center justify-center"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

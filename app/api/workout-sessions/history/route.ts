@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
 
     // Get URL parameters for pagination
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get("limit") || "50");
+    const offset = parseInt(searchParams.get("offset") || "0");
 
     // Fetch workout sessions with full details
     const sessions = await prisma.workoutSession.findMany({
@@ -42,19 +42,18 @@ export async function GET(request: NextRequest) {
             sets: true,
           },
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },
       orderBy: {
-        startTime: 'desc',
+        startTime: "desc",
       },
       take: limit,
       skip: offset,
     });
 
     return NextResponse.json(sessions);
-
   } catch (error) {
     console.error("Error fetching workout session history:", error);
     return NextResponse.json(
