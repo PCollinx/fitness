@@ -8,8 +8,6 @@ import {
   FaArrowRight,
   FaCheck,
   FaDumbbell,
-  FaFire,
-  FaClock,
   FaCrosshairs,
 } from "react-icons/fa";
 
@@ -66,7 +64,7 @@ const muscleGroups: MuscleGroup[] = [
   },
   {
     id: "full body",
-    label: "Full Body", 
+    label: "Full Body",
     description: "Compound movements",
     icon: "🔥",
   },

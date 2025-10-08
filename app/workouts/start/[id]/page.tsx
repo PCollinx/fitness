@@ -21,31 +21,40 @@ import {
   FaWeightHanging,
 } from "react-icons/fa";
 import {
-  getWorkoutById,
-  type Workout,
-  type WorkoutExercise,
-} from "../../../utils/workoutStorage";
-import {
   submitWorkoutSession,
   formatWorkoutSessionData,
   type WorkoutSessionData,
 } from "../../../utils/workoutSessionApi";
+import StreakCelebration from "@/app/components/StreakCelebration";
 
-type Exercise = {
+interface WorkoutExercise {
   id: string;
+  exerciseId: string;
   name: string;
+  exerciseName: string;
+  muscleGroup: string;
   sets: number;
   reps: number;
-  weight?: number;
+  weight: number | null;
+  order: number;
   notes?: string;
-  muscleGroup?: string;
-};
+}
 
-type WorkoutSession = {
+interface Workout {
   id: string;
   name: string;
-  exercises: Exercise[];
-};
+  description: string;
+  image: string;
+  isOwner: boolean;
+  author: string;
+  exerciseCount: number;
+  muscleGroups: string[];
+  difficulty: string | null;
+  timesCompleted: number;
+  createdAt: string;
+  exercises: WorkoutExercise[];
+  workoutExercises?: WorkoutExercise[];
+}
 
 type SetTracker = {
   completed: boolean;
@@ -78,33 +87,40 @@ export default function WorkoutSessionPage() {
   );
 
   useEffect(() => {
-    // Load real workout from storage
-    setIsLoading(true);
+    const loadWorkout = async () => {
+      if (!workoutId) return;
 
-    const loadWorkout = () => {
-      const foundWorkout = getWorkoutById(workoutId);
+      setIsLoading(true);
 
-      if (!foundWorkout) {
-        router.push("/workouts");
-        return;
-      }
+      try {
+        const response = await fetch(`/api/workouts/${workoutId}`);
 
-      setWorkout(foundWorkout);
+        if (!response.ok) {
+          throw new Error("Failed to load workout");
+        }
 
-      // Initialize set trackers based on workout exercises
-      const initialSetTrackers: Record<string, SetTracker[]> = {};
-      if (foundWorkout.workoutExercises) {
-        foundWorkout.workoutExercises.forEach((exercise) => {
-          initialSetTrackers[exercise.exerciseId] = Array(exercise.sets)
+        const data = await response.json();
+        setWorkout(data);
+
+        // Initialize set trackers based on workout exercises
+        const initialSetTrackers: Record<string, SetTracker[]> = {};
+        const exercises = data.exercises || data.workoutExercises || [];
+        
+        exercises.forEach((exercise: WorkoutExercise) => {
+          initialSetTrackers[exercise.exerciseId || exercise.id] = Array(exercise.sets)
             .fill(null)
             .map(() => ({
               completed: false,
             }));
         });
-      }
 
-      setSetTrackers(initialSetTrackers);
-      setIsLoading(false);
+        setSetTrackers(initialSetTrackers);
+      } catch (err) {
+        console.error("Error loading workout:", err);
+        router.push("/workouts");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadWorkout();
@@ -151,6 +167,11 @@ export default function WorkoutSessionPage() {
     setTimerRunning(true);
   };
 
+  // Helper to get exercises array from either structure
+  const getExercises = () => {
+    return workout?.exercises || workout?.workoutExercises || [];
+  };
+
   // Mark a set as completed
   const toggleSetCompletion = (
     exerciseId: string,
@@ -175,11 +196,8 @@ export default function WorkoutSessionPage() {
 
   // Move to the next exercise
   const nextExercise = () => {
-    if (
-      workout &&
-      workout.workoutExercises &&
-      currentExerciseIndex < workout.workoutExercises.length - 1
-    ) {
+    const exercises = getExercises();
+    if (workout && exercises && currentExerciseIndex < exercises.length - 1) {
       setCurrentExerciseIndex((prev) => prev + 1);
       resetTimer();
     } else {
@@ -263,15 +281,15 @@ export default function WorkoutSessionPage() {
       elapsedTime: sessionCompleted
         ? elapsedTime
         : Math.floor((endTime.getTime() - sessionStart.getTime()) / 1000),
-      exercises: workout.workoutExercises?.map((exercise) => ({
-        exerciseId: exercise.exerciseId,
-        sets: setTrackers[exercise.exerciseId],
+      exercises: getExercises().map((exercise) => ({
+        exerciseId: exercise.exerciseId || exercise.id,
+        sets: setTrackers[exercise.exerciseId || exercise.id],
       })),
     });
   };
 
   // Get the current exercise
-  const currentExercise = workout?.workoutExercises?.[currentExerciseIndex];
+  const currentExercise = getExercises()[currentExerciseIndex];
 
   if (isLoading) {
     return (
@@ -370,7 +388,7 @@ export default function WorkoutSessionPage() {
               <div className="bg-gray-700 p-4 rounded-lg">
                 <h3 className="font-medium mb-2 text-gray-300">Exercises</h3>
                 <p className="text-2xl font-bold text-white">
-                  {workout.workoutExercises?.length || 0}
+                  {getExercises().length || 0}
                 </p>
               </div>
 
@@ -387,6 +405,9 @@ export default function WorkoutSessionPage() {
                 </p>
               </div>
             </div>
+
+            {/* Streak Celebration */}
+            <StreakCelebration />
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
@@ -431,9 +452,9 @@ export default function WorkoutSessionPage() {
                 {workout.name}
               </h1>
               <p className="text-gray-300">
-                {workout.workoutExercises?.length || 0} exercises |{" "}
-                {workout.workoutExercises?.reduce(
-                  (acc, ex) => acc + ex.sets,
+                {getExercises().length || 0} exercises |{" "}
+                {getExercises().reduce(
+                  (acc: number, ex: WorkoutExercise) => acc + ex.sets,
                   0
                 ) || 0}{" "}
                 total sets
@@ -445,14 +466,14 @@ export default function WorkoutSessionPage() {
                 Workout Overview
               </h2>
               <div className="space-y-4 ">
-                {workout.workoutExercises?.map((exercise, index) => (
+                {getExercises().map((exercise: WorkoutExercise, index: number) => (
                   <div
                     key={exercise.exerciseId}
                     className="flex justify-between items-center py-3 border-b border-gray-600 last:border-0"
                   >
                     <div>
                       <div className="font-medium text-white">
-                        {exercise.exerciseName}
+                        {exercise.exerciseName || exercise.name}
                       </div>
                       <div className="text-sm text-gray-400">
                         {exercise.sets} sets × {exercise.reps} reps{" "}
@@ -461,7 +482,7 @@ export default function WorkoutSessionPage() {
                     </div>
                     <div className="text-yellow-400 text-sm font-medium">
                       Exercise {index + 1} of{" "}
-                      {workout.workoutExercises?.length || 0}
+                      {getExercises().length || 0}
                     </div>
                   </div>
                 ))}
@@ -505,7 +526,7 @@ export default function WorkoutSessionPage() {
                 <div>
                   <h2 className="text-xl font-semibold text-white">
                     Exercise {currentExerciseIndex + 1} of{" "}
-                    {workout.workoutExercises?.length || 0}
+                    {getExercises().length || 0}
                   </h2>
                   <p className="text-yellow-400 font-medium">
                     Exercise {currentExerciseIndex + 1}
@@ -526,7 +547,7 @@ export default function WorkoutSessionPage() {
                     className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md font-medium transition-colors"
                   >
                     {currentExerciseIndex ===
-                    (workout.workoutExercises?.length || 1) - 1
+                    (getExercises().length || 1) - 1
                       ? "Finish"
                       : "Next"}
                   </button>
@@ -537,7 +558,7 @@ export default function WorkoutSessionPage() {
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
                   <div>
                     <h3 className="text-2xl font-bold text-white">
-                      {currentExercise?.exerciseName}
+                      {currentExercise?.exerciseName || currentExercise?.name}
                     </h3>
                     {currentExercise?.notes && (
                       <p className="text-gray-300 mt-1">
@@ -572,9 +593,9 @@ export default function WorkoutSessionPage() {
                     {currentExercise &&
                       Array.from({ length: currentExercise.sets }).map(
                         (_, setIndex) => {
+                          const exerciseKey = currentExercise.exerciseId || currentExercise.id;
                           const isCompleted =
-                            setTrackers[currentExercise.exerciseId][setIndex]
-                              ?.completed;
+                            setTrackers[exerciseKey]?.[setIndex]?.completed;
 
                           return (
                             <div
@@ -592,7 +613,7 @@ export default function WorkoutSessionPage() {
                                 <button
                                   onClick={() =>
                                     toggleSetCompletion(
-                                      currentExercise.exerciseId,
+                                      exerciseKey,
                                       setIndex,
                                       !isCompleted
                                     )

@@ -81,7 +81,7 @@ export default function WorkoutDetailPage() {
 
   const handleStartWorkout = () => {
     if (workout) {
-      router.push(`/workouts/${workout.id}/session`);
+      router.push(`/workouts/start/${workout.id}`);
     }
   };
 

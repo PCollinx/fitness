@@ -259,7 +259,7 @@ function WorkoutsContent() {
                       View Workout
                     </Link>
                     <Link
-                      href={`/workouts/${workout.id}/session`}
+                      href={`/workouts/start/${workout.id}`}
                       className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-2 px-4 rounded-lg flex items-center justify-center mt-2 font-medium transition"
                     >
                       <FaPlayCircle className="mr-2" /> Start Workout

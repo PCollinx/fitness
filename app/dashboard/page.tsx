@@ -13,6 +13,7 @@ import {
   FaFire,
   FaWeight,
 } from "react-icons/fa";
+import StreakStatsCard from "@/app/components/StreakStatsCard";
 
 type WorkoutSummary = {
   id: string;
@@ -266,12 +267,12 @@ export default function Dashboard() {
             </Link>
 
             <Link
-              href="/workouts/plan"
+              href="/streak"
               className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
             >
-              <FaCalendar className="text-2xl text-yellow-500 mb-2" />
+              <FaFire className="text-2xl text-yellow-500 mb-2" />
               <span className="text-sm font-medium text-center text-white">
-                Plan Workout
+                View Streak
               </span>
             </Link>
           </div>
@@ -426,6 +427,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* Streak Stats */}
+              <StreakStatsCard />
 
               {/* Body Metrics */}
               {comprehensiveProgress.bodyMetrics.current && (
