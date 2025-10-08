@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -28,13 +28,20 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    console.log("Session in workout POST:", session);
-
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized - Please sign in" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - Please sign in" },
+        { status: 401 }
+      );
     }
 
-    const { name, description, exercises, image, public: isPublic }: CreateWorkoutInput = await request.json();
+    const {
+      name,
+      description,
+      exercises,
+      image,
+      public: isPublic,
+    }: CreateWorkoutInput = await request.json();
 
     // Validation
     if (!name || name.trim().length === 0) {
@@ -79,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify all exercises exist
-    const exerciseIds = exercises.map(e => e.exerciseId);
+    const exerciseIds = exercises.map((e) => e.exerciseId);
     const existingExercises = await prisma.exercise.findMany({
       where: { id: { in: exerciseIds } },
       select: { id: true, name: true, muscleGroup: true },
@@ -101,7 +108,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         public: isPublic || false,
         exercises: {
-          create: exercises.map(exercise => ({
+          create: exercises.map((exercise) => ({
             exerciseId: exercise.exerciseId,
             sets: exercise.sets,
             reps: exercise.reps,
@@ -124,23 +131,27 @@ export async function POST(request: NextRequest) {
               },
             },
           },
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      workout: {
-        id: workout.id,
-        name: workout.name,
-        description: workout.description,
-        exerciseCount: workout.exercises.length,
-        muscleGroups: [...new Set(workout.exercises.map(e => e.exercise.muscleGroup))],
-        createdAt: workout.createdAt,
+    return NextResponse.json(
+      {
+        success: true,
+        workout: {
+          id: workout.id,
+          name: workout.name,
+          description: workout.description,
+          exerciseCount: workout.exercises.length,
+          muscleGroups: [
+            ...new Set(workout.exercises.map((e) => e.exercise.muscleGroup)),
+          ],
+          createdAt: workout.createdAt,
+        },
       },
-    }, { status: 201 });
-
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating workout:", error);
     return NextResponse.json(
@@ -159,7 +170,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0");
 
     let whereClause: any;
-    
+
     if (session?.user?.email) {
       // Authenticated user: show their workouts + public workouts
       const user = await prisma.user.findUnique({
@@ -173,7 +184,7 @@ export async function GET(request: NextRequest) {
       whereClause = {
         OR: [
           { userId: user.id }, // User's own workouts
-          { public: true },    // Public workouts
+          { public: true }, // Public workouts
         ],
       };
     } else {
@@ -181,7 +192,7 @@ export async function GET(request: NextRequest) {
       whereClause = {
         public: true,
       };
-    };
+    }
 
     // Filter by muscle group if specified
     if (muscleGroup) {
@@ -219,23 +230,24 @@ export async function GET(request: NextRequest) {
               },
             },
           },
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         _count: {
           select: { sessions: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       skip: offset,
       take: limit,
     });
 
     // Get current user ID for ownership check
-    const currentUserId = session?.user?.email ? 
-      (await prisma.user.findUnique({ where: { email: session.user.email } }))?.id : 
-      null;
+    const currentUserId = session?.user?.email
+      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
+          ?.id
+      : null;
 
-    const workoutsWithStats = workouts.map(workout => ({
+    const workoutsWithStats = workouts.map((workout) => ({
       id: workout.id,
       name: workout.name,
       description: workout.description,
@@ -243,13 +255,16 @@ export async function GET(request: NextRequest) {
       isOwner: currentUserId ? workout.userId === currentUserId : false,
       author: workout.user.name,
       exerciseCount: workout.exercises.length,
-      muscleGroups: [...new Set(workout.exercises.map(e => e.exercise.muscleGroup))],
-      difficulty: workout.exercises.length > 0 
-        ? workout.exercises[0].exercise.difficulty 
-        : 'Beginner',
+      muscleGroups: [
+        ...new Set(workout.exercises.map((e) => e.exercise.muscleGroup)),
+      ],
+      difficulty:
+        workout.exercises.length > 0
+          ? workout.exercises[0].exercise.difficulty
+          : "Beginner",
       timesCompleted: workout._count.sessions,
       createdAt: workout.createdAt,
-      exercises: workout.exercises.map(e => ({
+      exercises: workout.exercises.map((e) => ({
         id: e.id,
         name: e.exercise.name,
         muscleGroup: e.exercise.muscleGroup,
@@ -264,7 +279,6 @@ export async function GET(request: NextRequest) {
       workouts: workoutsWithStats,
       hasMore: workouts.length === limit,
     });
-
   } catch (error) {
     console.error("Error fetching workouts:", error);
     return NextResponse.json(

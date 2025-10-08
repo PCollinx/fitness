@@ -4,8 +4,8 @@ import { authOptions } from "@/lib/auth/auth-options";
 import { isUserAdmin } from "@/lib/auth/admin";
 
 // Force this route to be dynamic
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   try {

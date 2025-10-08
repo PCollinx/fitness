@@ -70,7 +70,7 @@ export async function submitWorkoutSession(
   sessionData: WorkoutSessionData
 ): Promise<WorkoutSessionResponse> {
   try {
-    const response = await fetch("/api/workouts/sessions", {
+    const response = await fetch("/api/workout-sessions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,7 +79,7 @@ export async function submitWorkoutSession(
         workoutId: sessionData.workoutId,
         startTime: sessionData.startTime.toISOString(),
         endTime: sessionData.endTime.toISOString(),
-        elapsedTime: sessionData.elapsedTime,
+        duration: sessionData.elapsedTime * 1000, // Convert to milliseconds for /api/workout-sessions
         exercises: sessionData.exercises,
         notes: sessionData.notes,
       }),
@@ -91,11 +91,17 @@ export async function submitWorkoutSession(
 
     const data = await response.json();
 
-    if (!data.success) {
+    if (data.error) {
       throw new Error(data.error || "Failed to save workout session");
     }
 
-    return data;
+    // /api/workout-sessions returns different format - adapt it
+    return {
+      success: true,
+      sessionId: data.sessionId,
+      message: data.message || "Workout session saved successfully",
+      session: data
+    };
   } catch (error) {
     console.error("Error submitting workout session:", error);
     throw new Error(
@@ -109,7 +115,7 @@ export async function submitWorkoutSession(
  */
 export async function fetchWorkoutSessions(): Promise<WorkoutSessionsResponse> {
   try {
-    const response = await fetch("/api/workouts/sessions", {
+    const response = await fetch("/api/workout-sessions/history", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -120,13 +126,13 @@ export async function fetchWorkoutSessions(): Promise<WorkoutSessionsResponse> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const sessions = await response.json();
 
-    if (!data.success) {
-      throw new Error(data.error || "Failed to fetch workout sessions");
-    }
-
-    return data;
+    // /api/workout-sessions/history returns array directly, not wrapped in success object
+    return {
+      success: true,
+      sessions
+    };
   } catch (error) {
     console.error("Error fetching workout sessions:", error);
     throw new Error(

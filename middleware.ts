@@ -19,9 +19,7 @@ export async function middleware(req: NextRequest) {
     ];
 
     // Define API routes that should bypass authentication
-    const publicAPIRoutes = [
-      "/api/workouts/seed",
-    ];
+    const publicAPIRoutes = ["/api/workouts/seed"];
 
     // Check if this is a public API route
     const isPublicAPI = publicAPIRoutes.some((route) =>
@@ -39,7 +37,10 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/auth/signin", req.url));
       } else {
         // Only send to onboarding if user is truly new (no fitness goals)
-        if (!token.onboardingCompleted && (!token.fitnessGoals || token.fitnessGoals.length === 0)) {
+        if (
+          !token.onboardingCompleted &&
+          (!token.fitnessGoals || token.fitnessGoals.length === 0)
+        ) {
           return NextResponse.redirect(new URL("/onboarding", req.url));
         }
         return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -82,7 +83,9 @@ export async function middleware(req: NextRequest) {
         pathname.startsWith("/auth/signup"))
     ) {
       // Redirect based on onboarding status
-      const redirectPath = token.onboardingCompleted ? "/dashboard" : "/onboarding";
+      const redirectPath = token.onboardingCompleted
+        ? "/dashboard"
+        : "/onboarding";
       return NextResponse.redirect(new URL(redirectPath, req.url));
     }
 

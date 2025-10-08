@@ -13,41 +13,41 @@ interface FitnessGoal {
 }
 
 const goals: FitnessGoal[] = [
-  { 
-    id: "weight-loss", 
-    label: "Weight Loss", 
+  {
+    id: "weight-loss",
+    label: "Weight Loss",
     description: "Burn calories and reduce body fat",
-    icon: "🔥"
+    icon: "🔥",
   },
-  { 
-    id: "weight-gain", 
-    label: "Weight Gain", 
+  {
+    id: "weight-gain",
+    label: "Weight Gain",
     description: "Build mass and increase body weight",
-    icon: "⬆️"
+    icon: "⬆️",
   },
-  { 
-    id: "muscle-building", 
-    label: "Muscle Building", 
+  {
+    id: "muscle-building",
+    label: "Muscle Building",
     description: "Increase muscle mass and definition",
-    icon: "💪"
+    icon: "💪",
   },
-  { 
-    id: "strength-training", 
-    label: "Strength Training", 
+  {
+    id: "strength-training",
+    label: "Strength Training",
     description: "Build functional strength and power",
-    icon: "🏋️"
+    icon: "🏋️",
   },
-  { 
-    id: "endurance", 
-    label: "Endurance", 
+  {
+    id: "endurance",
+    label: "Endurance",
     description: "Improve cardiovascular fitness",
-    icon: "🏃"
+    icon: "🏃",
   },
-  { 
-    id: "mobility", 
-    label: "Mobility & Flexibility", 
+  {
+    id: "mobility",
+    label: "Mobility & Flexibility",
     description: "Enhance range of motion and flexibility",
-    icon: "🤸"
+    icon: "🤸",
   },
 ];
 
@@ -56,9 +56,9 @@ interface FitnessGoalsOnboardingProps {
   redirectPath?: string;
 }
 
-export default function FitnessGoalsOnboarding({ 
+export default function FitnessGoalsOnboarding({
   onComplete,
-  redirectPath = "/dashboard"
+  redirectPath = "/dashboard",
 }: FitnessGoalsOnboardingProps) {
   const { data: session, status, update } = useSession();
   const router = useRouter();
@@ -68,24 +68,26 @@ export default function FitnessGoalsOnboarding({
 
   useEffect(() => {
     // Only redirect if we're certain the user is unauthenticated
-  // Don't redirect during loading state
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      console.log("Redirecting to signin - no valid session");
-      router.push("/auth/signin");
-    }
-  }, [status, router]);
-    
+    // Don't redirect during loading state
+    useEffect(() => {
+      if (status === "unauthenticated") {
+        console.log("Redirecting to signin - no valid session");
+        router.push("/auth/signin");
+      }
+    }, [status, router]);
+
     // If user is authenticated and has already completed onboarding, redirect to dashboard
     if (status === "authenticated" && session?.user?.hasCompletedOnboarding) {
-      console.log("✅ User already completed onboarding, redirecting to dashboard");
+      console.log(
+        "✅ User already completed onboarding, redirecting to dashboard"
+      );
       router.push(redirectPath);
     }
   }, [status, router, session, redirectPath]);
 
   const toggleGoalSelection = (goalId: string) => {
     if (selectedGoals.includes(goalId)) {
-      setSelectedGoals(selectedGoals.filter(id => id !== goalId));
+      setSelectedGoals(selectedGoals.filter((id) => id !== goalId));
     } else {
       setSelectedGoals([...selectedGoals, goalId]);
     }
@@ -100,9 +102,9 @@ export default function FitnessGoalsOnboarding({
     setIsLoading(true);
     setError("");
 
-    console.log("Starting onboarding submission...", { 
-      selectedGoals, 
-      userEmail: session?.user?.email 
+    console.log("Starting onboarding submission...", {
+      selectedGoals,
+      userEmail: session?.user?.email,
     });
 
     try {
@@ -119,7 +121,9 @@ export default function FitnessGoalsOnboarding({
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Failed to save fitness goals:", errorData);
-        throw new Error(errorData.error || errorData.message || "Failed to save fitness goals");
+        throw new Error(
+          errorData.error || errorData.message || "Failed to save fitness goals"
+        );
       }
 
       console.log("Fitness goals saved successfully");
@@ -139,7 +143,9 @@ export default function FitnessGoalsOnboarding({
         if (!onboardingResponse.ok) {
           const errorData = await onboardingResponse.json();
           console.error("Failed to mark onboarding as completed:", errorData);
-          throw new Error(errorData.error || "Failed to mark onboarding as completed");
+          throw new Error(
+            errorData.error || "Failed to mark onboarding as completed"
+          );
         }
 
         console.log("Onboarding marked as completed");
@@ -147,9 +153,9 @@ export default function FitnessGoalsOnboarding({
         // Force session update to reflect new onboarding status
         console.log("Updating session...");
         await update();
-        
+
         console.log("Session updated, redirecting...");
-        
+
         // Small delay to ensure session is updated
         setTimeout(() => {
           if (onComplete) {
@@ -165,7 +171,9 @@ export default function FitnessGoalsOnboarding({
       }
     } catch (err) {
       console.error("Error saving fitness goals:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -189,7 +197,8 @@ export default function FitnessGoalsOnboarding({
           </div>
           <h1 className="text-3xl font-bold mb-2">What brings you here?</h1>
           <p className="text-gray-400 text-lg">
-            Select your fitness goals to get personalized workout recommendations
+            Select your fitness goals to get personalized workout
+            recommendations
           </p>
           <p className="text-gray-500 text-sm mt-2">
             You can choose multiple goals
@@ -202,44 +211,11 @@ export default function FitnessGoalsOnboarding({
           </div>
         )}
 
-        {/* Debug: Skip onboarding for testing */}
-        <div className="mb-6 p-4 bg-yellow-900/20 border border-yellow-900/50 rounded-lg">
-          <p className="text-yellow-400 text-sm mb-2">Debug: Having issues? Skip onboarding for now</p>
-          <button
-            onClick={async () => {
-              console.log("Force completing onboarding...");
-              setIsLoading(true);
-              try {
-                const response = await fetch("/api/user/onboarding", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ completed: true }),
-                });
-                if (response.ok) {
-                  await update();
-                  setTimeout(() => router.push("/dashboard"), 1000);
-                } else {
-                  const errorData = await response.json();
-                  console.error("Skip onboarding failed:", errorData);
-                }
-              } catch (err) {
-                console.error("Force completion failed:", err);
-              } finally {
-                setIsLoading(false);
-              }
-            }}
-            disabled={isLoading}
-            className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm"
-          >
-            Skip Onboarding (Debug)
-          </button>
-        </div>
-
         {/* Goals Grid */}
         <div className="grid grid-cols-1 gap-4 mb-8">
           {goals.map((goal) => {
             const isSelected = selectedGoals.includes(goal.id);
-            
+
             return (
               <button
                 key={goal.id}
@@ -254,19 +230,23 @@ export default function FitnessGoalsOnboarding({
                   <div className="flex items-center space-x-4">
                     <span className="text-2xl">{goal.icon}</span>
                     <div>
-                      <h3 className="text-lg font-semibold mb-1">{goal.label}</h3>
-                      <p className="text-gray-400 text-sm">{goal.description}</p>
+                      <h3 className="text-lg font-semibold mb-1">
+                        {goal.label}
+                      </h3>
+                      <p className="text-gray-400 text-sm">
+                        {goal.description}
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    isSelected
-                      ? "bg-yellow-400 border-yellow-400"
-                      : "border-gray-500"
-                  }`}>
-                    {isSelected && (
-                      <FaCheck className="w-3 h-3 text-black" />
-                    )}
+
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      isSelected
+                        ? "bg-yellow-400 border-yellow-400"
+                        : "border-gray-500"
+                    }`}
+                  >
+                    {isSelected && <FaCheck className="w-3 h-3 text-black" />}
                   </div>
                 </div>
               </button>
@@ -294,21 +274,12 @@ export default function FitnessGoalsOnboarding({
               </>
             )}
           </button>
-          
+
           {selectedGoals.length === 0 && (
             <p className="text-center text-gray-500 text-sm mt-2">
               Select at least one goal to continue
             </p>
           )}
-        </div>
-
-        {/* Progress indicator */}
-        <div className="mt-8 flex justify-center">
-          <div className="flex space-x-2">
-            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-            <div className="w-3 h-3 rounded-full bg-gray-600"></div>
-            <div className="w-3 h-3 rounded-full bg-gray-600"></div>
-          </div>
         </div>
       </div>
     </div>

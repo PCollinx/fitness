@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -9,11 +9,14 @@ export async function GET(request: NextRequest) {
   try {
     // Check if user is admin
     const session = await requireAdmin();
-    
+
     if (!session) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
-    
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
@@ -141,9 +144,12 @@ export async function DELETE(request: NextRequest) {
   try {
     // Check if user is admin
     const session = await requireAdmin();
-    
+
     if (!session) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
     // For now, prevent users from deleting themselves
     const { searchParams } = new URL(request.url);

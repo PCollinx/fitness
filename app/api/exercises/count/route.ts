@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -10,22 +10,25 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
-    
-    const muscleGroups = searchParams.get('muscleGroups');
-    
+
+    const muscleGroups = searchParams.get("muscleGroups");
+
     if (!muscleGroups) {
-      return NextResponse.json({ error: "muscleGroups parameter is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "muscleGroups parameter is required" },
+        { status: 400 }
+      );
     }
 
-    const muscleGroupArray = muscleGroups.split(',').map(mg => mg.trim());
-    
+    const muscleGroupArray = muscleGroups.split(",").map((mg) => mg.trim());
+
     // Get count of exercises for the specified muscle groups
     const count = await prisma.exercise.count({
       where: {
         muscleGroup: {
-          in: muscleGroupArray
-        }
-      }
+          in: muscleGroupArray,
+        },
+      },
     });
 
     return NextResponse.json({ count });
@@ -44,9 +47,12 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     const body = await request.json();
     const { muscleGroups } = body;
-    
+
     if (!muscleGroups || !Array.isArray(muscleGroups)) {
-      return NextResponse.json({ error: "muscleGroups array is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "muscleGroups array is required" },
+        { status: 400 }
+      );
     }
 
     // Get counts for each muscle group
@@ -54,8 +60,8 @@ export async function POST(request: NextRequest) {
       muscleGroups.map(async (muscleGroup: string) => {
         const count = await prisma.exercise.count({
           where: {
-            muscleGroup: muscleGroup
-          }
+            muscleGroup: muscleGroup,
+          },
         });
         return { muscleGroup, count };
       })

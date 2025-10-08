@@ -78,23 +78,14 @@ export const authOptions: NextAuthOptions = {
       user?: any;
       account?: any;
     }) {
-      console.log("🔑 JWT callback triggered:", {
-        hasUser: !!user,
-        tokenEmail: token.email,
-        userEmail: user?.email,
-        provider: account?.provider,
-      });
-
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        console.log("📝 Setting token from user:", { id: user.id, email: user.email });
       }
 
       // Always fetch the latest user data to get onboarding status
       if (token.email) {
         try {
-          console.log("🔍 Fetching user data for:", token.email);
           const userData = await prisma.user.findUnique({
             where: { email: token.email },
             include: {
@@ -102,29 +93,18 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          console.log("👤 User data found:", {
-            exists: !!userData,
-            onboardingCompleted: userData?.onboardingCompleted,
-            fitnessGoalsCount: userData?.fitnessGoals?.length || 0,
-          });
-
           if (userData) {
             token.role = userData.role;
             token.fitnessGoals = userData.fitnessGoals.map((fg) => fg.goalType);
-            
+
             // For existing users, if onboardingCompleted is null and they have fitness goals,
             // consider them as having completed onboarding
-            const hasCompletedOnboarding = userData.onboardingCompleted || 
+            const hasCompletedOnboarding =
+              userData.onboardingCompleted ||
               (userData.fitnessGoals && userData.fitnessGoals.length > 0);
-            
+
             token.onboardingCompleted = hasCompletedOnboarding;
             token.hasCompletedOnboarding = hasCompletedOnboarding;
-            
-            console.log("🔄 Setting onboarding status:", {
-              originalValue: userData.onboardingCompleted,
-              hasFitnessGoals: userData.fitnessGoals.length > 0,
-              finalValue: hasCompletedOnboarding
-            });
           } else {
             console.log("⚠️ No user found in database for email:", token.email);
             // For users not in database yet (first OAuth login), let them sign in normally
@@ -159,7 +139,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.fitnessGoals = token.fitnessGoals;
         session.user.hasCompletedOnboarding = token.hasCompletedOnboarding;
-        
+
         console.log("✅ Session updated with token data:", {
           userId: session.user.id,
           email: session.user.email,
@@ -167,30 +147,22 @@ export const authOptions: NextAuthOptions = {
           fitnessGoalsCount: session.user.fitnessGoals?.length || 0,
         });
       }
-      
+
       return session;
     },
     async signIn({ user, account, profile }) {
-      console.log("🔐 SignIn callback triggered:", {
-        provider: account?.provider,
-        userId: user?.id,
-        userEmail: user?.email,
-        accountId: account?.providerAccountId,
-        userName: user?.name,
-      });
-
       try {
         // Allow sign in from both credentials and OAuth providers
         if (account?.provider === "google") {
           console.log("✅ Google sign-in attempt for:", user?.email);
-          
+
           // Check if user exists in database
           const existingUser = await prisma.user.findUnique({
-            where: { email: user?.email || "" }
+            where: { email: user?.email || "" },
           });
-          
+
           console.log("👤 User exists in database:", !!existingUser);
-          
+
           return true;
         }
         if (account?.provider === "credentials") {

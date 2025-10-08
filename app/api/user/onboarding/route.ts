@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     const { completed } = await request.json();
 
-    if (typeof completed !== 'boolean') {
+    if (typeof completed !== "boolean") {
       return NextResponse.json(
         { error: "Completed must be a boolean value" },
         { status: 400 }

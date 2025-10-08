@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -10,36 +10,38 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
-    
+
     // Optional filters
-    const muscleGroup = searchParams.get('muscleGroup');
-    const difficulty = searchParams.get('difficulty');
-    const search = searchParams.get('search');
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const muscleGroup = searchParams.get("muscleGroup");
+    const difficulty = searchParams.get("difficulty");
+    const search = searchParams.get("search");
+    const limit = searchParams.get("limit")
+      ? parseInt(searchParams.get("limit")!)
+      : undefined;
 
     // Build where clause
     const where: any = {};
-    
+
     if (muscleGroup) {
       where.muscleGroup = muscleGroup;
     }
-    
+
     if (difficulty) {
       where.difficulty = difficulty;
     }
-    
+
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { muscleGroup: { contains: search, mode: 'insensitive' } }
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { muscleGroup: { contains: search, mode: "insensitive" } },
       ];
     }
 
     // Fetch exercises from database
     const exercises = await prisma.exercise.findMany({
       where,
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
       take: limit,
       select: {
         id: true,
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
         name,
         description: description || null,
         muscleGroup,
-        difficulty: difficulty || 'intermediate',
+        difficulty: difficulty || "intermediate",
         instructions: instructions || null,
         userId: session.user.id as string,
       },

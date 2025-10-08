@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      goals: user.fitnessGoals.map(goal => goal.goalType),
+      goals: user.fitnessGoals.map((goal) => goal.goalType),
       onboardingCompleted: user.onboardingCompleted,
     });
   } catch (error) {

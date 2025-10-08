@@ -6,8 +6,8 @@ import { refreshAccessToken } from "@/lib/spotify/config";
 import prisma from "@/lib/prisma";
 
 // Force this route to be dynamic
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 async function getValidSpotifyToken(userId: string) {
   const user = await prisma.user.findUnique({

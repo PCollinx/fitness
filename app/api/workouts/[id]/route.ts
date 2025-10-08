@@ -35,7 +35,7 @@ export async function GET(
       return NextResponse.json({ error: "Workout not found" }, { status: 404 });
     }
 
-        // Transform the data
+    // Transform the data
     const transformedWorkout = {
       id: workout.id,
       name: workout.name,
@@ -44,7 +44,9 @@ export async function GET(
       isOwner: workout.userId === session.user?.id,
       author: workout.user.name || "Unknown",
       exerciseCount: workout.exercises.length,
-      muscleGroups: [...new Set(workout.exercises.map((ex) => ex.exercise.muscleGroup))],
+      muscleGroups: [
+        ...new Set(workout.exercises.map((ex) => ex.exercise.muscleGroup)),
+      ],
       difficulty: workout.exercises[0]?.exercise.difficulty || null,
       timesCompleted: 0, // This would need to be calculated from WorkoutSession model
       createdAt: workout.createdAt.toISOString(),
@@ -52,7 +54,7 @@ export async function GET(
         id: workoutExercise.id,
         exerciseId: workoutExercise.exercise.id,
         name: workoutExercise.exercise.name,
-        muscleGroup: workoutExercise.exercise.muscleGroup || 'other',
+        muscleGroup: workoutExercise.exercise.muscleGroup || "other",
         sets: workoutExercise.sets,
         reps: workoutExercise.reps,
         weight: workoutExercise.weight,
@@ -85,15 +87,18 @@ export async function PUT(
     const { name, description, exercises } = body;
 
     if (!name || !exercises || !Array.isArray(exercises)) {
-      return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid request data" },
+        { status: 400 }
+      );
     }
 
     // Check if the workout exists and is owned by the user
     const existingWorkout = await prisma.workout.findUnique({
       where: { id: params.id },
-      select: { 
-        id: true, 
-        userId: true 
+      select: {
+        id: true,
+        userId: true,
       },
     });
 
@@ -102,7 +107,10 @@ export async function PUT(
     }
 
     if (existingWorkout.userId !== session.user?.id) {
-      return NextResponse.json({ error: "Not authorized to update this workout" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Not authorized to update this workout" },
+        { status: 403 }
+      );
     }
 
     // Update the workout in a transaction
@@ -146,7 +154,10 @@ export async function PUT(
       return workout;
     });
 
-    return NextResponse.json({ message: "Workout updated successfully", workout: updatedWorkout });
+    return NextResponse.json({
+      message: "Workout updated successfully",
+      workout: updatedWorkout,
+    });
   } catch (error) {
     console.error("Error updating workout:", error);
     return NextResponse.json(
@@ -167,13 +178,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-        // Check if the workout exists and is owned by the user
+    // Check if the workout exists and is owned by the user
     const workout = await prisma.workout.findUnique({
       where: { id: params.id },
-      select: { 
-        id: true, 
-        userId: true, 
-        name: true 
+      select: {
+        id: true,
+        userId: true,
+        name: true,
       },
     });
 
@@ -182,7 +193,10 @@ export async function DELETE(
     }
 
     if (workout.userId !== session.user?.id) {
-      return NextResponse.json({ error: "Not authorized to delete this workout" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Not authorized to delete this workout" },
+        { status: 403 }
+      );
     }
 
     // Delete the workout (exercises will be deleted due to CASCADE)

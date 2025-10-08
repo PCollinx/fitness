@@ -20,8 +20,6 @@ export default function ForgotPassword() {
     setStatus({ type: null, message: "" });
 
     try {
-      // Here we would typically call an API endpoint to send the reset email
-      // For now, we'll simulate a successful request
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: {
