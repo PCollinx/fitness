@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
-import { getSmartWorkoutImage } from "@/app/utils/workoutImageRecommendation";
+import { getImageForWorkout } from "@/app/utils/workoutImageStorage";
 
 // Fitness Goal aligned workouts - 4 workouts per goal type
 const defaultWorkouts = {
@@ -811,13 +811,7 @@ export async function POST(request: Request) {
           muscleGroup: ex.muscleGroup,
         }));
 
-        const workoutImage = getSmartWorkoutImage({
-          exercises: exerciseData,
-          category: workoutTemplate.category,
-          fitnessGoals: [goalType],
-          workoutName: workoutTemplate.name,
-          description: workoutTemplate.description,
-        });
+        const workoutImage = getImageForWorkout(exerciseData);
 
         // Create workout
         const workout = await prisma.workout.create({
