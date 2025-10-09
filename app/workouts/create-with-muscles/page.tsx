@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -43,7 +45,7 @@ const exerciseCreationSchema = z.object({
 
 type ExerciseCreationFormValues = z.infer<typeof exerciseCreationSchema>;
 
-export default function CreateWithMusclesPage() {
+function CreateWithMusclesContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -843,5 +845,20 @@ export default function CreateWithMusclesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CreateWithMusclesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading exercises...</p>
+        </div>
+      </div>
+    }>
+      <CreateWithMusclesContent />
+    </Suspense>
   );
 }

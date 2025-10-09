@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import BackButton from "@/app/components/BackButton";
@@ -34,7 +34,7 @@ interface WorkoutData {
   targetMuscles: string[];
 }
 
-export default function StartWorkoutPage() {
+function StartWorkoutContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -430,5 +430,20 @@ export default function StartWorkoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function StartWorkoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading workout...</p>
+        </div>
+      </div>
+    }>
+      <StartWorkoutContent />
+    </Suspense>
   );
 }

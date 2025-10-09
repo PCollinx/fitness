@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -83,7 +85,7 @@ const categoryOptions = [
   },
 ];
 
-export default function WorkoutPlanningPage() {
+function WorkoutPlanningContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -367,5 +369,20 @@ export default function WorkoutPlanningPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WorkoutPlanningPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading workout planner...</p>
+        </div>
+      </div>
+    }>
+      <WorkoutPlanningContent />
+    </Suspense>
   );
 }

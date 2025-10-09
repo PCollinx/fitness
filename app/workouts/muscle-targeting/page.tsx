@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import BackButton from "@/app/components/BackButton";
@@ -70,7 +72,7 @@ const muscleGroups: MuscleGroup[] = [
   },
 ];
 
-export default function MuscleTargetingPage() {
+function MuscleTargetingContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -425,5 +427,20 @@ export default function MuscleTargetingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MuscleTargetingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading muscle targeting...</p>
+        </div>
+      </div>
+    }>
+      <MuscleTargetingContent />
+    </Suspense>
   );
 }
