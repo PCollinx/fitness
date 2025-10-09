@@ -11,24 +11,24 @@ interface UseSmartBackOptions {
 export function useSmartBack(options: UseSmartBackOptions = {}) {
   const router = useRouter();
   const { fallbackRoute = "/dashboard", preventCycles = true } = options;
-  
+
   const [canGoBack, setCanGoBack] = useState(false);
-  
+
   useEffect(() => {
     // Check if there's meaningful browser history
     const hasHistory = window.history.length > 1;
-    
+
     // Check referrer to see if we came from within our app
     const referrer = document.referrer;
     const currentOrigin = window.location.origin;
-    
+
     const isInternalNavigation = Boolean(
-      referrer && 
-      referrer.includes(currentOrigin) &&
-      !referrer.includes('/auth/') && // Exclude auth redirects
-      referrer !== window.location.href // Not a refresh
+      referrer &&
+        referrer.includes(currentOrigin) &&
+        !referrer.includes("/auth/") && // Exclude auth redirects
+        referrer !== window.location.href // Not a refresh
     );
-    
+
     setCanGoBack(hasHistory && isInternalNavigation);
   }, []);
 
@@ -37,7 +37,7 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
       if (canGoBack && preventCycles) {
         // Store current path and set up fallback timer for cycle detection
         const currentPath = window.location.pathname;
-        
+
         // Set a timer to check if navigation actually happened
         const fallbackTimer = setTimeout(() => {
           // If we're still on the same page after attempting to go back,
@@ -49,29 +49,28 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
 
         // Attempt browser back navigation
         window.history.back();
-        
+
         // Clear timer on successful navigation change
         const handleNavigation = () => {
           clearTimeout(fallbackTimer);
-          window.removeEventListener('popstate', handleNavigation);
+          window.removeEventListener("popstate", handleNavigation);
           // Also remove the timeout cleanup
           clearTimeout(cleanupTimer);
         };
-        
-        window.addEventListener('popstate', handleNavigation);
-        
+
+        window.addEventListener("popstate", handleNavigation);
+
         // Cleanup timeout and event listener after reasonable delay
         const cleanupTimer = setTimeout(() => {
           clearTimeout(fallbackTimer);
-          window.removeEventListener('popstate', handleNavigation);
+          window.removeEventListener("popstate", handleNavigation);
         }, 1500);
-        
       } else {
         // No safe back history available, use fallback route
         router.push(fallbackRoute);
       }
     } catch (error) {
-      console.warn('Smart back navigation failed, using fallback:', error);
+      console.warn("Smart back navigation failed, using fallback:", error);
       router.push(fallbackRoute);
     }
   }, [canGoBack, fallbackRoute, preventCycles, router]);
@@ -83,7 +82,9 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
     fallbackRoute,
     // Helper to get appropriate back text
     getBackText: useCallback(() => {
-      return canGoBack ? "Back" : `Back to ${fallbackRoute === "/dashboard" ? "Dashboard" : "Home"}`;
-    }, [canGoBack, fallbackRoute])
+      return canGoBack
+        ? "Back"
+        : `Back to ${fallbackRoute === "/dashboard" ? "Dashboard" : "Home"}`;
+    }, [canGoBack, fallbackRoute]),
   };
 }

@@ -11,16 +11,16 @@ interface BackButtonProps {
   preventCycles?: boolean;
 }
 
-export default function BackButton({ 
-  fallbackRoute = "/dashboard", 
+export default function BackButton({
+  fallbackRoute = "/dashboard",
   className = "",
   text,
   showText = true,
-  preventCycles = true 
+  preventCycles = true,
 }: BackButtonProps) {
-  const { handleBack, getBackText } = useSmartBack({ 
-    fallbackRoute, 
-    preventCycles 
+  const { handleBack, getBackText } = useSmartBack({
+    fallbackRoute,
+    preventCycles,
   });
 
   // Use custom text if provided, otherwise use smart text

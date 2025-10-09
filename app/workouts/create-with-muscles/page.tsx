@@ -246,16 +246,22 @@ function CreateWithMusclesContent() {
       setIsSaving(true);
 
       // Generate an appropriate image for the workout based on exercises
-      const exerciseDetails = selectedExercises.map(exercise => ({
+      const exerciseDetails = selectedExercises.map((exercise) => ({
         name: exercise.name,
-        muscleGroup: exercise.muscleGroup
+        muscleGroup: exercise.muscleGroup,
       }));
-      const workoutImage = getImageForWorkout(exerciseDetails) || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
+      const workoutImage =
+        getImageForWorkout(exerciseDetails) ||
+        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
       console.log("Generated workout image URL:", workoutImage);
 
       const workoutData = {
         name: workoutName.trim(),
-        description: description?.trim() || `${muscles.join(" & ")} workout focusing on targeted muscle development`,
+        description:
+          description?.trim() ||
+          `${muscles.join(
+            " & "
+          )} workout focusing on targeted muscle development`,
         image: workoutImage,
         exercises: selectedExercises.map((exercise, index) => ({
           exerciseId: exercise.id,
@@ -286,12 +292,16 @@ function CreateWithMusclesContent() {
 
       const result = await response.json();
       console.log("Workout saved successfully:", result);
-      
+
       // Redirect to the workout details page
       router.push(`/workouts/${result.workout.id}`);
     } catch (error) {
       console.error("Error saving workout:", error);
-      setError(error instanceof Error ? error.message : "Failed to save workout. Please try again.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to save workout. Please try again."
+      );
     } finally {
       setIsSaving(false);
     }
@@ -318,17 +328,23 @@ function CreateWithMusclesContent() {
       setError("");
 
       // Generate an appropriate image for the workout based on exercises
-      const exerciseDetails = selectedExercises.map(exercise => ({
+      const exerciseDetails = selectedExercises.map((exercise) => ({
         name: exercise.name,
-        muscleGroup: exercise.muscleGroup
+        muscleGroup: exercise.muscleGroup,
       }));
-      const workoutImage = getImageForWorkout(exerciseDetails) || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
+      const workoutImage =
+        getImageForWorkout(exerciseDetails) ||
+        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
       console.log("Generated workout image URL for start:", workoutImage);
 
       // First, save the workout to get a proper workout ID
       const workoutData = {
         name: workoutName.trim(),
-        description: description?.trim() || `${muscles.join(" & ")} workout focusing on targeted muscle development`,
+        description:
+          description?.trim() ||
+          `${muscles.join(
+            " & "
+          )} workout focusing on targeted muscle development`,
         image: workoutImage,
         exercises: selectedExercises.map((exercise, index) => ({
           exerciseId: exercise.id,
@@ -359,14 +375,21 @@ function CreateWithMusclesContent() {
 
       const result = await response.json();
       const workoutId = result.workout.id;
-      
-      console.log("Workout created successfully, starting session for workout:", workoutId);
+
+      console.log(
+        "Workout created successfully, starting session for workout:",
+        workoutId
+      );
 
       // Navigate to the workout start page with the saved workout ID
       router.push(`/workouts/start/${workoutId}`);
     } catch (error) {
       console.error("Error starting workout:", error);
-      setError(error instanceof Error ? error.message : "Failed to start workout. Please try again.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to start workout. Please try again."
+      );
     } finally {
       setIsSaving(false);
     }
@@ -850,14 +873,16 @@ function CreateWithMusclesContent() {
 
 export default function CreateWithMusclesPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading exercises...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading exercises...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CreateWithMusclesContent />
     </Suspense>
   );
