@@ -143,6 +143,15 @@ export default function WorkoutStreak({
           >
             {streakData.isActiveToday ? "View Workouts" : "Start Workout"}
           </button>
+
+          {onEnd && (
+            <button
+              onClick={onEnd}
+              className="w-full py-3 px-4 text-yellow-400 font-medium hover:text-red-300 transition-colors"
+            >
+              View Dashboard
+            </button>
+          )}
         </div>
       )}
     </div>

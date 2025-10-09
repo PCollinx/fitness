@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import BackButton from "@/app/components/BackButton";
 import {
-  FaArrowLeft,
   FaClock,
   FaCalendarAlt,
   FaDumbbell,
@@ -95,16 +95,16 @@ export default function WorkoutHistoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-12 pb-12 sm:pb-8 max-w-4xl">
         {/* Header */}
         <div className="mb-6">
-          <Link
-            href="/workouts"
-            className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors mb-4"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back to Workouts</span>
-          </Link>
+          <div className="mb-4">
+            <BackButton
+              fallbackRoute="/workouts"
+              className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
+              text="Back to Workouts"
+            />
+          </div>
 
           <div className="flex items-center mb-2">
             <FaHistory className="text-yellow-500 mr-3 h-6 w-6" />

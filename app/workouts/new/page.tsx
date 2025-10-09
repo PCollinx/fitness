@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import BackButton from "@/app/components/BackButton";
 import {
   FaPlus,
   FaTrash,
-  FaArrowLeft,
   FaSave,
   FaDumbbell,
   FaInfoCircle,
@@ -297,15 +297,13 @@ export default function CreateWorkoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl fade-in">
+      <div className="container mx-auto px-4 sm:px-6 pt-12 pb-8 sm:pb-8 max-w-4xl fade-in">
         <div className="mb-6 flex items-center">
-          <button
-            onClick={() => router.push("/workouts")}
+          <BackButton
+            fallbackRoute="/workouts"
             className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back to Workouts</span>
-          </button>
+            text="Back to Workouts"
+          />
         </div>
 
         {/* Exercise Seeding Component */}

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import BackButton from "@/app/components/BackButton";
 import {
-  FaArrowLeft,
   FaPlay,
   FaClock,
   FaDumbbell,
@@ -81,13 +81,11 @@ export default function WorkoutDetailPage() {
 
   const handleStartWorkout = () => {
     if (workout) {
-      router.push(`/workouts/start/${workout.id}`);
+      router.push(`/workouts/${workout.id}/session`);
     }
   };
 
-  const handleBack = () => {
-    router.push("/workouts");
-  };
+
 
   const handleEditWorkout = () => {
     router.push(`/workouts/${workout?.id}/edit`);
@@ -136,13 +134,13 @@ export default function WorkoutDetailPage() {
     return (
       <div className="min-h-screen bg-black text-white p-6 mt-8">
         <div className="max-w-4xl mx-auto">
-          <button
-            onClick={handleBack}
-            className="mb-6 flex items-center text-yellow-400 hover:text-yellow-300 transition"
-          >
-            <FaArrowLeft className="mr-2" />
-            Back to Workouts
-          </button>
+          <div className="mb-6">
+            <BackButton 
+              fallbackRoute="/workouts" 
+              className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
+              text="Back to Workouts"
+            />
+          </div>
           <div className="text-center py-16">
             <FaDumbbell className="text-gray-600 h-16 w-16 mx-auto mb-6" />
             <h2 className="text-xl font-bold text-white mb-3">
@@ -151,12 +149,11 @@ export default function WorkoutDetailPage() {
             <p className="text-gray-300 mb-8">
               The workout you're looking for could not be loaded.
             </p>
-            <button
-              onClick={handleBack}
+            <BackButton 
+              fallbackRoute="/workouts" 
               className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg font-medium transition"
-            >
-              Back to Workouts
-            </button>
+              text="Back to Workouts"
+            />
           </div>
         </div>
       </div>
@@ -171,13 +168,13 @@ export default function WorkoutDetailPage() {
     <div className="min-h-screen bg-black text-white mt-8">
       <div className="bg-gray-900 p-6">
         <div className="max-w-4xl mx-auto">
-          <button
-            onClick={handleBack}
-            className="mb-6 flex items-center text-yellow-400 hover:text-yellow-300 transition"
-          >
-            <FaArrowLeft className="mr-2" />
-            Back to Workouts
-          </button>
+          <div className="mb-6">
+            <BackButton 
+              fallbackRoute="/workouts" 
+              className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
+              text="Back to Workouts"
+            />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="relative h-64 lg:h-80 rounded-lg overflow-hidden">

@@ -79,7 +79,7 @@ export async function submitWorkoutSession(
         workoutId: sessionData.workoutId,
         startTime: sessionData.startTime.toISOString(),
         endTime: sessionData.endTime.toISOString(),
-        duration: sessionData.elapsedTime * 1000, // Convert to milliseconds for /api/workout-sessions
+        elapsedTime: sessionData.elapsedTime * 1000,
         exercises: sessionData.exercises,
         notes: sessionData.notes,
       }),
@@ -91,17 +91,11 @@ export async function submitWorkoutSession(
 
     const data = await response.json();
 
-    if (data.error) {
+    if (!data.success) {
       throw new Error(data.error || "Failed to save workout session");
     }
 
-    // /api/workout-sessions returns different format - adapt it
-    return {
-      success: true,
-      sessionId: data.sessionId,
-      message: data.message || "Workout session saved successfully",
-      session: data
-    };
+    return data;
   } catch (error) {
     console.error("Error submitting workout session:", error);
     throw new Error(
@@ -115,7 +109,7 @@ export async function submitWorkoutSession(
  */
 export async function fetchWorkoutSessions(): Promise<WorkoutSessionsResponse> {
   try {
-    const response = await fetch("/api/workout-sessions/history", {
+    const response = await fetch("/api/workouts/sessions", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -126,13 +120,13 @@ export async function fetchWorkoutSessions(): Promise<WorkoutSessionsResponse> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const sessions = await response.json();
+    const data = await response.json();
 
-    // /api/workout-sessions/history returns array directly, not wrapped in success object
-    return {
-      success: true,
-      sessions
-    };
+    if (!data.success) {
+      throw new Error(data.error || "Failed to fetch workout sessions");
+    }
+
+    return data;
   } catch (error) {
     console.error("Error fetching workout sessions:", error);
     throw new Error(

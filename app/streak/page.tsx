@@ -1,9 +1,8 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaArrowLeft } from "react-icons/fa";
+import BackButton from "@/app/components/BackButton";
 import WorkoutStreak from "@/app/components/WorkoutStreak";
 
 export default function StreakPage() {
@@ -20,13 +19,11 @@ export default function StreakPage() {
     <div className="min-h-screen pt-16 md:pt-0 bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Navigation Header */}
       <div className="absolute top-4 pt-16 left-4 z-10">
-        <Link
-          href="/dashboard"
+        <BackButton 
+          fallbackRoute="/dashboard" 
           className="flex items-center text-white hover:text-yellow-400 transition-colors"
-        >
-          <FaArrowLeft className="mr-2" />
-          Dashboard
-        </Link>
+          text="Dashboard"
+        />
       </div>
 
       {/* Streak Component */}

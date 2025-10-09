@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
+import BackButton from "@/app/components/BackButton";
 import {
   FaUser,
   FaEdit,
@@ -19,7 +20,6 @@ import {
   FaTrophy,
   FaLock,
   FaBullseye,
-  FaArrowLeft,
   FaExclamationTriangle,
   FaCheckCircle,
   FaUpload,
@@ -254,15 +254,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 mt-16 fade-in">
+    <div className="max-w-6xl mx-auto px-4 pb-8 pt-12 fade-in">
       <div className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center text-yellow-500 hover:text-yellow-400 transition-colors"
-        >
-          <FaArrowLeft className="mr-2" />
-          <span>Back to Home</span>
-        </Link>
+        <BackButton fallbackRoute="/dashboard" text="Back to Dashboard" />
       </div>
 
       {/* Display success/error messages */}

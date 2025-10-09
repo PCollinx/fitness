@@ -2,303 +2,239 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import Link from "next/link";
+import BackButton from "@/app/components/BackButton";
 import {
   FaDumbbell,
-  FaArrowRight,
-  FaFire,
   FaClock,
+  FaFire,
+  FaUsers,
+  FaBullseye,
+  FaCalendarAlt,
+  FaArrowRight,
   FaLayerGroup,
-  FaArrowLeft,
 } from "react-icons/fa";
 
-const workoutPlanSchema = z.object({
-  name: z.string().min(1, "Workout name is required"),
-  intensity: z.enum(["Low", "Medium", "High"]).default("Medium"),
-  category: z
-    .enum(["Strength", "Cardio", "Flexibility", "HIIT", "Recovery"])
-    .default("Strength"),
-});
+interface WorkoutPlan {
+  type: string;
+  title: string;
+  description: string;
+  duration: string;
+  difficulty: string;
+  icon: JSX.Element;
+  color: string;
+  route: string;
+}
 
-type WorkoutPlanValues = z.infer<typeof workoutPlanSchema>;
-
-export default function WorkoutPlanPage() {
+export default function PlanWorkoutPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<WorkoutPlanValues>({
-    resolver: zodResolver(workoutPlanSchema),
-    defaultValues: {
-      name: "",
-      intensity: "Medium",
-      category: "Strength",
+  const workoutPlans: WorkoutPlan[] = [
+    {
+      type: "quick",
+      title: "Quick Workout",
+      description: "Create a workout in minutes with our guided builder",
+      duration: "5-10 min setup",
+      difficulty: "Any Level",
+      icon: <FaClock className="text-2xl" />,
+      color: "from-blue-500 to-blue-600",
+      route: "/workouts/new?type=quick",
     },
-  });
-
-  const watchedValues = watch();
-
-  const onSubmit = (data: WorkoutPlanValues) => {
-    setIsLoading(true);
-
-    // Navigate to muscle targeting with workout data
-    const params = new URLSearchParams({
-      name: data.name,
-      intensity: data.intensity,
-      category: data.category,
-    });
-
-    router.push(`/workouts/muscle-targeting?${params.toString()}`);
-  };
-
-  const intensityInfo = {
-    Low: {
-      color: "text-green-400",
-      description: "Light effort, suitable for recovery or beginners",
+    {
+      type: "targeted",
+      title: "Muscle-Targeted Plan",
+      description: "Focus on specific muscle groups with targeted exercises",
+      duration: "10-15 min setup",
+      difficulty: "Beginner to Advanced",
+      icon: <FaBullseye className="text-2xl" />,
+      color: "from-green-500 to-green-600",
+      route: "/workouts/muscle-targeting",
     },
-    Medium: {
-      color: "text-yellow-400",
-      description: "Moderate effort, balanced workout",
+    {
+      type: "comprehensive",
+      title: "Custom Workout",
+      description: "Design a detailed workout with full customization",
+      duration: "15-20 min setup",
+      difficulty: "Intermediate to Advanced",
+      icon: <FaLayerGroup className="text-2xl" />,
+      color: "from-purple-500 to-purple-600",
+      route: "/workouts/new?type=custom",
     },
-    High: {
-      color: "text-red-400",
-      description: "High effort, challenging and intense",
+    {
+      type: "schedule",
+      title: "Weekly Plan",
+      description: "Plan your entire week with scheduled workouts",
+      duration: "20-30 min setup",
+      difficulty: "All Levels",
+      icon: <FaCalendarAlt className="text-2xl" />,
+      color: "from-yellow-500 to-orange-500",
+      route: "/schedule?from=plan",
     },
-  };
+  ];
 
-  const categoryInfo = {
-    Strength: { icon: "💪", description: "Build muscle and increase strength" },
-    Cardio: { icon: "❤️", description: "Improve cardiovascular fitness" },
-    Flexibility: {
-      icon: "🤸",
-      description: "Enhance mobility and flexibility",
-    },
-    HIIT: { icon: "⚡", description: "High-intensity interval training" },
-    Recovery: { icon: "🧘", description: "Active recovery and relaxation" },
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
+  const handlePlanSelect = (plan: WorkoutPlan) => {
+    setSelectedPlan(plan.type);
+    // Small delay for visual feedback then navigate
+    setTimeout(() => {
+      router.push(plan.route);
+    }, 200);
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => router.push("/workouts")}
-            className="text-yellow-400 hover:text-yellow-300 p-2 rounded-full hover:bg-gray-800 transition-colors"
-          >
-            <FaArrowLeft className="h-5 w-5" />
-          </button>
-
-          {/* Progress indicator */}
-          <div className="flex items-center space-x-2">
-            <div className="h-2 w-8 rounded-full bg-yellow-400"></div>
-            <div className="h-2 w-8 rounded-full bg-gray-700"></div>
-            <div className="h-2 w-8 rounded-full bg-gray-700"></div>
-          </div>
-
-          <div className="w-10"></div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-12">
+        {/* Navigation */}
+        <div className="mb-6">
+          <BackButton fallbackRoute="/dashboard" />
         </div>
 
-        {/* Title Section */}
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="mb-4">
-            <FaDumbbell className="text-4xl text-yellow-500 mx-auto mb-4" />
+            <FaBullseye className="text-5xl text-yellow-500 mx-auto mb-4" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Plan Your Workout</h1>
-          <p className="text-gray-400 text-lg">
-            Let's start by setting up the basics for your workout
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Plan Your Workout
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Choose how you'd like to design your workout. Each option is
+            tailored for different goals and experience levels.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* Workout Name */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <label
-              htmlFor="name"
-              className="block text-lg font-semibold text-yellow-500 mb-2"
+        {/* Workout Plan Options */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {workoutPlans.map((plan) => (
+            <div
+              key={plan.type}
+              className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
+                selectedPlan === plan.type
+                  ? "ring-2 ring-yellow-500 shadow-2xl"
+                  : "hover:shadow-xl"
+              }`}
+              onClick={() => handlePlanSelect(plan)}
             >
-              Workout Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              {...register("name")}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all text-lg"
-              placeholder="e.g., Upper Body Power, Leg Day Blast, Full Body HIIT"
-            />
-            {errors.name && (
-              <p className="mt-2 text-sm text-red-400">{errors.name.message}</p>
-            )}
-            <p className="mt-2 text-sm text-gray-400">
-              Give your workout a descriptive name
-            </p>
-          </div>
+              <div
+                className={`bg-gradient-to-br ${plan.color} p-6 text-white relative`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="bg-white/20 p-3 rounded-lg">{plan.icon}</div>
+                  <FaArrowRight className="text-white/60" />
+                </div>
 
-          {/* Intensity */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <label className="block text-lg font-semibold text-yellow-500 mb-4">
-              <FaFire className="inline mr-2" />
-              Intensity Level
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {(["Low", "Medium", "High"] as const).map((level) => (
-                <label
-                  key={level}
-                  className={`relative flex items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    watchedValues.intensity === level
-                      ? "border-yellow-400 bg-yellow-400/10"
-                      : "border-gray-600 bg-gray-700 hover:border-gray-500"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    value={level}
-                    {...register("intensity")}
-                    className="sr-only"
-                  />
-                  <div className="text-center">
-                    <div
-                      className={`text-2xl font-bold mb-1 ${intensityInfo[level].color}`}
-                    >
-                      {level}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {level === "Low" && "🟢"}
-                      {level === "Medium" && "🟡"}
-                      {level === "High" && "🔴"}
-                    </div>
+                <h3 className="text-xl font-bold mb-2">{plan.title}</h3>
+                <p className="text-white/90 text-sm mb-4 leading-relaxed">
+                  {plan.description}
+                </p>
+
+                <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center">
+                    <FaClock className="mr-1 text-white/80" />
+                    <span className="text-white/90">{plan.duration}</span>
                   </div>
-                </label>
-              ))}
-            </div>
-            <p className="mt-3 text-sm text-gray-400">
-              {intensityInfo[watchedValues.intensity]?.description}
-            </p>
-          </div>
-
-          {/* Category */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <label className="block text-lg font-semibold text-yellow-500 mb-4">
-              <FaLayerGroup className="inline mr-2" />
-              Workout Category
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {(
-                [
-                  "Strength",
-                  "Cardio",
-                  "Flexibility",
-                  "HIIT",
-                  "Recovery",
-                ] as const
-              ).map((cat) => (
-                <label
-                  key={cat}
-                  className={`relative flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    watchedValues.category === cat
-                      ? "border-yellow-400 bg-yellow-400/10"
-                      : "border-gray-600 bg-gray-700 hover:border-gray-500"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    value={cat}
-                    {...register("category")}
-                    className="sr-only"
-                  />
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{categoryInfo[cat].icon}</span>
-                    <div>
-                      <div className="font-medium text-white">{cat}</div>
-                      <div className="text-xs text-gray-400">
-                        {categoryInfo[cat].description}
-                      </div>
-                    </div>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Workout Preview */}
-          {watchedValues.name && (
-            <div className="bg-gradient-to-r from-yellow-500/10 to-yellow-400/10 border border-yellow-500/20 rounded-xl p-6">
-              <h3 className="text-yellow-400 font-semibold mb-3 flex items-center">
-                <FaClock className="mr-2" />
-                Workout Preview
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-400">Name:</span>
-                  <div className="font-medium text-white">
-                    {watchedValues.name}
+                  <div className="flex items-center">
+                    <FaUsers className="mr-1 text-white/80" />
+                    <span className="text-white/90">{plan.difficulty}</span>
                   </div>
                 </div>
-                <div>
-                  <span className="text-gray-400">Intensity:</span>
-                  <div
-                    className={`font-medium ${
-                      intensityInfo[watchedValues.intensity]?.color
-                    }`}
-                  >
-                    {watchedValues.intensity}
+
+                {selectedPlan === plan.type && (
+                  <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
+                    <div className="bg-white rounded-full p-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-900 border-t-transparent"></div>
+                    </div>
                   </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="bg-gray-800 rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-semibold text-yellow-500 mb-4 flex items-center">
+            <FaDumbbell className="mr-2" />
+            Planning Tips
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <div className="bg-blue-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
+                  <FaClock className="text-blue-500 text-sm" />
                 </div>
                 <div>
-                  <span className="text-gray-400">Category:</span>
-                  <div className="font-medium text-white flex items-center">
-                    <span className="mr-1">
-                      {categoryInfo[watchedValues.category]?.icon}
-                    </span>
-                    {watchedValues.category}
-                  </div>
+                  <h4 className="font-medium text-white text-sm">
+                    Quick Start
+                  </h4>
+                  <p className="text-gray-400 text-xs">
+                    New to fitness? Start with Quick Workout for guided
+                    creation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <div className="bg-green-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
+                  <FaBullseye className="text-green-500 text-sm" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-white text-sm">
+                    Targeted Training
+                  </h4>
+                  <p className="text-gray-400 text-xs">
+                    Focus on specific muscles for balanced strength development.
+                  </p>
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Continue Button */}
-          <div className="mt-8">
-            <button
-              type="submit"
-              disabled={!watchedValues.name || isLoading}
-              className={`w-full py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
-                watchedValues.name && !isLoading
-                  ? "bg-yellow-500 text-black hover:bg-yellow-400"
-                  : "bg-gray-700 text-gray-400 cursor-not-allowed"
-              }`}
-            >
-              {isLoading ? (
-                <div className="w-6 h-6 animate-spin rounded-full border-2 border-gray-400 border-t-transparent"></div>
-              ) : (
-                <>
-                  <span>Choose Muscle Groups</span>
-                  <FaArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <div className="bg-purple-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
+                  <FaLayerGroup className="text-purple-500 text-sm" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-white text-sm">
+                    Custom Control
+                  </h4>
+                  <p className="text-gray-400 text-xs">
+                    Advanced users can create detailed, personalized routines.
+                  </p>
+                </div>
+              </div>
 
-            {!watchedValues.name && (
-              <p className="text-center text-gray-500 text-sm mt-2">
-                Enter a workout name to continue
-              </p>
-            )}
+              <div className="flex items-start space-x-3">
+                <div className="bg-yellow-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
+                  <FaCalendarAlt className="text-yellow-500 text-sm" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-white text-sm">
+                    Weekly Structure
+                  </h4>
+                  <p className="text-gray-400 text-xs">
+                    Plan consistent routines with scheduled workout times.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
 
-        {/* Info Section */}
-        <div className="mt-8 p-4 bg-blue-900/20 border border-blue-700/30 rounded-lg">
-          <h3 className="text-blue-400 font-medium mb-2">💡 Quick Tip</h3>
-          <p className="text-blue-200 text-sm">
-            Choose a descriptive name that reflects your workout goals. You'll
-            be able to select specific muscle groups on the next step!
+        {/* Browse Existing */}
+        <div className="text-center">
+          <p className="text-gray-400 mb-4">
+            Or browse from our curated workout library
           </p>
+          <Link
+            href="/workouts"
+            className="inline-flex items-center bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            <FaDumbbell className="mr-2" />
+            Browse Existing Workouts
+          </Link>
         </div>
       </div>
     </div>

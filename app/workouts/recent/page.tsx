@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import BackButton from "@/app/components/BackButton";
 import {
-  FaArrowLeft,
   FaDumbbell,
   FaCalendarAlt,
   FaClock,
@@ -147,13 +147,10 @@ export default function RecentWorkoutsPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
-            <button
-              onClick={() => router.push('/dashboard')}
+            <BackButton 
+              fallbackRoute="/dashboard" 
               className="text-yellow-500 hover:text-yellow-400 flex items-center transition-all text-sm sm:text-base mr-4"
-            >
-              <FaArrowLeft className="mr-2" />
-              <span>Back to Dashboard</span>
-            </button>
+            />
           </div>
         </div>
 

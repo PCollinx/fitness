@@ -14,6 +14,7 @@ import {
   FaSignOutAlt,
   FaSignInAlt,
   FaUserPlus,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import { useUserProfile } from "../context/UserProfileContext";
 
@@ -43,17 +44,20 @@ export default function Navbar() {
   // Handle click outside profile dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsProfileMenuOpen(false);
       }
     };
 
     if (isProfileMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isProfileMenuOpen]);
 
@@ -154,6 +158,7 @@ export default function Navbar() {
                       >
                         <FaChartLine className="mr-2" /> Dashboard
                       </Link>
+
                       {isAdmin && (
                         <Link
                           href="/admin/users"
@@ -283,6 +288,18 @@ export default function Navbar() {
                       <FaUser />
                     </span>
                     <span>Profile</span>
+                  </div>
+                </Link>
+                <Link
+                  href="/schedule"
+                  className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800 text-white"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400">
+                      <FaCalendarAlt />
+                    </span>
+                    <span>Schedule</span>
                   </div>
                 </Link>
                 <button

@@ -136,7 +136,7 @@ function WorkoutsContent() {
                 {isLoading ? "Loading" : "Refresh"}
               </button>
               <Link
-                href="/workouts/create"
+                href="/workouts/new"
                 className="bg-yellow-400 hover:bg-yellow-300 text-black px-3 py-2 rounded-lg flex items-center font-medium"
               >
                 <FaPlus className="mr-2" /> Create
@@ -259,7 +259,7 @@ function WorkoutsContent() {
                       View Workout
                     </Link>
                     <Link
-                      href={`/workouts/start/${workout.id}`}
+                      href={`/workouts/${workout.id}/session`}
                       className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-2 px-4 rounded-lg flex items-center justify-center mt-2 font-medium transition"
                     >
                       <FaPlayCircle className="mr-2" /> Start Workout
@@ -281,7 +281,7 @@ function WorkoutsContent() {
                 : "No workouts available in this category yet"}
             </p>
             <Link
-              href="/workouts/create"
+              href="/workouts/new"
               className="bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-3 rounded-lg flex items-center font-medium transition"
             >
               <FaPlus className="mr-2" />

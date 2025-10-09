@@ -12,8 +12,11 @@ import {
   FaUsers,
   FaFire,
   FaWeight,
+  FaTrophy,
+  FaCalendarAlt,
 } from "react-icons/fa";
-import StreakStatsCard from "@/app/components/StreakStatsCard";
+import WorkoutScheduleComponent from "../components/WorkoutSchedule";
+import { useWorkoutStreak } from "../hooks/useWorkoutStreak";
 
 type WorkoutSummary = {
   id: string;
@@ -52,6 +55,129 @@ type ComprehensiveProgress = {
     };
   };
 };
+
+// Workout Streak Dashboard Component
+function WorkoutStreakDashboard() {
+  const { streakData, isLoading, error } = useWorkoutStreak();
+
+  if (isLoading) {
+    return (
+      <div className="bg-gray-800 rounded-lg shadow-md p-6 col-span-full lg:col-span-2">
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !streakData) {
+    return (
+      <div className="bg-gray-800 rounded-lg shadow-md p-6 col-span-full lg:col-span-2">
+        <h2 className="text-xl font-semibold mb-4 text-yellow-500 flex items-center">
+          <FaTrophy className="mr-2" />
+          Workout Streak
+        </h2>
+        <div className="text-center py-6">
+          <FaTrophy className="text-4xl text-gray-600 mx-auto mb-3" />
+          <p className="text-gray-400">Start your streak today!</p>
+          <Link
+            href="/workouts"
+            className="inline-block mt-3 bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            Begin First Workout
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const getStreakEmoji = (streak: number) => {
+    if (streak === 0) return "🎯";
+    if (streak < 3) return "🔥";
+    if (streak < 7) return "⚡";
+    if (streak < 30) return "🚀";
+    return "👑";
+  };
+
+  const getStreakMessage = (streak: number, isActive: boolean) => {
+    if (streak === 0) return "Ready to start your fitness journey?";
+    if (isActive) return "You've already worked out today! Keep the momentum going tomorrow.";
+    if (streak === 1) return "Great start! One day down!";
+    if (streak < 7) return `You're on a ${streak}-day streak! Keep it up!`;
+    if (streak < 30) return `Amazing! ${streak} days in a row! You're unstoppable!`;
+    return `Incredible! ${streak} consecutive days! You're a fitness legend!`;
+  };
+
+  const getNextMilestone = (currentStreak: number) => {
+    const milestones = [3, 7, 14, 30, 60, 90, 180, 365];
+    return milestones.find(milestone => milestone > currentStreak) || currentStreak + 30;
+  };
+
+  const nextMilestone = getNextMilestone(streakData.currentStreak);
+
+  return (
+    <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full lg:col-span-2">
+      <div className="p-4 border-b border-gray-700">
+        <h2 className="text-xl font-semibold text-yellow-500 flex items-center">
+          <FaTrophy className="mr-2" />
+          Workout Streak
+        </h2>
+      </div>
+      
+      <div className="p-6">
+        <div className="text-center mb-6">
+          <div className="text-6xl mb-3">
+            {getStreakEmoji(streakData.currentStreak)}
+          </div>
+          <div className="text-3xl font-bold text-white mb-2">
+            {streakData.currentStreak} Days
+          </div>
+          <p className="text-gray-400 text-sm">
+            {getStreakMessage(streakData.currentStreak, streakData.isActiveToday)}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-gray-700 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-yellow-400">
+              {streakData.longestStreak}
+            </div>
+            <div className="text-xs text-gray-400">Best Streak</div>
+          </div>
+          <div className="bg-gray-700 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-blue-400">
+              {nextMilestone}
+            </div>
+            <div className="text-xs text-gray-400">Next Goal</div>
+          </div>
+        </div>
+
+        {/* Progress to next milestone */}
+        <div className="mb-4">
+          <div className="flex justify-between text-xs text-gray-400 mb-1">
+            <span>Progress to {nextMilestone} days</span>
+            <span>{streakData.currentStreak}/{nextMilestone}</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-yellow-500 to-yellow-400 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${Math.min((streakData.currentStreak / nextMilestone) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <Link
+            href="/streak"
+            className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            View Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -229,13 +355,13 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Quick Actions */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full">
           <h2 className="text-xl font-semibold mb-4 text-yellow-500">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             <Link
               href="/workouts"
               className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
@@ -267,19 +393,62 @@ export default function Dashboard() {
             </Link>
 
             <Link
+              href="/schedule"
+              className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              <FaCalendarAlt className="text-2xl text-yellow-500 mb-2" />
+              <span className="text-sm font-medium text-center text-white">
+                Schedule
+              </span>
+            </Link>
+
+            <Link
               href="/streak"
               className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
             >
-              <FaFire className="text-2xl text-yellow-500 mb-2" />
+              <FaTrophy className="text-2xl text-yellow-500 mb-2" />
               <span className="text-sm font-medium text-center text-white">
-                View Streak
+                Streak & Goals
+              </span>
+            </Link>
+
+            <Link
+              href="/workouts/plan"
+              className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              <FaCalendar className="text-2xl text-yellow-500 mb-2" />
+              <span className="text-sm font-medium text-center text-white">
+                Plan Workout
               </span>
             </Link>
           </div>
         </div>
 
+        {/* Workout Schedule Widget */}
+        <div className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full lg:col-span-2">
+          <div className="p-4 border-b border-gray-700">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-yellow-500">
+                Weekly Schedule
+              </h2>
+              <Link
+                href="/schedule"
+                className="text-yellow-400 text-sm font-medium hover:underline"
+              >
+                Manage
+              </Link>
+            </div>
+          </div>
+          <div className="p-4">
+            <WorkoutScheduleComponent compact={true} />
+          </div>
+        </div>
+
+        {/* Workout Streak & Motivation */}
+        <WorkoutStreakDashboard />
+
         {/* Recent Workouts */}
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full lg:col-span-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-yellow-500">
               Recent Sessions
@@ -326,7 +495,7 @@ export default function Dashboard() {
                     Track your fitness journey by logging your first workout
                   </p>
                   <Link
-                    href="/workouts/create"
+                    href="/workouts/new"
                     className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg text-sm font-medium transition flex items-center"
                   >
                     <FaDumbbell className="mr-2" /> Create Your First Workout
@@ -338,7 +507,7 @@ export default function Dashboard() {
         </div>
 
         {/* Progress Tracker */}
-        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full lg:col-span-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-yellow-500">
               Progress Tracker
@@ -427,9 +596,6 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* Streak Stats */}
-              <StreakStatsCard />
 
               {/* Body Metrics */}
               {comprehensiveProgress.bodyMetrics.current && (

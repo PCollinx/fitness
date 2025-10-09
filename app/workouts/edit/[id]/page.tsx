@@ -5,10 +5,10 @@ import { useRouter, useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import BackButton from "@/app/components/BackButton";
 import {
   FaPlus,
   FaTrash,
-  FaArrowLeft,
   FaSave,
   FaDumbbell,
   FaInfoCircle,
@@ -380,12 +380,11 @@ export default function EditWorkoutPage() {
             >
               Load Default Exercises
             </button>
-            <button
-              onClick={() => router.push("/workouts")}
+            <BackButton 
+              fallbackRoute="/workouts" 
               className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
-            >
-              Back to Workouts
-            </button>
+              text="Back to Workouts"
+            />
           </div>
         </div>
       </div>
@@ -397,13 +396,13 @@ export default function EditWorkoutPage() {
       <div className="container mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pb-8 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => router.push(`/workouts/${workoutId}`)}
-            className="text-yellow-500 hover:text-yellow-400 flex items-center mb-6 transition-colors"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back to Workout</span>
-          </button>
+          <div className="mb-6">
+            <BackButton 
+              fallbackRoute={`/workouts/${workoutId}`}
+              className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
+              text="Back to Workout"
+            />
+          </div>
 
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white mb-2">Edit Workout</h1>
