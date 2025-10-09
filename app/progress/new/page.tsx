@@ -5,37 +5,50 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FaSave, FaArrowLeft, FaCalendarAlt, FaChartLine, FaWeight, FaRulerCombined } from "react-icons/fa";
+import {
+  FaSave,
+  FaCalendarAlt,
+  FaChartLine,
+  FaWeight,
+  FaRulerCombined,
+} from "react-icons/fa";
 import Link from "next/link";
+import BackButton from "@/app/components/BackButton";
 import { format } from "date-fns";
 
 // Progress metric types
-type MetricType =
-  | "weight"
-  | "bodyFat"
-  | "chest"
-  | "waist"
-  | "arms"
-  | "legs";
+type MetricType = "weight" | "bodyFat" | "chest" | "waist" | "arms" | "legs";
 
 // Schema validation for form
-const progressSchema = z.object({
-  date: z.string().min(1, "Date is required"),
-  weight: z.string().optional(),
-  bodyFat: z.string().optional(),
-  chest: z.string().optional(),
-  waist: z.string().optional(),
-  arms: z.string().optional(),
-  legs: z.string().optional(),
-  notes: z.string().optional(),
-}).refine((data) => {
-  // At least one metric should be provided
-  const metrics = [data.weight, data.bodyFat, data.chest, data.waist, data.arms, data.legs];
-  return metrics.some(metric => metric && metric.trim() !== "");
-}, {
-  message: "At least one measurement is required",
-  path: ["weight"], // This will show the error on the weight field
-});
+const progressSchema = z
+  .object({
+    date: z.string().min(1, "Date is required"),
+    weight: z.string().optional(),
+    bodyFat: z.string().optional(),
+    chest: z.string().optional(),
+    waist: z.string().optional(),
+    arms: z.string().optional(),
+    legs: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // At least one metric should be provided
+      const metrics = [
+        data.weight,
+        data.bodyFat,
+        data.chest,
+        data.waist,
+        data.arms,
+        data.legs,
+      ];
+      return metrics.some((metric) => metric && metric.trim() !== "");
+    },
+    {
+      message: "At least one measurement is required",
+      path: ["weight"], // This will show the error on the weight field
+    }
+  );
 
 type ProgressFormData = z.infer<typeof progressSchema>;
 
@@ -43,7 +56,9 @@ function NewProgressContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [selectedDate, setSelectedDate] = useState(
+    format(new Date(), "yyyy-MM-dd")
+  );
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -69,28 +84,16 @@ function NewProgressContent() {
   // Watch for date changes
   const watchedDate = watch("date");
 
-  // Dynamic back navigation based on where user came from
-  const getBackPath = () => {
-    const from = searchParams.get('from');
+  // Determine fallback route based on where user came from
+  const getFallbackRoute = () => {
+    const from = searchParams.get("from");
     switch (from) {
-      case 'dashboard':
-        return '/dashboard';
-      case 'progress':
-        return '/progress';
+      case "dashboard":
+        return "/dashboard";
+      case "progress":
+        return "/progress";
       default:
-        return '/progress'; // Default fallback
-    }
-  };
-
-  const getBackText = () => {
-    const from = searchParams.get('from');
-    switch (from) {
-      case 'dashboard':
-        return 'Back to Dashboard';
-      case 'progress':
-        return 'Back to Progress Tracking';
-      default:
-        return 'Back to Progress Tracking'; // Default fallback
+        return "/progress"; // Default fallback
     }
   };
 
@@ -111,25 +114,29 @@ function NewProgressContent() {
         notes: data.notes || null,
       };
 
-      const response = await fetch('/api/progress', {
-        method: 'POST',
+      const response = await fetch("/api/progress", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(apiData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save progress');
+        throw new Error(errorData.error || "Failed to save progress");
       }
 
       // Navigate back to the previous page
-      router.push(getBackPath());
+      router.push(getFallbackRoute());
       router.refresh();
     } catch (error) {
       console.error("Error saving progress:", error);
-      setSubmitError(error instanceof Error ? error.message : "Failed to save progress. Please try again.");
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Failed to save progress. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -201,16 +208,13 @@ function NewProgressContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 pt-8 pb-12">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-gray-900 pt-12 pb-8">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-6">
-          <Link
-            href={getBackPath()}
+          <BackButton 
+            fallbackRoute={getFallbackRoute()}
             className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>{getBackText()}</span>
-          </Link>
+          />
         </div>
 
         <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700">
@@ -218,7 +222,9 @@ function NewProgressContent() {
             <div className="flex items-center">
               <FaChartLine className="text-3xl mr-4" />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Record New Progress</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold">
+                  Record New Progress
+                </h1>
                 <p className="mt-2 text-black/80 text-sm sm:text-base">
                   Track your fitness metrics to monitor your progress over time
                 </p>
@@ -226,7 +232,10 @@ function NewProgressContent() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="p-6 sm:p-8 space-y-8">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="p-6 sm:p-8 space-y-8"
+          >
             {/* Date Selector */}
             <div className="relative">
               <label
@@ -246,18 +255,21 @@ function NewProgressContent() {
                     onChange: (e) => {
                       setSelectedDate(e.target.value);
                       setValue("date", e.target.value);
-                    }
+                    },
                   })}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm transition-colors"
                 />
               </div>
               {watchedDate && (
                 <p className="mt-2 text-sm text-gray-300">
-                  Selected: {format(new Date(watchedDate), "EEEE, MMMM d, yyyy")}
+                  Selected:{" "}
+                  {format(new Date(watchedDate), "EEEE, MMMM d, yyyy")}
                 </p>
               )}
               {errors.date && (
-                <p className="mt-1 text-sm text-red-400">{errors.date.message}</p>
+                <p className="mt-1 text-sm text-red-400">
+                  {errors.date.message}
+                </p>
               )}
             </div>
 
@@ -332,12 +344,13 @@ function NewProgressContent() {
             )}
 
             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-700">
-              <Link
-                href="/progress"
+              <button
+                type="button"
+                onClick={() => router.push(getFallbackRoute())}
                 className="px-6 py-3 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-yellow-400 transition-colors text-center"
               >
                 Cancel
-              </Link>
+              </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -365,22 +378,24 @@ function NewProgressContent() {
 
 export default function NewProgressPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-900 pt-8 pb-12">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="animate-pulse">
-            <div className="h-6 w-32 bg-gray-800 rounded mb-6"></div>
-            <div className="bg-gray-800 rounded-xl p-8">
-              <div className="h-8 w-64 bg-gray-700 rounded mb-4"></div>
-              <div className="space-y-4">
-                <div className="h-4 w-full bg-gray-700 rounded"></div>
-                <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <div className="animate-pulse">
+              <div className="h-6 w-32 bg-gray-800 rounded mb-6"></div>
+              <div className="bg-gray-800 rounded-xl p-8">
+                <div className="h-8 w-64 bg-gray-700 rounded mb-4"></div>
+                <div className="space-y-4">
+                  <div className="h-4 w-full bg-gray-700 rounded"></div>
+                  <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <NewProgressContent />
     </Suspense>
   );

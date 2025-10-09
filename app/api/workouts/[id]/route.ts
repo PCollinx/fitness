@@ -213,3 +213,58 @@ export async function DELETE(
     );
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { image } = body;
+
+    if (!image) {
+      return NextResponse.json(
+        { error: "Image URL is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user owns the workout
+    const existingWorkout = await prisma.workout.findUnique({
+      where: { id: params.id },
+      select: { userId: true },
+    });
+
+    if (!existingWorkout) {
+      return NextResponse.json({ error: "Workout not found" }, { status: 404 });
+    }
+
+    if (existingWorkout.userId !== session.user?.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Update the workout image
+    const updatedWorkout = await prisma.workout.update({
+      where: { id: params.id },
+      data: { image },
+      select: { id: true, image: true },
+    });
+
+    return NextResponse.json({
+      success: true,
+      workout: updatedWorkout,
+    });
+  } catch (error) {
+    console.error("Error updating workout:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

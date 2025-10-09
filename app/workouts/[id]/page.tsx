@@ -179,11 +179,15 @@ export default function WorkoutDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="relative h-64 lg:h-80 rounded-lg overflow-hidden">
               <Image
-                src={workout.image}
+                src={workout.image || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600"}
                 alt={workout.name}
                 fill
                 className="object-cover"
                 priority
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600";
+                }}
               />
             </div>
 

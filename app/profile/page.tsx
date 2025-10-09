@@ -41,6 +41,7 @@ import {
 
 import ProfileImageUpload from "../components/ProfileImageUpload";
 import { useUserProfile } from "../context/UserProfileContext";
+import { useWorkoutStreak } from "../hooks/useWorkoutStreak";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -49,10 +50,19 @@ export default function ProfilePage() {
     isLoading: isProfileLoading,
     updateUserProfile,
   } = useUserProfile();
+  const { streakData, isLoading: isStreakLoading } = useWorkoutStreak();
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [tempImage, setTempImage] = useState<string | null>(null);
+  const [recentWorkouts, setRecentWorkouts] = useState<any[]>([]);
+  const [workoutStats, setWorkoutStats] = useState<{
+    totalWorkouts: number;
+    recentWorkouts: any[];
+  }>({
+    totalWorkouts: 0,
+    recentWorkouts: [],
+  });
   const [uploadStatus, setUploadStatus] = useState<{
     isUploading: boolean;
     isError: boolean;
@@ -85,6 +95,37 @@ export default function ProfilePage() {
       setIsLoading(false);
     }
   }, [userProfile, isProfileLoading]);
+
+  // Fetch actual workout data
+  useEffect(() => {
+    const fetchWorkoutData = async () => {
+      if (status !== "authenticated") return;
+
+      try {
+        // Fetch recent workouts
+        const workoutsResponse = await fetch("/api/workouts/recent");
+        if (workoutsResponse.ok) {
+          const workoutsData = await workoutsResponse.json();
+          setRecentWorkouts(workoutsData || []);
+        }
+
+        // Fetch comprehensive progress to get total workout count
+        const progressResponse = await fetch("/api/progress/comprehensive");
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json();
+          setWorkoutStats({
+            totalWorkouts: progressData?.workoutMetrics?.totalSessions || 0,
+            recentWorkouts: recentWorkouts,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching workout data:", error);
+        setWorkoutStats({ totalWorkouts: 0, recentWorkouts: [] });
+      }
+    };
+
+    fetchWorkoutData();
+  }, [status]);
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -338,7 +379,11 @@ export default function ProfilePage() {
                     </div>
                     <p className="text-gray-300 text-sm">Workouts</p>
                     <p className="text-white font-bold text-xl">
-                      {userData.workoutsCompleted}
+                      {isLoading ? (
+                        <div className="animate-pulse bg-gray-600 h-6 w-8 mx-auto rounded"></div>
+                      ) : (
+                        workoutStats.totalWorkouts
+                      )}
                     </p>
                   </div>
 
@@ -348,8 +393,17 @@ export default function ProfilePage() {
                     </div>
                     <p className="text-gray-300 text-sm">Current Streak</p>
                     <p className="text-white font-bold text-xl">
-                      {userData.streakDays} days
+                      {isStreakLoading ? (
+                        <div className="animate-pulse bg-gray-600 h-6 w-16 mx-auto rounded"></div>
+                      ) : (
+                        `${streakData?.currentStreak || 0}`
+                      )}
                     </p>
+                    {!isStreakLoading && (
+                      <p className="text-gray-400 text-xs mt-1">
+                        day {streakData?.currentStreak === 1 ? "" : "s"}
+                      </p>
+                    )}
                   </div>
 
                   <div className="bg-gray-700 rounded-lg p-3 text-center col-span-2">
@@ -557,49 +611,78 @@ export default function ProfilePage() {
 
               <div className="p-6">
                 <div className="grid gap-4">
-                  {[1, 2, 3].map((index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-700 rounded-lg p-4 hover:bg-gray-650 transition-colors"
-                    >
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium text-white">
-                          Upper Body Power
-                        </h3>
-                        <span className="text-gray-400 text-sm">
-                          2 days ago
-                        </span>
+                  {recentWorkouts.length > 0 ? (
+                    recentWorkouts.slice(0, 3).map((workout, index) => (
+                      <div
+                        key={workout.id || index}
+                        className="bg-gray-700 rounded-lg p-4 hover:bg-gray-650 transition-colors"
+                      >
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium text-white">
+                            {workout.name}
+                          </h3>
+                          <span className="text-gray-400 text-sm">
+                            {new Date(workout.date).toLocaleDateString(
+                              undefined,
+                              {
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
+                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center text-gray-300 text-sm">
+                          <FaDumbbell className="mr-2 text-yellow-500" />
+                          <span>Completed {workout.exercises} exercises</span>
+                        </div>
                       </div>
-                      <div className="mt-2 flex items-center text-gray-300 text-sm">
-                        <FaDumbbell className="mr-2 text-yellow-500" />
-                        <span>Completed 6 exercises • 45 minutes</span>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-yellow-500 mb-4">
+                        <FaDumbbell className="w-12 h-12 mx-auto" />
                       </div>
+                      <h3 className="text-white font-semibold mb-2">
+                        No workouts yet
+                      </h3>
+                      <p className="text-gray-400 text-sm">
+                        Start your fitness journey by completing your first
+                        workout!
+                      </p>
+                      <Link
+                        href="/workouts"
+                        className="inline-block mt-4 bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Browse Workouts
+                      </Link>
                     </div>
-                  ))}
+                  )}
                 </div>
 
-                <div className="mt-4 text-center">
-                  <Link
-                    href="/dashboard"
-                    className="text-yellow-500 hover:text-yellow-400 inline-flex items-center transition-colors"
-                  >
-                    View All History
-                    <svg
-                      className="ml-2 w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
+                {recentWorkouts.length > 0 && (
+                  <div className="mt-4 text-center">
+                    <Link
+                      href="/workouts/history"
+                      className="text-yellow-500 hover:text-yellow-400 inline-flex items-center transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      ></path>
-                    </svg>
-                  </Link>
-                </div>
+                      View All History
+                      <svg
+                        className="ml-2 w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 5l7 7-7 7"
+                        ></path>
+                      </svg>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

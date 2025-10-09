@@ -1,6 +1,178 @@
 /**
  * Exercise Image Storage System
- * Provides muscle-group-based images for exercises and workouts
+ * Provi  back: {
+    keywords: ["back"  shoulders: {
+    keywords: [
+      "sho  arms: {
+    keywords: ["bice  legs: {
+    keywords: [
+      "legs", "  glutes: {
+    keywords: [
+      "glute  core: {
+    keywords: [
+      "core", "  cardio: {
+    keywords: [
+      "cardio  full_body: {
+    keywords: [
+      "full body", "compound", "deadlift", "burpee", "thruster", "clean", "snatch", "circuit",
+      "total body", "functional", "crossfit", "metabolic", "complex"
+    ],
+    images: [
+      // Deadlifts & Compound Lifts
+      "https://images.unsplash.com/photo-1566241134987-711c68a9ac42?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1584863265364-2b019ee97def?auto=format&fit=crop&w=800&h=600",
+      // Burpees & Full Body HIIT
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      // Thrusters & Olympic Lifts
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Circuit Training & Functional
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // CrossFit & Metabolic
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",treadmill", "bike", "cycling", "elliptical", "jump rope", "burpee", "high knees",
+      "sprint", "jog", "hiit", "interval", "rowing", "stairs", "step"
+    ],
+    images: [
+      // Running & Treadmill
+      "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&h=600",
+      // Cycling & Bike
+      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      // HIIT & Burpees
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      // Jump Rope & Plyometric
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Rowing & Cross Training
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",crunch", "twist", "mountain climber", "abdominal",
+      "sit-up", "bicycle", "russian", "dead bug", "hollow", "v-up"
+    ],
+    images: [
+      // Planks & Isometric Core
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      // Crunches & Sit-ups
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // Mountain Climbers & Dynamic
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Russian Twists & Rotation
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",
+      // Cable & Machine Core
+      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&h=600",
+    ],
+    fallbackImage: "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+  },"bridge", "bulgarian", "split squat", "clamshell",
+      "kickback", "abduction", "romanian", "sumo", "step-up"
+    ],
+    images: [
+      // Hip Thrusts & Bridges
+      "https://images.unsplash.com/photo-1566241134987-711c68a9ac42?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1584863265364-2b019ee97def?auto=format&fit=crop&w=800&h=600",
+      // Bulgarian Split Squats
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      // Sumo & Wide Stance
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // Glute Isolation Work
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Cable & Machine Glutes
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",
+    ],
+    fallbackImage: "https://images.unsplash.com/photo-1566241134987-711c68a9ac42?auto=format&fit=crop&w=800&h=600",
+  },g", "squat", "lunge", "leg press", "calf", 
+      "thigh", "knee", "jump", "step-up", "bulgarian"
+    ],
+    images: [
+      // Squats & Compound Leg
+      "https://images.unsplash.com/photo-1566241134987-711c68a9ac42?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1584863265364-2b019ee97def?auto=format&fit=crop&w=800&h=600",
+      // Lunges & Single Leg
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      // Leg Press & Machine Work
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // Jump & Plyometric Legs  
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Calf Raises & Lower Leg
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",
+    ],
+    fallbackImage: "https://images.unsplash.com/photo-1566241134987-711c68a9ac42?auto=format&fit=crop&w=800&h=600",
+  },m", "curl", "extension", "hammer", "dip", "preacher", "concentration", "close-grip"],
+    images: [
+      // Bicep Curls & Training
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // Tricep Dips & Extensions
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      // Hammer Curls & Variations
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Cable Arm Work
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",
+      // Barbell & EZ Bar Arms
+      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&h=600",
+    ],
+    fallbackImage: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+  },deltoid", "press", "raise", "lateral", "rear", "front", 
+      "overhead", "military", "arnold", "upright", "shrug"
+    ],
+    images: [
+      // Overhead & Military Press
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      // Lateral & Side Raises
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // Dumbbell Shoulder Work
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Cable & Machine Shoulders
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",
+      // Rear Delt & Reverse Fly
+      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&h=600",
+    ],
+    fallbackImage: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+  },"row", "deadlift", "rhomboids", "traps", "pulldown", "chinup", "pullup"],
+    images: [
+      // Deadlifts & Back Compound
+      "https://images.unsplash.com/photo-1566241134987-711c68a9ac42?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1584863265364-2b019ee97def?auto=format&fit=crop&w=800&h=600",
+      // Pull-ups & Lat Pulldowns
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      // Rowing Exercises
+      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?auto=format&fit=crop&w=800&h=600",
+      // Cable & Machine Back Work
+      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&h=600",
+      // Dumbbell Back Exercises
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+    ],
+    fallbackImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+  },-group-based images for exercises and workouts
  */
 
 export type MuscleGroup =
@@ -23,15 +195,24 @@ export type ExerciseImageSet = {
 // Exercise images organized by muscle group (matching API structure)
 export const exerciseImageStorage: Record<MuscleGroup, ExerciseImageSet> = {
   chest: {
-    keywords: ["chest", "pecs", "push", "press", "bench", "fly", "dip"],
+    keywords: ["chest", "pecs", "push", "press", "bench", "fly", "dip", "pushup", "incline", "decline"],
     images: [
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
+      // Bench Press & Chest Training
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&h=600",
+      // Push-ups & Bodyweight Chest
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
+      // Dumbbell Chest Work
+      "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&h=600",
+      // Cable & Machine Chest
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&h=600",
+      "https://images.unsplash.com/photo-1549476464-37392f717541?auto=format&fit=crop&w=800&h=600",
     ],
-    fallbackImage:
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
+    fallbackImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
   },
 
   back: {

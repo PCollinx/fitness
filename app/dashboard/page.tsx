@@ -9,7 +9,6 @@ import {
   FaChartLine,
   FaRunning,
   FaCalendar,
-  FaUsers,
   FaFire,
   FaWeight,
   FaTrophy,
@@ -23,11 +22,6 @@ type WorkoutSummary = {
   name: string;
   date: string;
   exercises: number;
-};
-
-type ProgressSummary = {
-  date: string;
-  weight: number;
 };
 
 type ComprehensiveProgress = {
@@ -101,16 +95,21 @@ function WorkoutStreakDashboard() {
 
   const getStreakMessage = (streak: number, isActive: boolean) => {
     if (streak === 0) return "Ready to start your fitness journey?";
-    if (isActive) return "You've already worked out today! Keep the momentum going tomorrow.";
+    if (isActive)
+      return "You've already worked out today! Keep the momentum going tomorrow.";
     if (streak === 1) return "Great start! One day down!";
     if (streak < 7) return `You're on a ${streak}-day streak! Keep it up!`;
-    if (streak < 30) return `Amazing! ${streak} days in a row! You're unstoppable!`;
+    if (streak < 30)
+      return `Amazing! ${streak} days in a row! You're unstoppable!`;
     return `Incredible! ${streak} consecutive days! You're a fitness legend!`;
   };
 
   const getNextMilestone = (currentStreak: number) => {
     const milestones = [3, 7, 14, 30, 60, 90, 180, 365];
-    return milestones.find(milestone => milestone > currentStreak) || currentStreak + 30;
+    return (
+      milestones.find((milestone) => milestone > currentStreak) ||
+      currentStreak + 30
+    );
   };
 
   const nextMilestone = getNextMilestone(streakData.currentStreak);
@@ -123,17 +122,21 @@ function WorkoutStreakDashboard() {
           Workout Streak
         </h2>
       </div>
-      
+
       <div className="p-6">
         <div className="text-center mb-6">
           <div className="text-6xl mb-3">
             {getStreakEmoji(streakData.currentStreak)}
           </div>
           <div className="text-3xl font-bold text-white mb-2">
-            {streakData.currentStreak} Days
+            {streakData.currentStreak} Day{" "}
+            {streakData.currentStreak === 1 ? "" : "s"}
           </div>
           <p className="text-gray-400 text-sm">
-            {getStreakMessage(streakData.currentStreak, streakData.isActiveToday)}
+            {getStreakMessage(
+              streakData.currentStreak,
+              streakData.isActiveToday
+            )}
           </p>
         </div>
 
@@ -156,12 +159,19 @@ function WorkoutStreakDashboard() {
         <div className="mb-4">
           <div className="flex justify-between text-xs text-gray-400 mb-1">
             <span>Progress to {nextMilestone} days</span>
-            <span>{streakData.currentStreak}/{nextMilestone}</span>
+            <span>
+              {streakData.currentStreak}/{nextMilestone}
+            </span>
           </div>
           <div className="w-full bg-gray-700 rounded-full h-2">
-            <div 
+            <div
               className="bg-gradient-to-r from-yellow-500 to-yellow-400 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min((streakData.currentStreak / nextMilestone) * 100, 100)}%` }}
+              style={{
+                width: `${Math.min(
+                  (streakData.currentStreak / nextMilestone) * 100,
+                  100
+                )}%`,
+              }}
             />
           </div>
         </div>
@@ -184,49 +194,8 @@ export default function Dashboard() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [recentWorkouts, setRecentWorkouts] = useState<WorkoutSummary[]>([]);
-  const [progressData, setProgressData] = useState<ProgressSummary[]>([]);
   const [comprehensiveProgress, setComprehensiveProgress] =
     useState<ComprehensiveProgress | null>(null);
-
-  // Chart utility functions
-  const calculateChartData = (data: ProgressSummary[]) => {
-    const chartHeight = 96; // Available height accounting for padding
-
-    if (!data.length)
-      return {
-        positions: [],
-        range: { min: 0, max: 100, span: 100 },
-        chartHeight,
-      };
-
-    const weights = data.map((p) => p.weight);
-    const minWeight = Math.min(...weights);
-    const maxWeight = Math.max(...weights);
-    const weightRange = maxWeight - minWeight || 1;
-
-    const positions = data.map((point, index) => {
-      const normalizedValue = (point.weight - minWeight) / weightRange;
-      const barHeight = Math.max(normalizedValue * chartHeight * 0.8 + 12, 8);
-      const barWidth = 100 / data.length;
-      const xPosition = (index + 0.5) * barWidth;
-      const yPosition = chartHeight - barHeight;
-
-      return {
-        x: xPosition,
-        y: yPosition,
-        height: barHeight,
-        weight: point.weight,
-        date: point.date,
-        index,
-      };
-    });
-
-    return {
-      positions,
-      range: { min: minWeight, max: maxWeight, span: weightRange },
-      chartHeight,
-    };
-  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -250,27 +219,7 @@ export default function Dashboard() {
           setRecentWorkouts([]);
         }
 
-        // Fetch progress data
-        const progressResponse = await fetch("/api/progress/recent");
-        if (progressResponse.ok) {
-          const progressData = await progressResponse.json();
-
-          // Only set the progress data if we have at least one entry
-          if (progressData && progressData.length > 0) {
-            setProgressData(progressData);
-          } else {
-            // Set empty array for no progress data
-            setProgressData([]);
-          }
-        } else {
-          // Handle error but don't keep loading state
-          console.error(
-            "Error fetching progress:",
-            progressResponse.statusText
-          );
-          setProgressData([]);
-        }
-
+        // Note: Progress data is fetched via comprehensive endpoint only
         // Fetch comprehensive progress data
         const comprehensiveResponse = await fetch(
           "/api/progress/comprehensive"
@@ -293,7 +242,6 @@ export default function Dashboard() {
         // Don't keep loading on error
         setIsLoading(false);
         setRecentWorkouts([]);
-        setProgressData([]);
       }
     };
 
@@ -346,10 +294,10 @@ export default function Dashboard() {
     <div className="container mx-auto px-4 mt-12 md:mt-16">
       <div className="mb-4">
         <h1 className="text-2xl md:text-3xl mb-1 font-bold text-yellow-500">
-          Welcome, {session?.user?.name || "User"}
+          Welcome, {session?.user?.name.split(" ")[0] || "User"}
         </h1>
         <p className="text-gray-400 text-sm md:text-base">
-          {recentWorkouts.length === 0 && progressData.length === 0
+          {recentWorkouts.length === 0
             ? "Get started with your fitness journey by creating your first workout"
             : "Here's an overview of your fitness journey"}
         </p>
