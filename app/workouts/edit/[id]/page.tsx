@@ -20,10 +20,10 @@ import {
   FaEdit,
 } from "react-icons/fa";
 import {
-  loadWorkouts,
   updateWorkout,
+  getWorkoutById,
   type Workout,
-} from "../../../utils/workoutStorage";
+} from "../../../utils/workoutApiStorage";
 import {
   fetchExercises,
   fetchExerciseMetadata,
@@ -132,8 +132,7 @@ export default function EditWorkoutPage() {
 
       try {
         // Load the current workout
-        const allWorkouts = loadWorkouts();
-        const workout = allWorkouts.find((w) => w.id === workoutId);
+        const workout = await getWorkoutById(workoutId as string);
 
         if (!workout) {
           router.push("/workouts");
@@ -252,20 +251,16 @@ export default function EditWorkoutPage() {
 
       const workoutImage = getImageForWorkout(exerciseObjects);
 
-      // Create updated workout object
-      const updatedWorkout: Workout = {
-        ...currentWorkout,
+      // Create update data for API
+      const updateData = {
         name: data.name,
         description: data.description || "",
-        isPublic: data.isPublic,
-        intensity: data.intensity,
-        category: data.category,
-        workoutExercises,
-        image: workoutImage,
+        exercises: data.exercises,
+        public: data.isPublic,
       };
 
-      // Update workout in storage
-      const success = updateWorkout(currentWorkout.id, updatedWorkout);
+      // Update workout via API
+      const success = await updateWorkout(currentWorkout.id, updateData);
 
       if (success) {
         router.push(`/workouts/${currentWorkout.id}`);

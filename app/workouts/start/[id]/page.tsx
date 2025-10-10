@@ -26,7 +26,7 @@ import {
   getWorkoutById,
   type Workout,
   type WorkoutExercise,
-} from "../../../utils/workoutStorage";
+} from "../../../utils/workoutApiStorage";
 import {
   submitWorkoutSession,
   formatWorkoutSessionData,
@@ -86,15 +86,7 @@ export default function WorkoutSessionPage() {
       setIsLoading(true);
 
       try {
-        const response = await fetch(`/api/workouts/${workoutId}`);
-
-        if (!response.ok) {
-          console.error("Failed to load workout from API");
-          router.push("/workouts");
-          return;
-        }
-
-        const foundWorkout = await response.json();
+        const foundWorkout = await getWorkoutById(workoutId as string);
 
         if (!foundWorkout) {
           console.error("No workout found with ID:", workoutId);
@@ -104,23 +96,15 @@ export default function WorkoutSessionPage() {
 
         console.log("Loaded workout for session:", foundWorkout);
 
-        // Transform API response to match component expectations
-        const transformedWorkout = {
-          ...foundWorkout,
-          workoutExercises:
-            foundWorkout.exercises?.map((exercise: any) => ({
-              ...exercise,
-              exerciseId: exercise.exerciseId,
-              exerciseName: exercise.name,
-            })) || [],
-        };
+        // The API storage already returns workoutExercises in the right format
+        const transformedWorkout = foundWorkout;
 
         setWorkout(transformedWorkout);
 
         // Initialize set trackers based on workout exercises
         const initialSetTrackers: Record<string, SetTracker[]> = {};
-        if (foundWorkout.exercises) {
-          foundWorkout.exercises.forEach((exercise: any) => {
+        if (foundWorkout.workoutExercises) {
+          foundWorkout.workoutExercises.forEach((exercise: any) => {
             initialSetTrackers[exercise.exerciseId] = Array(exercise.sets)
               .fill(null)
               .map(() => ({

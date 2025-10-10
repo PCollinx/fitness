@@ -19,9 +19,7 @@ import {
 } from "react-icons/fa";
 import {
   addWorkout,
-  generateId,
-  getRandomWorkoutImage,
-} from "../../utils/workoutStorage";
+} from "../../utils/workoutApiStorage";
 import {
   fetchExercises,
   fetchExerciseMetadata,
@@ -192,30 +190,20 @@ export default function CreateWorkoutPage() {
         };
       });
 
-      // Create the new workout object
-      const newWorkout = {
-        id: generateId(),
+      // Create the workout data for API
+      const workoutData = {
         name: data.name,
         description:
           data.description ||
           `Custom workout with ${data.exercises.length} exercises`,
-        intensity: data.intensity,
-        category: data.category.toLowerCase(),
-        isPublic: data.isPublic,
-        duration: estimatedDuration,
-        rating: 5.0, // Default rating for new workouts
+        exercises: data.exercises,
         image: getImageForWorkout(exerciseDetails),
-        exercises: data.exercises.length,
-        createdAt: new Date().toISOString(),
-        lastPerformed: new Date().toISOString(),
-        workoutExercises,
+        public: data.isPublic,
       };
 
-      // Add the workout to storage
-      addWorkout(newWorkout);
-
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Add the workout via API
+      const newWorkout = await addWorkout(workoutData);
+      console.log('Workout created successfully:', newWorkout);
 
       // Redirect to the workouts page
       router.push("/workouts");
