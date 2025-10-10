@@ -6,7 +6,10 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,43 +17,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-    const search = searchParams.get("search");
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const { id } = params;
 
-    // Build where clause
-    const whereClause: any = {
-      userId: session.user.id as string,
-    };
-
-    // Add date filters if provided
-    if (startDate || endDate) {
-      whereClause.date = {};
-      if (startDate) {
-        whereClause.date.gte = new Date(startDate);
-      }
-      if (endDate) {
-        whereClause.date.lte = new Date(endDate);
-      }
-    }
-
-    // Add search filter if provided
-    if (search) {
-      whereClause.notes = {
-        contains: search,
-        mode: "insensitive",
-      };
-    }
-
-    // Fetch progress entries
-    const progressEntries = await prisma.progress.findMany({
-      where: whereClause,
-      orderBy: { date: "desc" },
-      take: limit,
-      skip: offset,
+    // Fetch the specific progress entry
+    const progressEntry = await prisma.progress.findFirst({
+      where: {
+        id,
+        userId: session.user.id as string,
+      },
       select: {
         id: true,
         date: true,
@@ -65,26 +39,27 @@ export async function GET(request: Request) {
       },
     });
 
-    // Get total count for pagination
-    const totalCount = await prisma.progress.count({
-      where: whereClause,
-    });
+    if (!progressEntry) {
+      return NextResponse.json(
+        { error: "Progress entry not found" },
+        { status: 404 }
+      );
+    }
 
-    return NextResponse.json({
-      entries: progressEntries,
-      totalCount,
-      hasMore: offset + progressEntries.length < totalCount,
-    });
+    return NextResponse.json(progressEntry);
   } catch (error) {
-    console.error("Error fetching progress entries:", error);
+    console.error("Error fetching progress entry:", error);
     return NextResponse.json(
-      { error: "Failed to fetch progress entries" },
+      { error: "Failed to fetch progress entry" },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: Request) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -92,14 +67,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = params;
     const body = await request.json();
     const { date, weight, bodyFat, chest, waist, hips, arms, thighs, notes } =
       body;
 
-    // Create progress entry in database
-    const progress = await prisma.progress.create({
-      data: {
+    // Verify the progress entry belongs to the user
+    const existingEntry = await prisma.progress.findFirst({
+      where: {
+        id,
         userId: session.user.id as string,
+      },
+    });
+
+    if (!existingEntry) {
+      return NextResponse.json(
+        { error: "Progress entry not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // Update the progress entry
+    const updatedEntry = await prisma.progress.update({
+      where: { id },
+      data: {
         date: new Date(date),
         weight: weight ? parseFloat(weight) : null,
         bodyFat: bodyFat ? parseFloat(bodyFat) : null,
@@ -110,19 +101,34 @@ export async function POST(request: Request) {
         thighs: thighs ? parseFloat(thighs) : null,
         notes: notes || null,
       },
+      select: {
+        id: true,
+        date: true,
+        weight: true,
+        bodyFat: true,
+        chest: true,
+        waist: true,
+        hips: true,
+        arms: true,
+        thighs: true,
+        notes: true,
+      },
     });
 
-    return NextResponse.json(progress);
+    return NextResponse.json(updatedEntry);
   } catch (error) {
-    console.error("Error creating progress entry:", error);
+    console.error("Error updating progress entry:", error);
     return NextResponse.json(
-      { error: "Failed to create progress entry" },
+      { error: "Failed to update progress entry" },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -130,15 +136,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "Progress entry ID is required" },
-        { status: 400 }
-      );
-    }
+    const { id } = params;
 
     // Verify the progress entry belongs to the user before deleting
     const existingEntry = await prisma.progress.findFirst({

@@ -19,7 +19,14 @@ import BackButton from "@/app/components/BackButton";
 import { format } from "date-fns";
 
 // Progress metric types
-type MetricType = "weight" | "bodyFat" | "chest" | "waist" | "arms" | "legs";
+type MetricType =
+  | "weight"
+  | "bodyFat"
+  | "chest"
+  | "waist"
+  | "hips"
+  | "arms"
+  | "thighs";
 
 // Schema validation for form
 const progressSchema = z
@@ -29,8 +36,9 @@ const progressSchema = z
     bodyFat: z.string().optional(),
     chest: z.string().optional(),
     waist: z.string().optional(),
+    hips: z.string().optional(),
     arms: z.string().optional(),
-    legs: z.string().optional(),
+    thighs: z.string().optional(),
     notes: z.string().optional(),
   })
   .refine(
@@ -41,8 +49,9 @@ const progressSchema = z
         data.bodyFat,
         data.chest,
         data.waist,
+        data.hips,
         data.arms,
-        data.legs,
+        data.thighs,
       ];
       return metrics.some((metric) => metric && metric.trim() !== "");
     },
@@ -77,8 +86,9 @@ function NewProgressContent() {
       bodyFat: "",
       chest: "",
       waist: "",
+      hips: "",
       arms: "",
-      legs: "",
+      thighs: "",
       notes: "",
     },
   });
@@ -111,8 +121,9 @@ function NewProgressContent() {
         bodyFat: data.bodyFat || null,
         chest: data.chest || null,
         waist: data.waist || null,
+        hips: data.hips || null,
         arms: data.arms || null,
-        thighs: data.legs || null, // Map legs to thighs for database compatibility
+        thighs: data.thighs || null,
         notes: data.notes || null,
       };
 
@@ -177,14 +188,23 @@ function NewProgressContent() {
       unit: "cm",
       placeholder: "100.0",
       step: "0.1",
-      min: "50",
-      max: "200",
+      min: "30",
+      max: "150",
     },
     {
       id: "waist",
       label: "Waist Circumference",
       unit: "cm",
       placeholder: "85.0",
+      step: "0.1",
+      min: "30",
+      max: "150",
+    },
+    {
+      id: "hips",
+      label: "Hip Circumference",
+      unit: "cm",
+      placeholder: "95.0",
       step: "0.1",
       min: "50",
       max: "200",
@@ -199,7 +219,7 @@ function NewProgressContent() {
       max: "80",
     },
     {
-      id: "legs",
+      id: "thighs",
       label: "Thigh Circumference",
       unit: "cm",
       placeholder: "60.0",
@@ -213,7 +233,7 @@ function NewProgressContent() {
     <div className="min-h-screen bg-gray-900 pt-12 pb-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-6">
-          <BackButton 
+          <BackButton
             fallbackRoute={getFallbackRoute()}
             className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors"
           />
@@ -303,7 +323,7 @@ function NewProgressContent() {
                         max={field.max}
                         placeholder={field.placeholder}
                         {...register(field.id)}
-                        className="block w-full pr-12 py-3 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm transition-colors"
+                        className="block w-full pl-2 pr-12 py-3 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm transition-colors"
                       />
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <span className="text-gray-400 sm:text-sm font-medium">

@@ -84,20 +84,20 @@ export default function RecentWorkoutsPage() {
     } else if (diffDays <= 7) {
       return `${diffDays - 1} days ago`;
     } else {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
       });
     }
   };
 
   // Function to format time
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return new Date(dateString).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -107,7 +107,7 @@ export default function RecentWorkoutsPage() {
     const end = endTime ? new Date(endTime) : new Date();
     const diffMs = end.getTime() - start.getTime();
     const diffMins = Math.round(diffMs / (1000 * 60));
-    
+
     if (diffMins < 60) {
       return `${diffMins}m`;
     }
@@ -121,8 +121,8 @@ export default function RecentWorkoutsPage() {
     let totalSets = 0;
     let completedSets = 0;
 
-    session.exercises.forEach(exercise => {
-      exercise.sets.forEach(set => {
+    session.exercises.forEach((exercise) => {
+      exercise.sets.forEach((set) => {
         totalSets++;
         if (set.completed) {
           completedSets++;
@@ -130,7 +130,12 @@ export default function RecentWorkoutsPage() {
       });
     });
 
-    return { totalSets, completedSets, completionRate: totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0 };
+    return {
+      totalSets,
+      completedSets,
+      completionRate:
+        totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0,
+    };
   };
 
   if (status === "loading") {
@@ -147,8 +152,8 @@ export default function RecentWorkoutsPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
-            <BackButton 
-              fallbackRoute="/dashboard" 
+            <BackButton
+              fallbackRoute="/dashboard"
               className="text-yellow-500 hover:text-yellow-400 flex items-center transition-all text-sm sm:text-base mr-4"
             />
           </div>
@@ -217,11 +222,16 @@ export default function RecentWorkoutsPage() {
                         </div>
                         <div className="flex items-center">
                           <FaClock className="mr-1" />
-                          <span>{calculateDuration(session.startTime, session.endTime)}</span>
+                          <span>
+                            {calculateDuration(
+                              session.startTime,
+                              session.endTime
+                            )}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-3 sm:mt-0 flex items-center gap-4">
                       <div className="text-center">
                         <div className="text-lg font-bold text-yellow-500">
@@ -248,18 +258,24 @@ export default function RecentWorkoutsPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between bg-gray-900 rounded-lg p-3">
-                        <span className="text-gray-300 text-sm">Sets Completed</span>
+                        <span className="text-gray-300 text-sm">
+                          Sets Completed
+                        </span>
                         <span className="font-semibold text-white">
                           {stats.completedSets}/{stats.totalSets}
                         </span>
                       </div>
                       <div className="flex items-center justify-between bg-gray-900 rounded-lg p-3">
                         <span className="text-gray-300 text-sm">Status</span>
-                        <span className={`font-semibold flex items-center ${
-                          session.endTime ? 'text-green-400' : 'text-yellow-400'
-                        }`}>
+                        <span
+                          className={`font-semibold flex items-center ${
+                            session.endTime
+                              ? "text-green-400"
+                              : "text-yellow-400"
+                          }`}
+                        >
                           <FaCheckCircle className="mr-1" />
-                          {session.endTime ? 'Completed' : 'In Progress'}
+                          {session.endTime ? "Completed" : "In Progress"}
                         </span>
                       </div>
                     </div>
@@ -267,7 +283,9 @@ export default function RecentWorkoutsPage() {
 
                   {/* Exercise Details */}
                   <div className="mt-4">
-                    <div className="text-sm text-gray-400 mb-2">Exercises performed:</div>
+                    <div className="text-sm text-gray-400 mb-2">
+                      Exercises performed:
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {session.exercises.map((exercise, index) => (
                         <span

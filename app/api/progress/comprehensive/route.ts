@@ -163,14 +163,52 @@ export async function GET() {
       100
     ); // Assuming 3 sessions/week is 100%
 
-    // 7. Calculate strength progress (average weight increase over time)
-    const strengthProgress =
-      recentSessions.length > 5
-        ? ((totalWeightLifted / recentSessions.slice(0, 5).length -
-            totalWeightLifted / recentSessions.slice(-5).length) /
-            (totalWeightLifted / recentSessions.slice(-5).length)) *
-          100
-        : 0;
+    // 7. Calculate strength progress (improvement over time)
+    let strengthProgress = 0;
+    if (recentSessions.length >= 2) {
+      // Compare first half vs second half of recent sessions
+      const midpoint = Math.floor(recentSessions.length / 2);
+      const recentHalf = recentSessions.slice(0, midpoint);
+      const olderHalf = recentSessions.slice(midpoint);
+
+      const recentWeight =
+        recentHalf.reduce((sum, session) => {
+          return (
+            sum +
+            session.exercises.reduce((exSum, ex) => {
+              return (
+                exSum +
+                ex.sets.reduce((setSum, set) => {
+                  return (
+                    setSum + (set.actualWeight || 0) * (set.actualReps || 0)
+                  );
+                }, 0)
+              );
+            }, 0)
+          );
+        }, 0) / recentHalf.length;
+
+      const olderWeight =
+        olderHalf.reduce((sum, session) => {
+          return (
+            sum +
+            session.exercises.reduce((exSum, ex) => {
+              return (
+                exSum +
+                ex.sets.reduce((setSum, set) => {
+                  return (
+                    setSum + (set.actualWeight || 0) * (set.actualReps || 0)
+                  );
+                }, 0)
+              );
+            }, 0)
+          );
+        }, 0) / olderHalf.length;
+
+      if (olderWeight > 0) {
+        strengthProgress = ((recentWeight - olderWeight) / olderWeight) * 100;
+      }
+    }
 
     // 8. Format response
     const progressSummary = {
@@ -238,18 +276,33 @@ export async function GET() {
       // Overall scores
       overallScores: {
         consistency: Math.round(consistencyScore),
-        improvement: Math.max(
-          0,
-          Math.min(
-            100,
-            50 +
-              (weightTrend30d > 0
-                ? -weightTrend30d * 10
-                : Math.abs(weightTrend30d) * 5) +
-              strengthProgress +
-              (sessionsLast30Days > 8 ? 20 : sessionsLast30Days * 2.5)
-          )
-        ),
+        improvement: (() => {
+          // Simple improvement score calculation
+          let score = 50; // Base score
+
+          // Weight loss/gain factor (-5 to +10 points)
+          if (isFinite(weightTrend30d) && Math.abs(weightTrend30d) > 0.1) {
+            if (weightTrend30d < 0) {
+              // Weight loss = positive
+              score += Math.min(10, Math.abs(weightTrend30d) * 2);
+            } else {
+              // Weight gain = slightly negative
+              score -= Math.min(5, weightTrend30d);
+            }
+          }
+
+          // Strength progress factor (-10 to +20 points)
+          if (isFinite(strengthProgress) && Math.abs(strengthProgress) > 0.1) {
+            score += Math.max(-10, Math.min(20, strengthProgress * 0.5));
+          }
+
+          // Consistency factor (0 to +30 points)
+          if (sessionsLast30Days > 0) {
+            score += Math.min(30, sessionsLast30Days * 2);
+          }
+
+          return Math.round(Math.max(0, Math.min(100, score)));
+        })(),
       },
     };
 

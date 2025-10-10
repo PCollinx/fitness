@@ -364,6 +364,39 @@ export default function ProfilePage() {
                     Edit Profile
                   </button>
                 )}
+                {isEditing && (
+                  <div className="mx-auto px-6 mb-6 items-center flex space-x-2">
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={uploadStatus.isUploading}
+                      className={`bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg flex items-center transition-colors ${
+                        uploadStatus.isUploading
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      {uploadStatus.isUploading ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 border-2 border-black rounded-full mr-2"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <FaSave className="mr-2" />
+                          Save
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleEditToggle}
+                      disabled={uploadStatus.isUploading}
+                      className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                    >
+                      <FaTimes className="mr-2" />
+                      Cancel
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Stats Section */}
@@ -437,46 +470,12 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold text-white">
                   Profile Information
                 </h2>
-
-                {isEditing && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={handleSaveProfile}
-                      disabled={uploadStatus.isUploading}
-                      className={`bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg flex items-center transition-colors ${
-                        uploadStatus.isUploading
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {uploadStatus.isUploading ? (
-                        <>
-                          <div className="animate-spin h-4 w-4 border-2 border-black rounded-full mr-2"></div>
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <FaSave className="mr-2" />
-                          Save
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={handleEditToggle}
-                      disabled={uploadStatus.isUploading}
-                      className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
-                    >
-                      <FaTimes className="mr-2" />
-                      Cancel
-                    </button>
-                  </div>
-                )}
               </div>
 
               <div className="p-6">
                 {/* Bio Section */}
                 <div className="mb-6">
-                  <label className="text-gray-400 mb-2">About Me</label>
+                  <label className="text-gray-400 mb-2 pb-2">About Me</label>
                   {isEditing ? (
                     <textarea
                       name="bio"

@@ -8,26 +8,20 @@ import { z } from "zod";
 import { FaSave, FaArrowLeft, FaCalendarAlt } from "react-icons/fa";
 import Link from "next/link";
 import { format } from "date-fns";
+import { useSession } from "next-auth/react";
 
-// Progress metric types
-type MetricType =
-  | "weight"
-  | "bodyFat"
-  | "muscleMass"
-  | "chest"
-  | "waist"
-  | "arms"
-  | "legs"
-  | "restingHeartRate";
-
-// Progress entry
+// Progress entry from database
 type ProgressEntry = {
   id: string;
   date: string;
-  metrics: {
-    [key in MetricType]?: number;
-  };
-  notes?: string;
+  weight?: number | null;
+  bodyFat?: number | null;
+  chest?: number | null;
+  waist?: number | null;
+  hips?: number | null;
+  arms?: number | null;
+  thighs?: number | null;
+  notes?: string | null;
 };
 
 // Schema validation for form
@@ -35,24 +29,25 @@ const progressSchema = z.object({
   date: z.string(),
   weight: z.string().optional(),
   bodyFat: z.string().optional(),
-  muscleMass: z.string().optional(),
   chest: z.string().optional(),
   waist: z.string().optional(),
+  hips: z.string().optional(),
   arms: z.string().optional(),
-  legs: z.string().optional(),
-  restingHeartRate: z.string().optional(),
+  thighs: z.string().optional(),
   notes: z.string().optional(),
 });
 
 type ProgressFormData = z.infer<typeof progressSchema>;
 
 export default function EditProgressPage() {
+  const { data: session, status } = useSession();
   const params = useParams();
   const router = useRouter();
   const progressId = params.id as string;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -64,137 +59,101 @@ export default function EditProgressPage() {
   });
 
   useEffect(() => {
-    // In a real app, fetch progress entry from the API
-    // For now, we'll use mock data
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+      return;
+    }
+
+    if (status === "authenticated") {
+      fetchProgressEntry();
+    }
+  }, [status, router, progressId]);
+
+  const fetchProgressEntry = async () => {
     setIsLoading(true);
+    setError(null);
 
-    setTimeout(() => {
-      // This would be an API call in a real app
-      // Generate a mock progress entry
-      const baseWeight = 80;
-      const baseBodyFat = 20;
-      const baseMuscleMass = 35;
-      const baseChest = 100;
-      const baseWaist = 85;
-      const baseArms = 35;
-      const baseLegs = 60;
-      const baseHeartRate = 65;
+    try {
+      const response = await fetch(`/api/progress/${progressId}`);
 
-      // Extract the day number from the ID if it matches the pattern
-      const dayMatch = progressId.match(/progress-(\d+)/);
-      const day = dayMatch ? parseInt(dayMatch[1]) : 0;
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError("Progress entry not found");
+        } else {
+          throw new Error("Failed to fetch progress entry");
+        }
+        return;
+      }
 
-      // Random fluctuation
-      const randomFactor = (Math.random() - 0.3) * 2;
-
-      // Trend factor (decreases over time for weight, body fat, waist, heart rate)
-      // Increases for muscle mass, chest, arms, legs
-      const trendFactor = day / 90;
-
-      const today = new Date();
-      const date = new Date();
-      date.setDate(today.getDate() - day);
-
-      const mockProgressEntry: ProgressEntry = {
-        id: progressId,
-        date: format(date, "yyyy-MM-dd"),
-        metrics: {
-          weight: +(baseWeight - trendFactor * 5 + randomFactor).toFixed(1),
-          bodyFat: +(baseBodyFat - trendFactor * 3 + randomFactor).toFixed(1),
-          muscleMass: +(
-            baseMuscleMass +
-            trendFactor * 2 +
-            randomFactor
-          ).toFixed(1),
-          chest: +(baseChest + trendFactor * 3 + randomFactor).toFixed(1),
-          waist: +(baseWaist - trendFactor * 4 + randomFactor).toFixed(1),
-          arms: +(baseArms + trendFactor * 1 + randomFactor).toFixed(1),
-          legs: +(baseLegs + trendFactor * 2 + randomFactor).toFixed(1),
-          restingHeartRate: +(
-            baseHeartRate -
-            trendFactor * 5 +
-            randomFactor
-          ).toFixed(0),
-        },
-        notes:
-          day % 15 === 0
-            ? "Monthly measurement"
-            : day % 7 === 0
-            ? "Weekly check-in"
-            : undefined,
-      };
+      const progressEntry: ProgressEntry = await response.json();
 
       // Set form values
       reset({
-        date: mockProgressEntry.date,
-        weight: mockProgressEntry.metrics.weight?.toString() || "",
-        bodyFat: mockProgressEntry.metrics.bodyFat?.toString() || "",
-        muscleMass: mockProgressEntry.metrics.muscleMass?.toString() || "",
-        chest: mockProgressEntry.metrics.chest?.toString() || "",
-        waist: mockProgressEntry.metrics.waist?.toString() || "",
-        arms: mockProgressEntry.metrics.arms?.toString() || "",
-        legs: mockProgressEntry.metrics.legs?.toString() || "",
-        restingHeartRate:
-          mockProgressEntry.metrics.restingHeartRate?.toString() || "",
-        notes: mockProgressEntry.notes || "",
+        date: format(new Date(progressEntry.date), "yyyy-MM-dd"),
+        weight: progressEntry.weight?.toString() || "",
+        bodyFat: progressEntry.bodyFat?.toString() || "",
+        chest: progressEntry.chest?.toString() || "",
+        waist: progressEntry.waist?.toString() || "",
+        hips: progressEntry.hips?.toString() || "",
+        arms: progressEntry.arms?.toString() || "",
+        thighs: progressEntry.thighs?.toString() || "",
+        notes: progressEntry.notes || "",
       });
-
+    } catch (error) {
+      console.error("Error fetching progress entry:", error);
+      setError("Failed to load progress entry");
+    } finally {
       setIsLoading(false);
-    }, 500);
-  }, [progressId, reset]);
+    }
+  };
 
   const onSubmit = async (data: ProgressFormData) => {
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      // In a real app, you would send this data to your API
-      console.log("Updated progress data:", data);
-
       // Transform the data for API submission
-      const metrics: Record<string, number | undefined> = {
-        weight: data.weight ? parseFloat(data.weight) : undefined,
-        bodyFat: data.bodyFat ? parseFloat(data.bodyFat) : undefined,
-        muscleMass: data.muscleMass ? parseFloat(data.muscleMass) : undefined,
-        chest: data.chest ? parseFloat(data.chest) : undefined,
-        waist: data.waist ? parseFloat(data.waist) : undefined,
-        arms: data.arms ? parseFloat(data.arms) : undefined,
-        legs: data.legs ? parseFloat(data.legs) : undefined,
-        restingHeartRate: data.restingHeartRate
-          ? parseFloat(data.restingHeartRate)
-          : undefined,
-      };
-
       const apiData = {
-        id: progressId,
         date: data.date,
-        metrics,
-        notes: data.notes,
+        weight: data.weight || null,
+        bodyFat: data.bodyFat || null,
+        chest: data.chest || null,
+        waist: data.waist || null,
+        hips: data.hips || null,
+        arms: data.arms || null,
+        thighs: data.thighs || null,
+        notes: data.notes || null,
       };
 
-      console.log("API data:", apiData);
+      const response = await fetch(`/api/progress/${progressId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update progress entry");
+      }
 
       // Navigate back to progress details page
       router.push(`/progress/${progressId}`);
       router.refresh();
     } catch (error) {
       console.error("Error updating progress:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to update progress entry. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const metricFields: Array<{
-    id: MetricType;
-    label: string;
-    unit: string;
-    placeholder: string;
-    step?: string;
-    min?: string;
-    max?: string;
-  }> = [
+  const metricFields = [
     {
       id: "weight",
       label: "Weight",
@@ -214,17 +173,8 @@ export default function EditProgressPage() {
       max: "60",
     },
     {
-      id: "muscleMass",
-      label: "Muscle Mass",
-      unit: "kg",
-      placeholder: "35.0",
-      step: "0.1",
-      min: "10",
-      max: "100",
-    },
-    {
       id: "chest",
-      label: "Chest",
+      label: "Chest Circumference",
       unit: "cm",
       placeholder: "100.0",
       step: "0.1",
@@ -233,7 +183,7 @@ export default function EditProgressPage() {
     },
     {
       id: "waist",
-      label: "Waist",
+      label: "Waist Circumference",
       unit: "cm",
       placeholder: "85.0",
       step: "0.1",
@@ -241,8 +191,17 @@ export default function EditProgressPage() {
       max: "200",
     },
     {
+      id: "hips",
+      label: "Hip Circumference",
+      unit: "cm",
+      placeholder: "95.0",
+      step: "0.1",
+      min: "50",
+      max: "200",
+    },
+    {
       id: "arms",
-      label: "Arms",
+      label: "Arm Circumference",
       unit: "cm",
       placeholder: "35.0",
       step: "0.1",
@@ -250,30 +209,51 @@ export default function EditProgressPage() {
       max: "80",
     },
     {
-      id: "legs",
-      label: "Legs",
+      id: "thighs",
+      label: "Thigh Circumference",
       unit: "cm",
       placeholder: "60.0",
       step: "0.1",
       min: "30",
       max: "120",
     },
-    {
-      id: "restingHeartRate",
-      label: "Resting Heart Rate",
-      unit: "bpm",
-      placeholder: "65",
-      step: "1",
-      min: "30",
-      max: "120",
-    },
-  ];
+  ] as const;
 
-  if (isLoading) {
+  if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 pt-8 pb-12">
         <div className="container mx-auto px-4 py-8 max-w-7xl flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-8">
+            <Link
+              href={`/progress/${progressId}`}
+              className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
+            >
+              <FaArrowLeft className="mr-2" />
+              <span>Back to Progress Details</span>
+            </Link>
+          </div>
+          <div className="text-center py-16 bg-gray-800 border border-gray-700 rounded-xl">
+            <h3 className="text-xl font-semibold text-white mb-3">
+              Error Loading Progress Entry
+            </h3>
+            <p className="text-gray-400 mb-6">{error}</p>
+            <button
+              onClick={fetchProgressEntry}
+              className="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-gray-900 bg-yellow-400 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -360,7 +340,7 @@ export default function EditProgressPage() {
                         max={field.max}
                         placeholder={field.placeholder}
                         {...register(field.id)}
-                        className="block w-full pr-12 py-3 border border-gray-600 rounded-lg leading-5 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all"
+                        className="block w-full pr-12 px-3 py-3 border border-gray-600 rounded-lg leading-5 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all"
                       />
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <span className="text-yellow-400 text-sm font-medium">
@@ -368,9 +348,9 @@ export default function EditProgressPage() {
                         </span>
                       </div>
                     </div>
-                    {errors[field.id] && (
+                    {errors[field.id as keyof ProgressFormData] && (
                       <p className="mt-2 text-sm text-red-400">
-                        {errors[field.id]?.message}
+                        {errors[field.id as keyof ProgressFormData]?.message}
                       </p>
                     )}
                   </div>
@@ -394,6 +374,13 @@ export default function EditProgressPage() {
                 className="block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all resize-none"
               />
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-lg">
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-700">
               <Link

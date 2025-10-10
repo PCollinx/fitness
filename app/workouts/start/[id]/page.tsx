@@ -80,33 +80,62 @@ export default function WorkoutSessionPage() {
   );
 
   useEffect(() => {
-    // Load real workout from storage
-    setIsLoading(true);
+    const loadWorkout = async () => {
+      if (!workoutId) return;
 
-    const loadWorkout = () => {
-      const foundWorkout = getWorkoutById(workoutId);
+      setIsLoading(true);
 
-      if (!foundWorkout) {
+      try {
+        const response = await fetch(`/api/workouts/${workoutId}`);
+
+        if (!response.ok) {
+          console.error("Failed to load workout from API");
+          router.push("/workouts");
+          return;
+        }
+
+        const foundWorkout = await response.json();
+
+        if (!foundWorkout) {
+          console.error("No workout found with ID:", workoutId);
+          router.push("/workouts");
+          return;
+        }
+
+        console.log("Loaded workout for session:", foundWorkout);
+
+        // Transform API response to match component expectations
+        const transformedWorkout = {
+          ...foundWorkout,
+          workoutExercises:
+            foundWorkout.exercises?.map((exercise: any) => ({
+              ...exercise,
+              exerciseId: exercise.exerciseId,
+              exerciseName: exercise.name,
+            })) || [],
+        };
+
+        setWorkout(transformedWorkout);
+
+        // Initialize set trackers based on workout exercises
+        const initialSetTrackers: Record<string, SetTracker[]> = {};
+        if (foundWorkout.exercises) {
+          foundWorkout.exercises.forEach((exercise: any) => {
+            initialSetTrackers[exercise.exerciseId] = Array(exercise.sets)
+              .fill(null)
+              .map(() => ({
+                completed: false,
+              }));
+          });
+        }
+
+        setSetTrackers(initialSetTrackers);
+      } catch (error) {
+        console.error("Error loading workout:", error);
         router.push("/workouts");
-        return;
+      } finally {
+        setIsLoading(false);
       }
-
-      setWorkout(foundWorkout);
-
-      // Initialize set trackers based on workout exercises
-      const initialSetTrackers: Record<string, SetTracker[]> = {};
-      if (foundWorkout.workoutExercises) {
-        foundWorkout.workoutExercises.forEach((exercise) => {
-          initialSetTrackers[exercise.exerciseId] = Array(exercise.sets)
-            .fill(null)
-            .map(() => ({
-              completed: false,
-            }));
-        });
-      }
-
-      setSetTrackers(initialSetTrackers);
-      setIsLoading(false);
     };
 
     loadWorkout();

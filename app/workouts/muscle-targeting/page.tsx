@@ -120,11 +120,17 @@ function MuscleTargetingContent() {
               const exercises = await response.json();
               counts[muscle.id] = exercises.length;
             } else {
-              console.warn(`Failed to fetch exercises for ${muscle.id}:`, response.statusText);
+              console.warn(
+                `Failed to fetch exercises for ${muscle.id}:`,
+                response.statusText
+              );
               counts[muscle.id] = 0; // Set to 0 if API fails
             }
           } catch (muscleError) {
-            console.warn(`Error fetching exercises for ${muscle.id}:`, muscleError);
+            console.warn(
+              `Error fetching exercises for ${muscle.id}:`,
+              muscleError
+            );
             counts[muscle.id] = 0; // Set to 0 if individual muscle group fails
           }
         }
@@ -134,7 +140,7 @@ function MuscleTargetingContent() {
         console.error("Error fetching exercise counts:", error);
         // Set all counts to 0 as fallback
         const fallbackCounts: Record<string, number> = {};
-        muscleGroups.forEach(muscle => {
+        muscleGroups.forEach((muscle) => {
           fallbackCounts[muscle.id] = 0;
         });
         setExerciseCounts(fallbackCounts);
@@ -157,7 +163,9 @@ function MuscleTargetingContent() {
         if (isMounted.current) {
           console.log("Navigation timeout, resetting loading state");
           setIsLoading(false);
-          setError("Navigation is taking longer than expected. Please try clicking the button again.");
+          setError(
+            "Navigation is taking longer than expected. Please try clicking the button again."
+          );
         }
       }, 5000); // 5 second timeout (increased)
 
@@ -191,14 +199,15 @@ function MuscleTargetingContent() {
     if (workoutName) params.append("name", workoutName);
     if (intensity) params.append("intensity", intensity);
     if (category) params.append("category", category);
-    if (searchParams.get("description")) params.append("description", searchParams.get("description")!);
+    if (searchParams.get("description"))
+      params.append("description", searchParams.get("description")!);
 
     // Add selected muscles
     params.append("muscles", selectedMuscles.join(","));
 
     const targetUrl = `/workouts/create-with-muscles?${params.toString()}`;
     console.log("Attempting navigation to:", targetUrl);
-    
+
     // Simple navigation - let Next.js handle it
     router.push(targetUrl);
   };
@@ -209,10 +218,13 @@ function MuscleTargetingContent() {
       // If we came from workout planning step 1, go back to that step
       const params = new URLSearchParams();
       params.append("name", workoutName);
-      if (searchParams.get("intensity")) params.append("intensity", searchParams.get("intensity")!);
-      if (searchParams.get("category")) params.append("category", searchParams.get("category")!);
-      if (searchParams.get("description")) params.append("description", searchParams.get("description")!);
-      
+      if (searchParams.get("intensity"))
+        params.append("intensity", searchParams.get("intensity")!);
+      if (searchParams.get("category"))
+        params.append("category", searchParams.get("category")!);
+      if (searchParams.get("description"))
+        params.append("description", searchParams.get("description")!);
+
       return "/workouts/muscle-targeting-plan?" + params.toString();
     }
     return "/workouts/plan";
@@ -255,9 +267,11 @@ function MuscleTargetingContent() {
                   {stepNum}
                 </div>
                 {stepNum < 3 && (
-                  <div className={`w-8 h-0.5 mx-2 ${
-                    stepNum < 2 ? "bg-yellow-500" : "bg-gray-700"
-                  }`}></div>
+                  <div
+                    className={`w-8 h-0.5 mx-2 ${
+                      stepNum < 2 ? "bg-yellow-500" : "bg-gray-700"
+                    }`}
+                  ></div>
                 )}
               </div>
             ))}
@@ -272,8 +286,12 @@ function MuscleTargetingContent() {
           <div className="mb-4">
             <FaCrosshairs className="text-4xl text-yellow-500 mx-auto mb-4" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">What muscles do you want to target?</h1>
-          <p className="text-gray-400 text-lg">Select the muscle groups for your workout</p>
+          <h1 className="text-3xl font-bold mb-2">
+            What muscles do you want to target?
+          </h1>
+          <p className="text-gray-400 text-lg">
+            Select the muscle groups for your workout
+          </p>
           <p className="text-gray-500 text-sm mt-2">
             Select one or more muscle groups
           </p>
@@ -432,14 +450,16 @@ function MuscleTargetingContent() {
 
 export default function MuscleTargetingPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading muscle targeting...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading muscle targeting...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <MuscleTargetingContent />
     </Suspense>
   );

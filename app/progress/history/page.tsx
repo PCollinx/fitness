@@ -4,129 +4,92 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaArrowLeft, FaSearch, FaTrash, FaCalendarAlt } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-// Progress metric types
-type MetricType =
-  | "weight"
-  | "bodyFat"
-  | "muscleMass"
-  | "chest"
-  | "waist"
-  | "arms"
-  | "legs"
-  | "restingHeartRate";
-
-// Progress entry
+// Progress entry from database
 type ProgressEntry = {
   id: string;
   date: string;
-  metrics: {
-    [key in MetricType]?: number;
-  };
-  notes?: string;
+  weight?: number | null;
+  bodyFat?: number | null;
+  chest?: number | null;
+  waist?: number | null;
+  hips?: number | null;
+  arms?: number | null;
+  thighs?: number | null;
+  notes?: string | null;
+};
+
+type ProgressHistoryResponse = {
+  entries: ProgressEntry[];
+  totalCount: number;
+  hasMore: boolean;
 };
 
 export default function ProgressHistoryPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [progressData, setProgressData] = useState<ProgressEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [totalCount, setTotalCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, fetch progress data from the API
-    // For now, we'll use mock data
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+      return;
+    }
+
+    if (status === "authenticated") {
+      fetchProgressData();
+    }
+  }, [status, router, searchQuery, startDate, endDate]);
+
+  const fetchProgressData = async () => {
     setIsLoading(true);
+    setError(null);
 
-    setTimeout(() => {
-      // Generate mock progress data for the past 90 days
-      const mockData: ProgressEntry[] = [];
-      const today = new Date();
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("search", searchQuery);
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
+      params.append("limit", "100"); // Fetch up to 100 entries
 
-      // Generate random progress over time with a slight upward or downward trend
-      // based on the metric
-      for (let i = 90; i >= 0; i -= 3) {
-        const date = new Date();
-        date.setDate(today.getDate() - i);
-        const formattedDate = format(date, "yyyy-MM-dd");
+      const response = await fetch(`/api/progress?${params.toString()}`);
 
-        // Base values for each metric
-        const baseWeight = 80;
-        const baseBodyFat = 20;
-        const baseMuscleMass = 35;
-        const baseChest = 100;
-        const baseWaist = 85;
-        const baseArms = 35;
-        const baseLegs = 60;
-        const baseHeartRate = 65;
-
-        // Random fluctuation
-        const randomFactor = (Math.random() - 0.3) * 2;
-
-        // Trend factor (decreases over time for weight, body fat, waist, heart rate)
-        // Increases for muscle mass, chest, arms, legs
-        const trendFactor = i / 90;
-
-        mockData.push({
-          id: `progress-${i}`,
-          date: formattedDate,
-          metrics: {
-            weight: +(baseWeight - trendFactor * 5 + randomFactor).toFixed(1),
-            bodyFat: +(baseBodyFat - trendFactor * 3 + randomFactor).toFixed(1),
-            muscleMass: +(
-              baseMuscleMass +
-              trendFactor * 2 +
-              randomFactor
-            ).toFixed(1),
-            chest: +(baseChest + trendFactor * 3 + randomFactor).toFixed(1),
-            waist: +(baseWaist - trendFactor * 4 + randomFactor).toFixed(1),
-            arms: +(baseArms + trendFactor * 1 + randomFactor).toFixed(1),
-            legs: +(baseLegs + trendFactor * 2 + randomFactor).toFixed(1),
-            restingHeartRate: +(
-              baseHeartRate -
-              trendFactor * 5 +
-              randomFactor
-            ).toFixed(0),
-          },
-          notes: i % 15 === 0 ? "Monthly measurement" : undefined,
-        });
+      if (!response.ok) {
+        throw new Error("Failed to fetch progress data");
       }
 
-      setProgressData(mockData);
+      const data: ProgressHistoryResponse = await response.json();
+      setProgressData(data.entries);
+      setTotalCount(data.totalCount);
+    } catch (error) {
+      console.error("Error fetching progress data:", error);
+      setError("Failed to load progress history");
+    } finally {
       setIsLoading(false);
-    }, 500);
-  }, []);
-
-  const metricLabels: Record<MetricType, string> = {
-    weight: "Weight (kg)",
-    bodyFat: "Body Fat (%)",
-    muscleMass: "Muscle Mass (kg)",
-    chest: "Chest (cm)",
-    waist: "Waist (cm)",
-    arms: "Arms (cm)",
-    legs: "Legs (cm)",
-    restingHeartRate: "Resting Heart Rate (bpm)",
+    }
   };
 
-  // Filter data based on search query and date range
-  const filteredData = progressData.filter((entry) => {
-    // Filter by date range
-    const entryDate = parseISO(entry.date);
-    const isAfterStartDate = !startDate || entryDate >= parseISO(startDate);
-    const isBeforeEndDate = !endDate || entryDate <= parseISO(endDate);
+  const metricLabels = {
+    weight: "Weight (kg)",
+    bodyFat: "Body Fat (%)",
+    chest: "Chest (cm)",
+    waist: "Waist (cm)",
+    hips: "Hips (cm)",
+    arms: "Arms (cm)",
+    thighs: "Thighs (cm)",
+  } as const;
 
-    // Filter by search query (check notes)
-    const matchesSearch =
-      !searchQuery ||
-      (entry.notes &&
-        entry.notes.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return isAfterStartDate && isBeforeEndDate && matchesSearch;
-  });
-
-  // Sort the data
-  const sortedData = [...filteredData].sort((a, b) => {
+  // Sort the data (data is already filtered by API)
+  const sortedData = [...progressData].sort((a, b) => {
     const dateA = parseISO(a.date);
     const dateB = parseISO(b.date);
 
@@ -142,12 +105,23 @@ export default function ProgressHistoryPage() {
     setEndDate("");
   };
 
-  const handleDelete = (id: string) => {
-    // In a real app, you would call your API to delete the entry
-    console.log("Deleting progress entry:", id);
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/progress?id=${id}`, {
+        method: "DELETE",
+      });
 
-    // Update the UI immediately for better UX
-    setProgressData(progressData.filter((entry) => entry.id !== id));
+      if (!response.ok) {
+        throw new Error("Failed to delete progress entry");
+      }
+
+      // Update the UI immediately for better UX
+      setProgressData(progressData.filter((entry) => entry.id !== id));
+      setTotalCount((prev) => prev - 1);
+    } catch (error) {
+      console.error("Error deleting progress entry:", error);
+      setError("Failed to delete progress entry");
+    }
   };
 
   return (
@@ -226,6 +200,21 @@ export default function ProgressHistoryPage() {
             <div className="flex justify-center items-center h-64 bg-gray-800">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
             </div>
+          ) : error ? (
+            <div className="text-center py-16 bg-gray-800">
+              <div className="max-w-md mx-auto">
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  Error Loading Progress History
+                </h3>
+                <p className="text-gray-400 mb-6">{error}</p>
+                <button
+                  onClick={fetchProgressData}
+                  className="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-gray-900 bg-yellow-400 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
           ) : sortedData.length === 0 ? (
             <div className="text-center py-16 bg-gray-800">
               <div className="max-w-md mx-auto">
@@ -300,14 +289,17 @@ export default function ProgressHistoryPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                         {format(parseISO(entry.date), "MMM d, yyyy")}
                       </td>
-                      {Object.keys(metricLabels).map((key) => (
-                        <td
-                          key={key}
-                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium"
-                        >
-                          {entry.metrics[key as MetricType]?.toFixed(1) || "-"}
-                        </td>
-                      ))}
+                      {Object.keys(metricLabels).map((key) => {
+                        const value = entry[key as keyof typeof metricLabels];
+                        return (
+                          <td
+                            key={key}
+                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium"
+                          >
+                            {value ? value.toFixed(1) : "-"}
+                          </td>
+                        );
+                      })}
                       <td className="px-6 py-4 text-sm text-gray-300 max-w-xs truncate">
                         {entry.notes || "-"}
                       </td>
@@ -336,8 +328,9 @@ export default function ProgressHistoryPage() {
 
           <div className="p-6 border-t border-gray-700 bg-gray-800 flex justify-between items-center">
             <div className="text-sm text-gray-400 font-medium">
-              {filteredData.length}{" "}
-              {filteredData.length === 1 ? "entry" : "entries"} found
+              {sortedData.length}{" "}
+              {sortedData.length === 1 ? "entry" : "entries"} found
+              {totalCount > sortedData.length && ` (${totalCount} total)`}
             </div>
             <Link
               href="/progress/new?from=progress"

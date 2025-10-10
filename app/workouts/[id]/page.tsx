@@ -81,11 +81,13 @@ export default function WorkoutDetailPage() {
 
   const handleStartWorkout = () => {
     if (workout) {
-      router.push(`/workouts/${workout.id}/session`);
+      console.log("Starting workout:", workout.id);
+      console.log("Navigating to:", `/workouts/start/${workout.id}`);
+      router.push(`/workouts/start/${workout.id}`);
+    } else {
+      console.log("No workout found");
     }
   };
-
-
 
   const handleEditWorkout = () => {
     router.push(`/workouts/${workout?.id}/edit`);
@@ -135,8 +137,8 @@ export default function WorkoutDetailPage() {
       <div className="min-h-screen bg-black text-white p-6 mt-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <BackButton 
-              fallbackRoute="/workouts" 
+            <BackButton
+              fallbackRoute="/workouts"
               className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
               text="Back to Workouts"
             />
@@ -149,8 +151,8 @@ export default function WorkoutDetailPage() {
             <p className="text-gray-300 mb-8">
               The workout you're looking for could not be loaded.
             </p>
-            <BackButton 
-              fallbackRoute="/workouts" 
+            <BackButton
+              fallbackRoute="/workouts"
               className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg font-medium transition"
               text="Back to Workouts"
             />
@@ -169,8 +171,8 @@ export default function WorkoutDetailPage() {
       <div className="bg-gray-900 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <BackButton 
-              fallbackRoute="/workouts" 
+            <BackButton
+              fallbackRoute="/workouts"
               className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
               text="Back to Workouts"
             />
@@ -179,14 +181,18 @@ export default function WorkoutDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="relative h-64 lg:h-80 rounded-lg overflow-hidden">
               <Image
-                src={workout.image || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600"}
+                src={
+                  workout.image ||
+                  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600"
+                }
                 alt={workout.name}
                 fill
                 className="object-cover"
                 priority
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600";
+                  target.src =
+                    "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600";
                 }}
               />
             </div>

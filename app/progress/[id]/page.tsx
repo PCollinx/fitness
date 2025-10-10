@@ -5,29 +5,24 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
+import { useSession } from "next-auth/react";
 
-// Progress metric types
-type MetricType =
-  | "weight"
-  | "bodyFat"
-  | "muscleMass"
-  | "chest"
-  | "waist"
-  | "arms"
-  | "legs"
-  | "restingHeartRate";
-
-// Progress entry
+// Progress entry from database
 type ProgressEntry = {
   id: string;
   date: string;
-  metrics: {
-    [key in MetricType]?: number;
-  };
-  notes?: string;
+  weight?: number | null;
+  bodyFat?: number | null;
+  chest?: number | null;
+  waist?: number | null;
+  hips?: number | null;
+  arms?: number | null;
+  thighs?: number | null;
+  notes?: string | null;
 };
 
 export default function ProgressDetailPage() {
+  const { data: session, status } = useSession();
   const params = useParams();
   const router = useRouter();
   const progressId = params.id as string;
@@ -37,107 +32,84 @@ export default function ProgressDetailPage() {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, fetch progress entry from the API
-    // For now, we'll use mock data
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+      return;
+    }
+
+    if (status === "authenticated") {
+      fetchProgressEntry();
+    }
+  }, [status, router, progressId]);
+
+  const fetchProgressEntry = async () => {
     setIsLoading(true);
+    setError(null);
 
-    setTimeout(() => {
-      // This would be an API call in a real app
-      // Generate a mock progress entry
-      const baseWeight = 80;
-      const baseBodyFat = 20;
-      const baseMuscleMass = 35;
-      const baseChest = 100;
-      const baseWaist = 85;
-      const baseArms = 35;
-      const baseLegs = 60;
-      const baseHeartRate = 65;
+    try {
+      const response = await fetch(`/api/progress/${progressId}`);
 
-      // Extract the day number from the ID if it matches the pattern
-      const dayMatch = progressId.match(/progress-(\d+)/);
-      const day = dayMatch ? parseInt(dayMatch[1]) : 0;
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError("Progress entry not found");
+        } else {
+          throw new Error("Failed to fetch progress entry");
+        }
+        return;
+      }
 
-      // Random fluctuation
-      const randomFactor = (Math.random() - 0.3) * 2;
-
-      // Trend factor (decreases over time for weight, body fat, waist, heart rate)
-      // Increases for muscle mass, chest, arms, legs
-      const trendFactor = day / 90;
-
-      const today = new Date();
-      const date = new Date();
-      date.setDate(today.getDate() - day);
-
-      const mockProgressEntry: ProgressEntry = {
-        id: progressId,
-        date: format(date, "yyyy-MM-dd"),
-        metrics: {
-          weight: +(baseWeight - trendFactor * 5 + randomFactor).toFixed(1),
-          bodyFat: +(baseBodyFat - trendFactor * 3 + randomFactor).toFixed(1),
-          muscleMass: +(
-            baseMuscleMass +
-            trendFactor * 2 +
-            randomFactor
-          ).toFixed(1),
-          chest: +(baseChest + trendFactor * 3 + randomFactor).toFixed(1),
-          waist: +(baseWaist - trendFactor * 4 + randomFactor).toFixed(1),
-          arms: +(baseArms + trendFactor * 1 + randomFactor).toFixed(1),
-          legs: +(baseLegs + trendFactor * 2 + randomFactor).toFixed(1),
-          restingHeartRate: +(
-            baseHeartRate -
-            trendFactor * 5 +
-            randomFactor
-          ).toFixed(0),
-        },
-        notes:
-          day % 15 === 0
-            ? "Monthly measurement"
-            : day % 7 === 0
-            ? "Weekly check-in"
-            : undefined,
-      };
-
-      setProgressEntry(mockProgressEntry);
+      const data: ProgressEntry = await response.json();
+      setProgressEntry(data);
+    } catch (error) {
+      console.error("Error fetching progress entry:", error);
+      setError("Failed to load progress entry");
+    } finally {
       setIsLoading(false);
-    }, 500);
-  }, [progressId]);
+    }
+  };
 
-  const handleDelete = () => {
-    // In a real app, you would call your API to delete the progress entry
-    console.log("Deleting progress entry:", progressId);
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`/api/progress/${progressId}`, {
+        method: "DELETE",
+      });
 
-    // Simulate API call
-    setTimeout(() => {
+      if (!response.ok) {
+        throw new Error("Failed to delete progress entry");
+      }
+
       router.push("/progress/history");
       router.refresh();
-    }, 500);
+    } catch (error) {
+      console.error("Error deleting progress entry:", error);
+      setError("Failed to delete progress entry");
+    }
   };
 
-  const metricLabels: Record<MetricType, string> = {
+  const metricLabels = {
     weight: "Weight",
     bodyFat: "Body Fat",
-    muscleMass: "Muscle Mass",
     chest: "Chest",
     waist: "Waist",
+    hips: "Hips",
     arms: "Arms",
-    legs: "Legs",
-    restingHeartRate: "Resting Heart Rate",
-  };
+    thighs: "Thighs",
+  } as const;
 
-  const metricUnits: Record<MetricType, string> = {
+  const metricUnits = {
     weight: "kg",
     bodyFat: "%",
-    muscleMass: "kg",
     chest: "cm",
     waist: "cm",
+    hips: "cm",
     arms: "cm",
-    legs: "cm",
-    restingHeartRate: "bpm",
-  };
+    thighs: "cm",
+  } as const;
 
-  if (isLoading) {
+  if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 pt-8 pb-12">
         <div className="container mx-auto px-4 py-8 max-w-7xl flex justify-center items-center h-64">
@@ -147,25 +119,45 @@ export default function ProgressDetailPage() {
     );
   }
 
-  if (!progressEntry) {
+  if (error || !progressEntry) {
     return (
       <div className="min-h-screen bg-gray-900 pt-8 pb-12">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="text-center py-16 bg-gray-800 border border-gray-700 rounded-xl">
-            <h3 className="text-xl font-semibold text-white mb-3">
-              Progress entry not found
-            </h3>
-            <p className="text-gray-400 mb-6">
-              The progress entry you're looking for doesn't exist or has been
-              deleted.
-            </p>
+          <div className="mb-8">
             <Link
               href="/progress/history"
               className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
             >
               <FaArrowLeft className="mr-2" />
-              Return to Progress History
+              <span>Back to Progress History</span>
             </Link>
+          </div>
+          <div className="text-center py-16 bg-gray-800 border border-gray-700 rounded-xl">
+            <h3 className="text-xl font-semibold text-white mb-3">
+              {error
+                ? "Error Loading Progress Entry"
+                : "Progress entry not found"}
+            </h3>
+            <p className="text-gray-400 mb-6">
+              {error ||
+                "The progress entry you're looking for doesn't exist or has been deleted."}
+            </p>
+            {error ? (
+              <button
+                onClick={fetchProgressEntry}
+                className="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-gray-900 bg-yellow-400 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
+              >
+                Try Again
+              </button>
+            ) : (
+              <Link
+                href="/progress/history"
+                className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
+              >
+                <FaArrowLeft className="mr-2" />
+                Return to Progress History
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -219,10 +211,9 @@ export default function ProgressDetailPage() {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
               {Object.entries(metricLabels).map(([key, label]) => {
-                const metricKey = key as MetricType;
-                const value = progressEntry.metrics[metricKey];
+                const value = progressEntry[key as keyof typeof metricLabels];
 
-                return value !== undefined ? (
+                return value !== null && value !== undefined ? (
                   <div
                     key={key}
                     className="bg-gray-700 border border-gray-600 p-4 sm:p-5 rounded-xl hover:bg-gray-650 transition-colors"
@@ -233,7 +224,7 @@ export default function ProgressDetailPage() {
                     <p className="text-2xl sm:text-3xl font-bold text-white">
                       {value.toFixed(1)}
                       <span className="text-sm sm:text-base font-normal text-yellow-400 ml-1">
-                        {metricUnits[metricKey]}
+                        {metricUnits[key as keyof typeof metricUnits]}
                       </span>
                     </p>
                   </div>
@@ -259,7 +250,7 @@ export default function ProgressDetailPage() {
                 href="/progress"
                 className="inline-flex items-center justify-center px-6 py-3 border border-gray-600 rounded-lg text-sm font-semibold text-white bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all"
               >
-                View Progress Charts
+                View Progress
               </Link>
 
               <Link

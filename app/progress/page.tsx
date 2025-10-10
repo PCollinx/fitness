@@ -180,7 +180,7 @@ export default function ProgressPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 mt-12 max-w-7xl">
+    <div className="container mx-auto px-6 mt-14 max-w-7xl">
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
@@ -209,7 +209,7 @@ export default function ProgressPage() {
             >
               {progressData.overallScores.consistency}
             </span>
-            <span className="text-gray-400 text-lg mb-1">/100</span>
+            <span className="text-gray-400 text-lg mb-1">%</span>
           </div>
           <p className="text-sm text-gray-300 mt-2">
             Based on workout frequency and routine adherence
@@ -231,7 +231,7 @@ export default function ProgressPage() {
             >
               {progressData.overallScores.improvement}
             </span>
-            <span className="text-gray-400 text-lg mb-1">/100</span>
+            <span className="text-gray-400 text-lg mb-1">%</span>
           </div>
           <p className="text-sm text-gray-300 mt-2">
             Based on strength progress and body composition changes
