@@ -26,13 +26,6 @@ import {
 } from "react-icons/fa";
 
 import {
-  UserProfile,
-  loadUserProfile,
-  saveUserProfile,
-  createUserProfile,
-} from "../utils/userStorage/profileUtils";
-
-import {
   validateAndProcessImage,
   compressImage,
   MAX_FILE_SIZE,
@@ -40,7 +33,7 @@ import {
 } from "../utils/userStorage/imageUtils";
 
 import ProfileImageUpload from "../components/ProfileImageUpload";
-import { useUserProfile } from "../context/UserProfileContext";
+import { useUserProfile, UserProfile } from "../context/UserProfileContext";
 import { useWorkoutStreak } from "../hooks/useWorkoutStreak";
 
 export default function ProfilePage() {
@@ -49,6 +42,7 @@ export default function ProfilePage() {
     userProfile,
     isLoading: isProfileLoading,
     updateUserProfile,
+    uploadProfileImage,
   } = useUserProfile();
   const { streakData, isLoading: isStreakLoading } = useWorkoutStreak();
   const [isLoading, setIsLoading] = useState(true);
@@ -196,16 +190,29 @@ export default function ProfilePage() {
         message: "Saving profile...",
       });
 
-      // Create updated profile with the temp image if available
-      const updatedProfile: UserProfile = {
-        ...userData,
-        image: tempImage || userData.image,
-        lastUpdated: new Date().toISOString(),
+      // Upload image first if there's a temp image
+      if (tempImage) {
+        const imageUploadSuccess = await uploadProfileImage(tempImage);
+        if (!imageUploadSuccess) {
+          throw new Error("Failed to upload profile image");
+        }
+      }
+
+      // Create partial update object (excluding id, email, dateJoined, lastUpdated, image)
+      const updates = {
+        name: userData.name,
+        bio: userData.bio,
+        weight: userData.weight,
+        height: userData.height,
+        fitnessLevel: userData.fitnessLevel,
+        fitnessGoals: userData.fitnessGoals,
+        workoutsCompleted: userData.workoutsCompleted,
+        streakDays: userData.streakDays,
+        onboardingCompleted: userData.onboardingCompleted,
       };
 
       // Save the updated profile using context
-      await updateUserProfile(updatedProfile);
-      setUserData(updatedProfile);
+      await updateUserProfile(updates);
 
       setUploadStatus({
         isUploading: false,

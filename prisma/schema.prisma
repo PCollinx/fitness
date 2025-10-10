@@ -47,6 +47,9 @@ model User {
   weight              Float?
   role                String               @default("user")
   onboardingCompleted Boolean              @default(false)
+  fitnessLevel        String?
+  workoutsCompleted   Int                  @default(0)
+  streakDays          Int                  @default(0)
   spotifyAccessToken  String?
   spotifyRefreshToken String?
   spotifyTokenExpiry  DateTime?

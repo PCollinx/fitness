@@ -9,9 +9,9 @@ export interface ImageValidationResult {
 }
 
 /**
- * Maximum file size in bytes (5MB)
+ * Maximum file size in bytes (3MB)
  */
-export const MAX_FILE_SIZE = 5 * 1024 * 1024;
+export const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
 /**
  * Allowed image mime types
