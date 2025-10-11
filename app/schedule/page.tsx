@@ -21,10 +21,12 @@ import {
 
 export default function SchedulePage() {
   const { data: session, status } = useSession();
-  const { schedules, isLoading } = useWorkoutSchedule();
+  const { schedules, isLoading, refetch } = useWorkoutSchedule();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  const handleScheduleUpdate = (updatedSchedules: WorkoutSchedule[]) => {
+  const handleScheduleUpdate = async (updatedSchedules: WorkoutSchedule[]) => {
+    // Refresh the schedules to ensure we have the latest data
+    await refetch();
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 3000);
   };

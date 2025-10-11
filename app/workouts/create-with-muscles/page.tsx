@@ -83,36 +83,24 @@ function CreateWithMusclesContent() {
   });
 
   // Debug logging
-  console.log("Create-with-muscles page loaded with params:", {
-    muscles,
-    musclesRaw: searchParams.get("muscles"),
-    intensity,
-    category,
-    initialName,
-    status,
-  });
+  
 
   useEffect(() => {
-    console.log("Create-with-muscles useEffect triggered", {
-      status,
-      muscles,
-      musclesLength: muscles.length,
-    });
+    
 
     if (status === "loading") {
-      console.log("Status is loading, waiting...");
       return; // Wait for auth to finish loading
     }
 
     if (status === "unauthenticated") {
-      console.log("User not authenticated");
+
       setError("You must be logged in to create workouts. Please sign in.");
       setIsLoading(false);
       return;
     }
 
     const musclesParam = searchParams.get("muscles");
-    console.log("Raw muscles param:", musclesParam);
+
 
     if (!musclesParam || musclesParam.trim() === "") {
       console.warn("No muscles parameter provided");
@@ -123,7 +111,6 @@ function CreateWithMusclesContent() {
       return;
     }
 
-    console.log("All checks passed, setting up workout");
     setWorkoutName(initialName || `${muscles.join(" & ")} Workout`);
     fetchExercises();
   }, [status, searchParams, initialName, router]);
@@ -214,7 +201,7 @@ function CreateWithMusclesContent() {
         setShowCreateExercise(false);
         resetExerciseForm();
 
-        console.log("Exercise created successfully!");
+
       } else {
         throw new Error("Failed to create exercise");
       }
@@ -253,7 +240,7 @@ function CreateWithMusclesContent() {
       const workoutImage =
         getImageForWorkout(exerciseDetails) ||
         "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
-      console.log("Generated workout image URL:", workoutImage);
+
 
       const workoutData = {
         name: workoutName.trim(),
@@ -275,7 +262,7 @@ function CreateWithMusclesContent() {
         public: false,
       };
 
-      console.log("Saving workout with data:", workoutData);
+
 
       const response = await fetch("/api/workouts", {
         method: "POST",
@@ -291,7 +278,7 @@ function CreateWithMusclesContent() {
       }
 
       const result = await response.json();
-      console.log("Workout saved successfully:", result);
+
 
       // Redirect to the workout details page
       router.push(`/workouts/${result.workout.id}`);
@@ -335,7 +322,7 @@ function CreateWithMusclesContent() {
       const workoutImage =
         getImageForWorkout(exerciseDetails) ||
         "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
-      console.log("Generated workout image URL for start:", workoutImage);
+
 
       // First, save the workout to get a proper workout ID
       const workoutData = {
@@ -358,7 +345,7 @@ function CreateWithMusclesContent() {
         public: false,
       };
 
-      console.log("Creating workout for start session:", workoutData);
+
 
       const response = await fetch("/api/workouts", {
         method: "POST",
@@ -682,7 +669,7 @@ function CreateWithMusclesContent() {
             ) : (
               <FaPlay className="mr-2 h-4 w-4" />
             )}
-            {isSaving ? "Creating Workout..." : "Start Workout Now"}
+            {isSaving ? "Creating Workout..." : "Start Now"}
           </button>
 
           <button

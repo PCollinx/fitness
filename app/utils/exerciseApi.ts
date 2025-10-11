@@ -83,7 +83,7 @@ export const seedExercises = async (): Promise<boolean> => {
     }
 
     const result = await response.json();
-    console.log("Exercises seeded:", result);
+
     return true;
   } catch (error) {
     console.error("Error seeding exercises:", error);

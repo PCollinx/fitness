@@ -17,9 +17,7 @@ import {
   FaWeightHanging,
   FaFire,
 } from "react-icons/fa";
-import {
-  addWorkout,
-} from "../../utils/workoutApiStorage";
+import { addWorkout } from "../../utils/workoutApiStorage";
 import {
   fetchExercises,
   fetchExerciseMetadata,
@@ -47,7 +45,7 @@ const workoutSchema = z.object({
         notes: z.string().optional(),
       })
     )
-    .min(1, "At least one exercise is required"),
+    .min(3, "At least 3 exercises are required"),
 });
 
 type WorkoutFormValues = z.infer<typeof workoutSchema>;
@@ -70,17 +68,21 @@ export default function CreateWorkoutPage() {
   const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fallbackRoute, setFallbackRoute] = useState("/workouts");
   const [visibleExerciseDropdown, setVisibleExerciseDropdown] = useState<
     number | null
   >(null);
   const [needsSeeding, setNeedsSeeding] = useState(false);
   const [showCreateExercise, setShowCreateExercise] = useState(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
+  const [showExerciseValidationModal, setShowExerciseValidationModal] =
+    useState(false);
 
   const {
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
@@ -90,7 +92,11 @@ export default function CreateWorkoutPage() {
       isPublic: false,
       intensity: "Medium",
       category: "Strength",
-      exercises: [{ exerciseId: "", sets: 3, reps: 10, weight: 0, notes: "" }],
+      exercises: [
+        { exerciseId: "", sets: 3, reps: 10, weight: 0, notes: "" },
+        { exerciseId: "", sets: 3, reps: 10, weight: 0, notes: "" },
+        { exerciseId: "", sets: 3, reps: 10, weight: 0, notes: "" },
+      ],
     },
   });
 
@@ -146,6 +152,19 @@ export default function CreateWorkoutPage() {
     loadExercises();
   }, []);
 
+  // Detect if coming from plan page via query parameters
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get('type');
+      
+      // If type is quick or custom, user came from plan page
+      if (type === 'quick' || type === 'custom') {
+        setFallbackRoute("/workouts/plan");
+      }
+    }
+  }, []);
+
   const handleSeedExercises = async () => {
     setIsLoading(true);
     const success = await seedExercises();
@@ -165,6 +184,15 @@ export default function CreateWorkoutPage() {
   };
 
   const onSubmit = async (data: WorkoutFormValues) => {
+    // Check if user has selected at least 3 exercises with valid exercise selections
+    const validExercises = data.exercises.filter(
+      (ex) => ex.exerciseId.trim() !== ""
+    );
+    if (validExercises.length < 3) {
+      setShowExerciseValidationModal(true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -201,9 +229,11 @@ export default function CreateWorkoutPage() {
         public: data.isPublic,
       };
 
+
+
       // Add the workout via API
       const newWorkout = await addWorkout(workoutData);
-      console.log('Workout created successfully:', newWorkout);
+
 
       // Redirect to the workouts page
       router.push("/workouts");
@@ -256,22 +286,14 @@ export default function CreateWorkoutPage() {
         setExercises((prev) => [...prev, newExercise]);
 
         // Auto-select the new exercise for the current dropdown
-        const event = {
-          target: {
-            name: `exercises.${currentExerciseIndex}.exerciseId`,
-            value: newExercise.id,
-          },
-        } as React.ChangeEvent<HTMLInputElement>;
-        register(`exercises.${currentExerciseIndex}.exerciseId`).onChange(
-          event
-        );
+        setValue(`exercises.${currentExerciseIndex}.exerciseId`, newExercise.id);
 
         // Close modal and reset form
         setShowCreateExercise(false);
         resetExerciseForm();
 
         // Show success message (you can add toast notification here)
-        console.log("Exercise created successfully!");
+
       } else {
         throw new Error("Failed to create exercise");
       }
@@ -288,9 +310,9 @@ export default function CreateWorkoutPage() {
       <div className="container mx-auto px-4 sm:px-6 pt-12 pb-8 sm:pb-8 max-w-4xl fade-in">
         <div className="mb-6 flex items-center">
           <BackButton
-            fallbackRoute="/workouts"
+            fallbackRoute={fallbackRoute}
             className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
-            text="Back to Workouts"
+            text={fallbackRoute === "/workouts/plan" ? "Back to Plan" : "Back to Workouts"}
           />
         </div>
 
@@ -318,7 +340,7 @@ export default function CreateWorkoutPage() {
           </div>
         )}
 
-        <div className="bg-gray-900 rounded-lg shadow-lg p-6 border border-gray-800">
+        <div className=" rounded-lg shadow-lg py-4 border-t-gray-800">
           <div className="flex items-center mb-6">
             <FaDumbbell className="text-yellow-500 h-8 w-8 mr-3" />
             <h1 className="text-2xl font-bold text-white">
@@ -332,7 +354,6 @@ export default function CreateWorkoutPage() {
                 <FaInfoCircle className="mr-2" />
                 Workout Information
               </h2>
-
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label
@@ -422,21 +443,18 @@ export default function CreateWorkoutPage() {
                 </div>
 
                 <div>
-                  <div className="flex items-center">
+                  <label className="flex items-center cursor-pointer">
                     <input
-                      id="isPublic"
                       type="checkbox"
                       {...register("isPublic")}
-                      className="h-4 w-4 text-yellow-500 focus:ring-yellow-500 border-gray-600 rounded bg-gray-700"
+                      className="sr-only peer"
                     />
-                    <label
-                      htmlFor="isPublic"
-                      className="ml-2 block text-sm text-gray-300"
-                    >
+                    <div className="relative w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                    <span className="ml-3 text-gray-300 text-sm font-medium">
                       Make this workout public
-                    </label>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-400">
+                    </span>
+                  </label>
+                  <p className="mt-2 text-xs text-gray-400">
                     Public workouts can be viewed and copied by other users
                   </p>
                 </div>
@@ -553,16 +571,7 @@ export default function CreateWorkoutPage() {
                                               : "text-white"
                                           }`}
                                           onClick={() => {
-                                            // Update the field value
-                                            const event = {
-                                              target: {
-                                                name: `exercises.${index}.exerciseId`,
-                                                value: exercise.id,
-                                              },
-                                            } as React.ChangeEvent<HTMLInputElement>;
-                                            register(
-                                              `exercises.${index}.exerciseId`
-                                            ).onChange(event);
+                                            setValue(`exercises.${index}.exerciseId`, exercise.id);
                                             toggleExerciseDropdown(index);
                                           }}
                                         >
@@ -900,6 +909,38 @@ export default function CreateWorkoutPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Exercise Validation Modal */}
+        {showExerciseValidationModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 rounded-lg max-w-md w-full p-6 border border-gray-700">
+              <div className="flex items-center mb-4">
+                <div className="bg-yellow-100 rounded-full p-2 mr-3">
+                  <FaInfoCircle className="text-yellow-600 text-xl" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  Minimum Exercises Required
+                </h3>
+              </div>
+
+              <p className="text-gray-300 mb-6">
+                A workout must contain at least 3 selected exercises to be
+                effective. Please select exercises for all 3 slots or add more
+                exercises to your workout before saving.
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowExerciseValidationModal(false)}
+                  className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md font-medium transition-colors flex items-center"
+                >
+                  <FaDumbbell className="mr-2" />
+                  Add More Exercises
+                </button>
+              </div>
             </div>
           </div>
         )}

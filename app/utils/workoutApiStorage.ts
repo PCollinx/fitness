@@ -74,13 +74,13 @@ export const loadWorkouts = async (options?: {
     if (options?.offset) params.append("offset", options.offset.toString());
 
     const response = await fetch(`/api/workouts?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch workouts: ${response.status}`);
     }
 
     const data = await response.json();
-    
+
     // Transform API response to match expected format
     return data.workouts.map((workout: any) => ({
       id: workout.id,
@@ -97,15 +97,16 @@ export const loadWorkouts = async (options?: {
       muscleGroups: workout.muscleGroups || [],
       difficulty: workout.difficulty,
       timesCompleted: workout.timesCompleted || 0,
-      workoutExercises: workout.exercises?.map((ex: any, index: number) => ({
-        exerciseId: ex.exerciseId || ex.id,
-        exerciseName: ex.name,
-        sets: ex.sets,
-        reps: ex.reps,
-        weight: ex.weight,
-        notes: ex.notes,
-        order: ex.order || index,
-      })) || [],
+      workoutExercises:
+        workout.exercises?.map((ex: any, index: number) => ({
+          exerciseId: ex.exerciseId || ex.id,
+          exerciseName: ex.name,
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight,
+          notes: ex.notes,
+          order: ex.order || index,
+        })) || [],
       // Legacy compatibility fields
       duration: 0, // Will be calculated dynamically
       intensity: workout.difficulty || "Medium",
@@ -122,10 +123,12 @@ export const loadWorkouts = async (options?: {
 /**
  * Get a single workout by ID from API
  */
-export const getWorkoutById = async (workoutId: string): Promise<Workout | null> => {
+export const getWorkoutById = async (
+  workoutId: string
+): Promise<Workout | null> => {
   try {
     const response = await fetch(`/api/workouts/${workoutId}`);
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         return null;
@@ -134,7 +137,7 @@ export const getWorkoutById = async (workoutId: string): Promise<Workout | null>
     }
 
     const workout = await response.json();
-    
+
     // Transform API response to match expected format
     return {
       id: workout.id,
@@ -151,15 +154,16 @@ export const getWorkoutById = async (workoutId: string): Promise<Workout | null>
       muscleGroups: workout.muscleGroups || [],
       difficulty: workout.difficulty,
       timesCompleted: workout.timesCompleted || 0,
-      workoutExercises: workout.exercises?.map((ex: any, index: number) => ({
-        exerciseId: ex.exerciseId || ex.id,
-        exerciseName: ex.name,
-        sets: ex.sets,
-        reps: ex.reps,
-        weight: ex.weight,
-        notes: ex.notes,
-        order: ex.order || index,
-      })) || [],
+      workoutExercises:
+        workout.exercises?.map((ex: any, index: number) => ({
+          exerciseId: ex.exerciseId || ex.id,
+          exerciseName: ex.name,
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight,
+          notes: ex.notes,
+          order: ex.order || index,
+        })) || [],
       // Legacy compatibility fields
       duration: 0,
       intensity: workout.difficulty || "Medium",
@@ -176,7 +180,9 @@ export const getWorkoutById = async (workoutId: string): Promise<Workout | null>
 /**
  * Create a new workout via API
  */
-export const addWorkout = async (workoutData: CreateWorkoutData): Promise<Workout | null> => {
+export const addWorkout = async (
+  workoutData: CreateWorkoutData
+): Promise<Workout | null> => {
   try {
     // Auto-assign image if not provided
     if (!workoutData.image) {
@@ -199,7 +205,7 @@ export const addWorkout = async (workoutData: CreateWorkoutData): Promise<Workou
             return { name: "unknown", muscleGroup: undefined };
           })
         );
-        
+
         workoutData.image = getImageForWorkout(exerciseDetails);
       } else {
         workoutData.image = getImageByCategory("strength");
@@ -229,11 +235,13 @@ export const addWorkout = async (workoutData: CreateWorkoutData): Promise<Workou
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `Failed to create workout: ${response.status}`);
+      throw new Error(
+        errorData.error || `Failed to create workout: ${response.status}`
+      );
     }
 
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.error || "Failed to create workout");
     }
@@ -254,29 +262,40 @@ export const updateWorkout = async (
   updates: Partial<CreateWorkoutData>
 ): Promise<boolean> => {
   try {
-    const response = await fetch(`/api/workouts/${workoutId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: updates.name,
-        description: updates.description,
-        exercises: updates.exercises?.map((ex, index) => ({
+    const requestBody = {
+      name: updates.name,
+      description: updates.description,
+      public: updates.public,
+      exercises:
+        updates.exercises?.map((ex, index) => ({
           name: ex.exerciseId, // API expects exercise name for now
           sets: ex.sets,
           reps: ex.reps,
           weight: ex.weight,
           notes: ex.notes,
         })) || [],
-      }),
+    };
+
+
+
+    const response = await fetch(`/api/workouts/${workoutId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
     });
 
+
+
     if (!response.ok) {
-      throw new Error(`Failed to update workout: ${response.status}`);
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+
+      throw new Error(`Failed to update workout: ${response.status} - ${errorData.error}`);
     }
 
     const result = await response.json();
+
     return !!result.workout;
   } catch (error) {
     console.error("Error updating workout:", error);
@@ -338,7 +357,7 @@ export const updateWorkoutImage = async (
 export const canDeleteWorkout = async (workoutId: string): Promise<boolean> => {
   try {
     const workout = await getWorkoutById(workoutId);
-    return workout ? (workout.isOwner ?? false) : false;
+    return workout ? workout.isOwner ?? false : false;
   } catch (error) {
     console.error("Error checking workout ownership:", error);
     return false;
@@ -380,7 +399,7 @@ export const getRandomWorkoutImage = (
     }));
     return getImageForWorkout(exerciseDetails);
   }
-  
+
   return getImageByCategory(category);
 };
 
@@ -394,88 +413,8 @@ export const getFallbackImageByCategory = (category: string): string => {
 // For backwards compatibility, export image functions
 export {
   getImageForExercise,
-  getImageForWorkout, 
-  getImageByCategory
+  getImageForWorkout,
+  getImageByCategory,
 } from "./workoutImageStorage";
 
-/**
- * Migration function to handle localStorage to API transition
- * This will be called automatically when components load
- */
-export const migrateLocalStorageWorkouts = async (): Promise<boolean> => {
-  if (typeof window === "undefined") return true;
-  
-  try {
-    // Check if migration was already completed
-    const migrationComplete = localStorage.getItem("workout_migration_complete");
-    if (migrationComplete === "true") {
-      return true;
-    }
 
-    // Check for existing localStorage workouts
-    const savedWorkouts = localStorage.getItem("customWorkouts");
-    if (!savedWorkouts) {
-      // No localStorage workouts to migrate
-      localStorage.setItem("workout_migration_complete", "true");
-      return true;
-    }
-
-    const localWorkouts = JSON.parse(savedWorkouts) as Workout[];
-    if (localWorkouts.length === 0) {
-      localStorage.setItem("workout_migration_complete", "true");
-      return true;
-    }
-
-    console.log(`Migrating ${localWorkouts.length} workouts from localStorage to API...`);
-
-    // Migrate each workout
-    let successCount = 0;
-    for (const workout of localWorkouts) {
-      try {
-        if (workout.workoutExercises && workout.workoutExercises.length > 0) {
-          const migrationData: CreateWorkoutData = {
-            name: workout.name,
-            description: workout.description,
-            exercises: workout.workoutExercises.map((ex) => ({
-              exerciseId: ex.exerciseId,
-              sets: ex.sets,
-              reps: ex.reps,
-              weight: ex.weight,
-              notes: ex.notes,
-            })),
-            image: workout.image,
-            public: false, // Keep user workouts private by default
-          };
-
-          await addWorkout(migrationData);
-          successCount++;
-          console.log(`Successfully migrated workout: ${workout.name}`);
-        }
-      } catch (error) {
-        console.error(`Failed to migrate workout "${workout.name}":`, error);
-      }
-    }
-
-    if (successCount > 0) {
-      localStorage.setItem("workout_migration_complete", "true");
-      console.log(`Successfully migrated ${successCount}/${localWorkouts.length} workouts`);
-    }
-
-    return successCount === localWorkouts.length;
-  } catch (error) {
-    console.error("Error during workout migration:", error);
-    return false;
-  }
-};
-
-/**
- * Initialize API-based workout system
- * Call this in components that need workout data
- */
-export const initializeWorkoutSystem = async (): Promise<void> => {
-  try {
-    await migrateLocalStorageWorkouts();
-  } catch (error) {
-    console.warn("Workout migration failed, but continuing with API system:", error);
-  }
-};

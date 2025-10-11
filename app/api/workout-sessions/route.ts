@@ -10,27 +10,27 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
     const body = await request.json();
-    console.log(
-      "Received workout session data:",
-      JSON.stringify(body, null, 2)
-    );
 
     const { workoutId, startTime, endTime, duration, exercises } = body;
 
     if (!workoutId || !startTime || !endTime || !duration) {
-      console.error("Missing required data:", {
-        workoutId,
-        startTime,
-        endTime,
-        duration,
-      });
       return NextResponse.json(
-        { error: "Missing required session data" },
+        { success: false, error: "Missing required session data" },
         { status: 400 }
       );
     }
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!existingWorkout) {
-      return NextResponse.json({ error: "Workout not found" }, { status: 404 });
+      return NextResponse.json({ success: false, error: "Workout not found" }, { status: 404 });
     }
 
     // Validate and filter exercises before transaction
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         const newSession = await tx.workoutSession.create({
           data: {
             workoutId,
-            userId: session.user.id as string,
+            userId: user.id,
             startTime: new Date(startTime),
             endTime: new Date(endTime),
             duration: Math.floor(duration / 1000), // Convert to seconds
@@ -122,14 +122,15 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({
+      success: true,
       message: "Workout session saved successfully",
       sessionId: workoutSession.id,
     });
   } catch (error) {
     console.error("Error saving workout session:", error);
-    console.error("Error details:", error);
     return NextResponse.json(
       {
+        success: false,
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
       },

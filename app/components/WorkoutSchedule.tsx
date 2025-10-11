@@ -110,6 +110,8 @@ export default function WorkoutScheduleComponent({
       
       if (result) {
         setHasChanges(false);
+        // Refresh the schedules data to get the latest from the server
+        await refetch();
         onScheduleUpdate?.(result);
       }
     } finally {
@@ -118,7 +120,8 @@ export default function WorkoutScheduleComponent({
   };
 
   const toggleDay = (dayOfWeek: number) => {
-    handleScheduleChange(dayOfWeek, 'isEnabled', !editingSchedules[dayOfWeek].isEnabled);
+    const currentValue = editingSchedules[dayOfWeek]?.isEnabled;
+    handleScheduleChange(dayOfWeek, 'isEnabled', !currentValue);
   };
 
   const getTimeSlots = () => {
@@ -194,43 +197,11 @@ export default function WorkoutScheduleComponent({
 
   return (
     <div className="bg-gray-800 rounded-xl p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+      <div className="mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
           <FaCalendarAlt className="mr-2 sm:mr-3 text-yellow-500" />
           Workout Schedule
         </h2>
-        
-        {hasChanges && (
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-            <button
-              onClick={() => {
-                refetch();
-                setHasChanges(false);
-              }}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base"
-            >
-              <FaTimes className="mr-2" />
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center font-medium transition-colors disabled:opacity-50 text-sm sm:text-base"
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-black mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <FaSave className="mr-2" />
-                  Save Schedule
-                </>
-              )}
-            </button>
-          </div>
-        )}
       </div>
 
       {error && (
@@ -344,6 +315,39 @@ export default function WorkoutScheduleComponent({
           </div>
         ))}
       </div>
+
+      {/* Save/Cancel Buttons */}
+      {hasChanges && (
+        <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+          <button
+            onClick={() => {
+              refetch();
+              setHasChanges(false);
+            }}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base"
+          >
+            <FaTimes className="mr-2" />
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg flex items-center justify-center font-medium transition-colors disabled:opacity-50 text-sm sm:text-base"
+          >
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-black mr-2"></div>
+                Saving...
+              </>
+            ) : (
+              <>
+                <FaSave className="mr-2" />
+                Save Schedule
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       <div className="mt-6 p-4 bg-gray-750 rounded-lg">
         <div className="text-sm text-gray-400">

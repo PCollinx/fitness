@@ -30,7 +30,7 @@ import {
   compressImage,
   MAX_FILE_SIZE,
   ALLOWED_IMAGE_TYPES,
-} from "../utils/userStorage/imageUtils";
+} from "../utils/imageUtils";
 
 import ProfileImageUpload from "../components/ProfileImageUpload";
 import { useUserProfile, UserProfile } from "../context/UserProfileContext";
@@ -148,13 +148,13 @@ export default function ProfilePage() {
         setUploadStatus({
           isUploading: false,
           isError: true,
-          message: validationResult.message || "Invalid image file",
+          message: validationResult.error || "Invalid image file",
         });
         return;
       }
 
       // Set the processed image data
-      setTempImage(validationResult.imageData || "");
+      setTempImage(validationResult.processedImage || "");
 
       setUploadStatus({
         isUploading: false,

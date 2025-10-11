@@ -6,6 +6,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FaArrowLeft, FaLock } from "react-icons/fa";
+import BackButton from "@/app/components/BackButton";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -176,13 +177,12 @@ function ResetPasswordContent() {
           </div>
 
           <div className="flex justify-center">
-            <Link
-              href="/auth/signin"
+            <BackButton
+              fallbackRoute="/auth/signin"
               className="flex items-center text-sm text-gray-300 hover:text-yellow-500"
-            >
-              <FaArrowLeft className="mr-2" />
-              Back to sign in
-            </Link>
+              text="Back to sign in"
+              showText={true}
+            />
           </div>
         </form>
       </div>

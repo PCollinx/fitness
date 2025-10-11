@@ -73,6 +73,7 @@ export default function WorkoutSessionPage() {
   const [isSubmittingSession, setIsSubmittingSession] = useState(false);
   const [sessionSubmitted, setSessionSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   // Track the progress of each set for each exercise
   const [setTrackers, setSetTrackers] = useState<Record<string, SetTracker[]>>(
@@ -94,7 +95,7 @@ export default function WorkoutSessionPage() {
           return;
         }
 
-        console.log("Loaded workout for session:", foundWorkout);
+
 
         // The API storage already returns workoutExercises in the right format
         const transformedWorkout = foundWorkout;
@@ -203,12 +204,7 @@ export default function WorkoutSessionPage() {
     }
   };
 
-  // Move to the previous exercise
-  const prevExercise = () => {
-    if (currentExerciseIndex > 0) {
-      setCurrentExerciseIndex((prev) => prev - 1);
-    }
-  };
+
 
   // Handle confirm completion
   const handleConfirmComplete = async () => {
@@ -248,7 +244,8 @@ export default function WorkoutSessionPage() {
       workout.id,
       sessionStart,
       endTime,
-      setTrackers
+      setTrackers,
+      workout.workoutExercises
     );
 
     // Submit session to API
@@ -257,7 +254,7 @@ export default function WorkoutSessionPage() {
 
     try {
       const response = await submitWorkoutSession(sessionData);
-      console.log("Workout session saved successfully:", response);
+
       setSessionSubmitted(true);
     } catch (error) {
       console.error("Failed to save workout session:", error);
@@ -270,19 +267,23 @@ export default function WorkoutSessionPage() {
       setIsSubmittingSession(false);
     }
 
-    // Log session completion
-    console.log("Workout completed:", {
-      workoutId: workout.id,
-      startTime: sessionStart,
-      endTime: endTime,
-      elapsedTime: sessionCompleted
-        ? elapsedTime
-        : Math.floor((endTime.getTime() - sessionStart.getTime()) / 1000),
-      exercises: workout.workoutExercises?.map((exercise) => ({
-        exerciseId: exercise.exerciseId,
-        sets: setTrackers[exercise.exerciseId],
-      })),
-    });
+    
+  };
+
+  // Cancel workout functions
+  const cancelWorkout = () => {
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelWorkout = () => {
+    // Reset session state and navigate back
+    setSessionStarted(false);
+    setSessionCompleted(false);
+    setTimerRunning(false);
+    setTimerSeconds(0);
+    setElapsedTime(0);
+    setSessionStart(null);
+    router.push("/workouts");
   };
 
   // Get the current exercise
@@ -489,7 +490,7 @@ export default function WorkoutSessionPage() {
                 className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-8 rounded-md text-lg font-medium flex items-center justify-center mx-auto transition-colors"
               >
                 <FaPlay className="mr-2" />
-                <span>Start Workout</span>
+                <span>Start Now</span>
               </button>
             </div>
           </div>
@@ -528,14 +529,6 @@ export default function WorkoutSessionPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  {currentExerciseIndex > 0 && (
-                    <button
-                      onClick={prevExercise}
-                      className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md border border-gray-600 transition-colors"
-                    >
-                      Previous
-                    </button>
-                  )}
                   <button
                     onClick={nextExercise}
                     className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-2 px-4 rounded-md font-medium transition-colors"
@@ -687,6 +680,54 @@ export default function WorkoutSessionPage() {
                       <span>Reset</span>
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Cancel Workout Button */}
+              <div className="mt-6 text-center">
+                <button
+                  onClick={cancelWorkout}
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center justify-center font-medium transition-colors mx-auto"
+                >
+                  <FaTimes className="mr-2" />
+                  Cancel Workout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cancel Workout Confirmation Modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500 rounded-full mb-4">
+                  <FaTimes className="h-8 w-8 text-white" />
+                </div>
+
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Cancel Workout?
+                </h3>
+
+                <p className="text-gray-300 mb-6">
+                  Are you sure you want to cancel this workout? Your progress will not be saved.
+                </p>
+
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md border border-gray-600 transition-colors"
+                  >
+                    Continue Workout
+                  </button>
+
+                  <button
+                    onClick={confirmCancelWorkout}
+                    className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md font-medium transition-colors"
+                  >
+                    Cancel Workout
+                  </button>
                 </div>
               </div>
             </div>

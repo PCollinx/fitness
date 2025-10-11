@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import BackButton from "@/app/components/BackButton";
@@ -44,6 +44,8 @@ export default function WorkoutDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const fromPlan = searchParams.get('from') === 'plan';
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +69,7 @@ export default function WorkoutDetailPage() {
         }
 
         const data = await response.json();
+
         setWorkout(data);
       } catch (err) {
         console.error("Error loading workout:", err);
@@ -81,20 +84,24 @@ export default function WorkoutDetailPage() {
 
   const handleStartWorkout = () => {
     if (workout) {
-      console.log("Starting workout:", workout.id);
-      console.log("Navigating to:", `/workouts/start/${workout.id}`);
-      router.push(`/workouts/start/${workout.id}`);
+      const startUrl = `/workouts/start/${workout.id}`;
+      router.push(startUrl);
     } else {
-      console.log("No workout found");
+
     }
   };
 
   const handleEditWorkout = () => {
-    router.push(`/workouts/${workout?.id}/edit`);
+
+    const editUrl = fromPlan 
+      ? `/workouts/edit/${workout?.id}?from=plan`
+      : `/workouts/edit/${workout?.id}`;
+    router.push(editUrl);
   };
 
   const handleDeleteWorkout = async () => {
     if (!workout || !workout.isOwner) return;
+
 
     setIsDeleting(true);
 
@@ -103,13 +110,20 @@ export default function WorkoutDetailPage() {
         method: "DELETE",
       });
 
+
+
       if (!response.ok) {
-        throw new Error("Failed to delete workout");
+        const errorData = await response.json();
+        console.error("Delete failed with error:", errorData);
+        throw new Error(errorData.error || "Failed to delete workout");
       }
+
+      const result = await response.json();
 
       router.push("/workouts");
     } catch (err) {
       console.error("Error deleting workout:", err);
+      alert("Failed to delete workout. Please try again.");
       setIsDeleting(false);
     }
   };
@@ -138,9 +152,9 @@ export default function WorkoutDetailPage() {
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
             <BackButton
-              fallbackRoute="/workouts"
+              fallbackRoute={fromPlan ? "/workouts/plan" : "/workouts"}
               className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
-              text="Back to Workouts"
+              text={fromPlan ? "Back to Plan" : "Back to Workouts"}
             />
           </div>
           <div className="text-center py-16">
@@ -152,9 +166,9 @@ export default function WorkoutDetailPage() {
               The workout you're looking for could not be loaded.
             </p>
             <BackButton
-              fallbackRoute="/workouts"
+              fallbackRoute={fromPlan ? "/workouts/plan" : "/workouts"}
               className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg font-medium transition"
-              text="Back to Workouts"
+              text={fromPlan ? "Back to Plan" : "Back to Workouts"}
             />
           </div>
         </div>
@@ -172,9 +186,9 @@ export default function WorkoutDetailPage() {
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
             <BackButton
-              fallbackRoute="/workouts"
+              fallbackRoute={fromPlan ? "/workouts/plan" : "/workouts"}
               className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
-              text="Back to Workouts"
+              text={fromPlan ? "Back to Plan" : "Back to Workouts"}
             />
           </div>
 
@@ -256,7 +270,7 @@ export default function WorkoutDetailPage() {
                   className="w-full bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-4 rounded-lg font-bold text-lg flex items-center justify-center transition"
                 >
                   <FaPlay className="mr-3" />
-                  Start Workout
+                  Start Now
                 </button>
 
                 {workout.isOwner && (

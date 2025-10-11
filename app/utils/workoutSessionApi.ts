@@ -11,6 +11,8 @@ export interface WorkoutSessionData {
       completed: boolean;
       actualReps?: number;
       actualWeight?: number;
+      targetReps?: number;
+      targetWeight?: number;
       notes?: string;
     }>;
   }>;
@@ -70,23 +72,32 @@ export async function submitWorkoutSession(
   sessionData: WorkoutSessionData
 ): Promise<WorkoutSessionResponse> {
   try {
+    const requestBody = {
+      workoutId: sessionData.workoutId,
+      startTime: sessionData.startTime.toISOString(),
+      endTime: sessionData.endTime.toISOString(),
+      duration: sessionData.elapsedTime * 1000, // Convert to milliseconds as API expects
+      exercises: sessionData.exercises,
+      notes: sessionData.notes,
+    };
+
     const response = await fetch("/api/workout-sessions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        workoutId: sessionData.workoutId,
-        startTime: sessionData.startTime.toISOString(),
-        endTime: sessionData.endTime.toISOString(),
-        elapsedTime: sessionData.elapsedTime * 1000,
-        exercises: sessionData.exercises,
-        notes: sessionData.notes,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch (e) {
+        // Could not parse error response, use default message
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -186,16 +197,36 @@ export function formatWorkoutSessionData(
       notes?: string;
     }>
   >,
+  workoutExercises?: Array<{
+    exerciseId: string;
+    sets: number;
+    reps: number;
+    weight?: number;
+  }>,
   notes?: string
 ): WorkoutSessionData {
   const elapsedTime = Math.floor(
     (endTime.getTime() - startTime.getTime()) / 1000
   );
 
-  const exercises = Object.entries(setTrackers).map(([exerciseId, sets]) => ({
-    exerciseId,
-    sets,
-  }));
+  const exercises = Object.entries(setTrackers)
+    .filter(([exerciseId, sets]) => exerciseId && sets && sets.length > 0)
+    .map(([exerciseId, sets]) => {
+      // Find the corresponding workout exercise to get target values
+      const workoutExercise = workoutExercises?.find(ex => ex.exerciseId === exerciseId);
+      
+      return {
+        exerciseId,
+        sets: sets.map(set => ({
+          completed: set.completed || false,
+          actualReps: set.actualReps ?? (workoutExercise ? parseInt(workoutExercise.reps.toString()) : undefined),
+          actualWeight: set.actualWeight ?? workoutExercise?.weight,
+          targetReps: workoutExercise ? parseInt(workoutExercise.reps.toString()) : undefined,
+          targetWeight: workoutExercise?.weight,
+          notes: set.notes,
+        })),
+      };
+    });
 
   return {
     workoutId,

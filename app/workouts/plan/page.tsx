@@ -33,12 +33,22 @@ export default function PlanWorkoutPage() {
     {
       type: "quick",
       title: "Quick Workout",
-      description: "Create a workout in minutes with our guided builder",
-      duration: "5-10 min setup",
+      description: "Choose from ready-made workouts and start immediately",
+      duration: "1-2 min setup",
       difficulty: "Any Level",
       icon: <FaClock className="text-2xl" />,
       color: "from-blue-500 to-blue-600",
-      route: "/workouts/new?type=quick",
+      route: "/workouts?from=plan&quick=true",
+    },
+    {
+      type: "comprehensive",
+      title: "Custom Workout",
+      description: "Design a detailed workout with full customization",
+      duration: "15-20 min setup",
+      difficulty: "Intermediate",
+      icon: <FaLayerGroup className="text-2xl" />,
+      color: "from-purple-500 to-purple-600",
+      route: "/workouts/new?type=custom&from=plan",
     },
     {
       type: "targeted",
@@ -50,16 +60,7 @@ export default function PlanWorkoutPage() {
       color: "from-green-500 to-green-600",
       route: "/workouts/muscle-targeting-plan",
     },
-    {
-      type: "comprehensive",
-      title: "Custom Workout",
-      description: "Design a detailed workout with full customization",
-      duration: "15-20 min setup",
-      difficulty: "Intermediate",
-      icon: <FaLayerGroup className="text-2xl" />,
-      color: "from-purple-500 to-purple-600",
-      route: "/workouts/new?type=custom",
-    },
+
     {
       type: "schedule",
       title: "Weekly Plan",
@@ -84,7 +85,7 @@ export default function PlanWorkoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 sm:py-8 pt-12">
         {/* Navigation */}
         <div className="mb-6">
           <BackButton fallbackRoute="/dashboard" />
@@ -170,39 +171,40 @@ export default function PlanWorkoutPage() {
                     Quick Start
                   </h4>
                   <p className="text-gray-400 text-xs">
-                    New to fitness? Start with Quick Workout for guided
-                    creation.
+                    New to fitness? Browse through our custom workouts for a
+                    quick start.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-3">
-                <div className="bg-green-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
-                  <FaBullseye className="text-green-500 text-sm" />
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-purple-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
+                    <FaLayerGroup className="text-purple-500 text-sm" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white text-sm">
+                      Custom Control
+                    </h4>
+                    <p className="text-gray-400 text-xs">
+                      Advanced users can create detailed, personalized routines.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-medium text-white text-sm">
-                    Targeted Training
-                  </h4>
-                  <p className="text-gray-400 text-xs">
-                    Focus on specific muscles for balanced strength development.
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="bg-purple-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
-                  <FaLayerGroup className="text-purple-500 text-sm" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-white text-sm">
-                    Custom Control
-                  </h4>
-                  <p className="text-gray-400 text-xs">
-                    Advanced users can create detailed, personalized routines.
-                  </p>
+                <div className="flex items-start space-x-3">
+                  <div className="bg-green-500/20 p-2 rounded-lg mt-1 flex-shrink-0">
+                    <FaBullseye className="text-green-500 text-sm" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white text-sm">
+                      Targeted Training
+                    </h4>
+                    <p className="text-gray-400 text-xs">
+                      Focus on specific muscles for balanced strength
+                      development.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -221,20 +223,6 @@ export default function PlanWorkoutPage() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Browse Existing */}
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">
-            Or browse from our curated workout library
-          </p>
-          <Link
-            href="/workouts"
-            className="inline-flex items-center bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            <FaDumbbell className="mr-2" />
-            Browse Existing Workouts
-          </Link>
         </div>
       </div>
     </div>

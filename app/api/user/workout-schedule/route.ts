@@ -3,31 +3,27 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/prisma";
 
-// Type assertion to include WorkoutSchedule model
-type PrismaWithWorkoutSchedule = typeof prisma & {
-  workoutSchedule: {
-    findMany: (args: any) => Promise<any>;
-    findFirst: (args: any) => Promise<any>;
-    findUnique: (args: any) => Promise<any>;
-    create: (args: any) => Promise<any>;
-    update: (args: any) => Promise<any>;
-    deleteMany: (args: any) => Promise<any>;
-  };
-};
-
-const prismaWithWorkoutSchedule = prisma as PrismaWithWorkoutSchedule;
-
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const schedules = await prismaWithWorkoutSchedule.workoutSchedule.findMany({
+    // Find the user by email to get the actual database user ID
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    const schedules = await prisma.workoutSchedule.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
       },
       orderBy: {
         dayOfWeek: "asc",
@@ -48,8 +44,18 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Find the user by email to get the actual database user ID
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const body = await request.json();
@@ -81,13 +87,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if schedule already exists for this user and day
-    const existingSchedule =
-      await prismaWithWorkoutSchedule.workoutSchedule.findFirst({
-        where: {
-          userId: session.user.id,
-          dayOfWeek: dayOfWeek,
-        },
-      });
+    const existingSchedule = await prisma.workoutSchedule.findFirst({
+      where: {
+        userId: user.id,
+        dayOfWeek: dayOfWeek,
+      },
+    });
 
     if (existingSchedule) {
       return NextResponse.json(
@@ -96,9 +101,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const schedule = await prismaWithWorkoutSchedule.workoutSchedule.create({
+    const schedule = await prisma.workoutSchedule.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         dayOfWeek,
         time,
         isActive: isActive ?? true,
@@ -121,8 +126,18 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Find the user by email to get the actual database user ID
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const body = await request.json();
@@ -166,12 +181,10 @@ export async function PUT(request: NextRequest) {
 
     // Use transaction to update all schedules
     const result = await prisma.$transaction(async (tx) => {
-      const txWithWorkoutSchedule = tx as any;
-
       // Delete existing schedules for the user
-      await txWithWorkoutSchedule.workoutSchedule.deleteMany({
+      await tx.workoutSchedule.deleteMany({
         where: {
-          userId: session.user.id,
+          userId: user.id,
         },
       });
 
@@ -179,9 +192,9 @@ export async function PUT(request: NextRequest) {
       const createdSchedules = [];
       for (const schedule of schedules) {
         if (schedule.isEnabled) {
-          const created = await txWithWorkoutSchedule.workoutSchedule.create({
+          const created = await tx.workoutSchedule.create({
             data: {
-              userId: session.user.id,
+              userId: user.id,
               dayOfWeek: schedule.dayOfWeek,
               time: schedule.time,
               isActive: schedule.isActive ?? true,
@@ -191,6 +204,7 @@ export async function PUT(request: NextRequest) {
               reminderMinutes: schedule.reminderMinutes ?? 15,
             },
           });
+          
           createdSchedules.push(created);
         }
       }
@@ -212,8 +226,18 @@ export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Find the user by email to get the actual database user ID
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -227,12 +251,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verify the schedule belongs to the user
-    const schedule = await prismaWithWorkoutSchedule.workoutSchedule.findUnique(
-      {
-        where: { id: scheduleId },
-        select: { userId: true },
-      }
-    );
+    const schedule = await prisma.workoutSchedule.findUnique({
+      where: { id: scheduleId },
+      select: { userId: true },
+    });
 
     if (!schedule) {
       return NextResponse.json(
@@ -241,7 +263,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    if (schedule.userId !== session.user?.id) {
+    if (schedule.userId !== user.id) {
       return NextResponse.json(
         { error: "Not authorized to delete this schedule" },
         { status: 403 }
@@ -249,7 +271,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Soft delete by deactivating
-    await prismaWithWorkoutSchedule.workoutSchedule.update({
+    await prisma.workoutSchedule.update({
       where: { id: scheduleId },
       data: { isActive: false },
     });

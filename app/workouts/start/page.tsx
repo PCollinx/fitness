@@ -16,6 +16,7 @@ import {
   FaFire,
   FaArrowRight,
   FaArrowLeft,
+  FaTimes,
 } from "react-icons/fa";
 
 interface Exercise {
@@ -49,10 +50,21 @@ function StartWorkoutContent() {
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
   const [completedExercises, setCompletedExercises] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [fallbackRoute, setFallbackRoute] = useState("/workouts");
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isWorkoutPaused, setIsWorkoutPaused] = useState(false);
+  const [pausedTime, setPausedTime] = useState(0);
+  const [pauseStartTime, setPauseStartTime] = useState<Date | null>(null);
 
   const isTemp = searchParams.get("temp") === "true";
 
   useEffect(() => {
+    // Check if coming from plan flow
+    const from = searchParams.get("from");
+    if (from === "plan") {
+      setFallbackRoute("/workouts?from=plan&quick=true");
+    }
+
     if (status === "unauthenticated") {
       router.push("/auth/signin");
       return;
@@ -80,7 +92,7 @@ function StartWorkoutContent() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (isTimerRunning && isResting && restTimer > 0) {
+    if (isTimerRunning && isResting && restTimer > 0 && !isWorkoutPaused) {
       interval = setInterval(() => {
         setRestTimer((prev) => prev - 1);
       }, 1000);
@@ -91,7 +103,7 @@ function StartWorkoutContent() {
     }
 
     return () => clearInterval(interval);
-  }, [isTimerRunning, isResting, restTimer, restTime]);
+  }, [isTimerRunning, isResting, restTimer, restTime, isWorkoutPaused]);
 
   const startRestTimer = () => {
     setIsResting(true);
@@ -206,6 +218,31 @@ function StartWorkoutContent() {
     }
   };
 
+  const cancelWorkout = () => {
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelWorkout = () => {
+    // Clear any temp data
+    sessionStorage.removeItem("tempWorkout");
+    // Navigate back without saving progress
+    router.push(fallbackRoute);
+  };
+
+  const toggleWorkoutPause = () => {
+    if (isWorkoutPaused) {
+      // Resume workout - add pause duration to total paused time
+      if (pauseStartTime) {
+        setPausedTime(prev => prev + (new Date().getTime() - pauseStartTime.getTime()));
+      }
+      setPauseStartTime(null);
+    } else {
+      // Pause workout - record when pause started
+      setPauseStartTime(new Date());
+    }
+    setIsWorkoutPaused(!isWorkoutPaused);
+  };
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -222,7 +259,7 @@ function StartWorkoutContent() {
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-400 mb-4">No workout data found</p>
-          <BackButton fallbackRoute="/workouts" />
+          <BackButton fallbackRoute={fallbackRoute} />
         </div>
       </div>
     );
@@ -235,7 +272,7 @@ function StartWorkoutContent() {
     100;
   const workoutTime = workoutStartTime
     ? Math.floor(
-        (new Date().getTime() - workoutStartTime.getTime()) / 1000 / 60
+        (new Date().getTime() - workoutStartTime.getTime() - pausedTime) / 1000 / 60
       )
     : 0;
 
@@ -244,17 +281,35 @@ function StartWorkoutContent() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <BackButton fallbackRoute="/workouts" />
+          <BackButton fallbackRoute={fallbackRoute} />
           <div className="text-center">
-            <p className="text-gray-400 text-sm">Workout In Progress</p>
+            <p className="text-gray-400 text-sm">
+              {isWorkoutPaused ? "Workout Paused" : "Workout In Progress"}
+            </p>
             <p className="text-yellow-500 font-medium">{workoutTime}min</p>
           </div>
-          <button
-            onClick={endWorkout}
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            End
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={toggleWorkoutPause}
+              className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+            >
+              {isWorkoutPaused ? <FaPlay className="mr-1" /> : <FaPause className="mr-1" />}
+              {isWorkoutPaused ? "Resume" : "Pause"}
+            </button>
+            <button
+              onClick={cancelWorkout}
+              className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+            >
+              <FaTimes className="mr-1" />
+              Cancel
+            </button>
+            <button
+              onClick={endWorkout}
+              className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              End
+            </button>
+          </div>
         </div>
 
         {/* Progress Bar */}
@@ -296,7 +351,7 @@ function StartWorkoutContent() {
 
         {/* Rest Timer */}
         {isResting && (
-          <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-6 mb-6 text-center">
+          <div className={`bg-blue-900/50 border border-blue-500 rounded-lg p-6 mb-6 text-center ${isWorkoutPaused ? 'opacity-60' : ''}`}>
             <FaClock className="text-4xl text-blue-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Rest Time</h2>
             <p className="text-4xl font-mono text-blue-400 mb-4">
@@ -306,13 +361,15 @@ function StartWorkoutContent() {
             <div className="flex space-x-4 justify-center">
               <button
                 onClick={skipRest}
-                className="bg-yellow-600 hover:bg-yellow-700 px-6 py-3 rounded-lg font-medium transition-colors"
+                disabled={isWorkoutPaused}
+                className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 Skip Rest
               </button>
               <button
                 onClick={() => setIsTimerRunning(!isTimerRunning)}
-                className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium transition-colors flex items-center"
+                disabled={isWorkoutPaused}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-medium transition-colors flex items-center"
               >
                 {isTimerRunning ? (
                   <FaPause className="mr-2" />
@@ -327,7 +384,7 @@ function StartWorkoutContent() {
 
         {/* Current Exercise */}
         {!isResting && (
-          <div className="bg-gray-800 rounded-lg p-6 mb-6">
+          <div className={`bg-gray-800 rounded-lg p-6 mb-6 ${isWorkoutPaused ? 'opacity-60' : ''}`}>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-gray-400 text-sm">
@@ -363,17 +420,9 @@ function StartWorkoutContent() {
 
             <div className="flex space-x-4">
               <button
-                onClick={previousExercise}
-                disabled={currentExerciseIndex === 0}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-4 rounded-lg font-medium transition-colors flex items-center justify-center"
-              >
-                <FaArrowLeft className="mr-2" />
-                Previous
-              </button>
-
-              <button
                 onClick={completeSet}
-                className="flex-1 bg-green-600 hover:bg-green-700 px-6 py-4 rounded-lg font-medium transition-colors flex items-center justify-center"
+                disabled={isWorkoutPaused}
+                className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-4 rounded-lg font-medium transition-colors flex items-center justify-center"
               >
                 <FaCheck className="mr-2" />
                 Complete Set
@@ -381,7 +430,8 @@ function StartWorkoutContent() {
 
               <button
                 onClick={skipExercise}
-                className="flex-1 bg-yellow-600 hover:bg-yellow-700 px-6 py-4 rounded-lg font-medium transition-colors flex items-center justify-center"
+                disabled={isWorkoutPaused}
+                className="flex-1 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-4 rounded-lg font-medium transition-colors flex items-center justify-center"
               >
                 Skip
                 <FaArrowRight className="ml-2" />
@@ -428,6 +478,35 @@ function StartWorkoutContent() {
             ))}
           </div>
         </div>
+
+        {/* Cancel Workout Confirmation Modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
+              <div className="text-center mb-6">
+                <FaTimes className="text-red-500 text-4xl mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">Cancel Workout?</h3>
+                <p className="text-gray-400">
+                  Are you sure you want to cancel this workout? Your progress will not be saved.
+                </p>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Continue Workout
+                </button>
+                <button
+                  onClick={confirmCancelWorkout}
+                  className="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Cancel Workout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

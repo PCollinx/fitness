@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
 import { useSession } from "next-auth/react";
+import BackButton from "@/app/components/BackButton";
 
 // Progress entry from database
 type ProgressEntry = {
@@ -168,13 +169,11 @@ export default function ProgressDetailPage() {
     <div className="min-h-screen bg-gray-900 pt-8 pb-12">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-8">
-          <Link
-            href="/progress/history"
+          <BackButton
+            fallbackRoute="/progress"
             className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back to Progress History</span>
-          </Link>
+            text="Back to Progress"
+          />
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">

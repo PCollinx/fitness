@@ -131,6 +131,12 @@ export default function EditWorkoutPage() {
       setIsLoading(true);
 
       try {
+        // Load exercises and metadata first
+        const [exerciseData, metaData] = await Promise.all([
+          fetchExercises(),
+          fetchExerciseMetadata(),
+        ]);
+
         // Load the current workout
         const workout = await getWorkoutById(workoutId as string);
 
@@ -148,7 +154,15 @@ export default function EditWorkoutPage() {
 
         setCurrentWorkout(workout);
 
-        // Populate form with workout data
+        // Populate form with workout data AFTER exercises are loaded
+        const formExercises = workout.workoutExercises?.map((ex) => ({
+          exerciseId: ex.exerciseId,
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight || 0,
+          notes: ex.notes || "",
+        })) || [{ exerciseId: "", sets: 3, reps: 10, weight: 0, notes: "" }];
+
         reset({
           name: workout.name,
           description: workout.description || "",
@@ -162,29 +176,11 @@ export default function EditWorkoutPage() {
               | "Flexibility"
               | "HIIT"
               | "Recovery") || "Strength",
-          exercises: workout.workoutExercises?.map((ex) => ({
-            exerciseId: ex.exerciseId,
-            sets: ex.sets,
-            reps: ex.reps,
-            weight: ex.weight || 0,
-            notes: ex.notes || "",
-          })) || [{ exerciseId: "", sets: 3, reps: 10, weight: 0, notes: "" }],
+          exercises: formExercises,
         });
-
-        // Load exercises and metadata
-        const [exerciseData, metaData] = await Promise.all([
-          fetchExercises(),
-          fetchExerciseMetadata(),
-        ]);
-
-        console.log("Loaded exercises:", exerciseData.length);
-        console.log("Loaded muscle groups:", metaData.muscleGroups);
 
         if (exerciseData.length === 0) {
           setNeedsSeeding(true);
-        } else {
-          setExercises(exerciseData);
-          setMuscleGroups(metaData.muscleGroups);
         }
       } catch (error) {
         console.error("Error loading workout data:", error);
@@ -207,8 +203,7 @@ export default function EditWorkoutPage() {
         fetchExercises(),
         fetchExerciseMetadata(),
       ]);
-      console.log("Seeded exercises:", exerciseData.length);
-      console.log("Seeded muscle groups:", metaData.muscleGroups);
+
       setExercises(exerciseData);
       setMuscleGroups(metaData.muscleGroups);
       setNeedsSeeding(false);
@@ -310,12 +305,10 @@ export default function EditWorkoutPage() {
 
   // Remove exercise from workout
   const removeExercise = (index: number) => {
-    console.log(
-      `Attempting to remove exercise at index ${index}, total exercises: ${fields.length}`
-    );
+
     if (fields.length > 1) {
       remove(index);
-      console.log(`Exercise removed, new total: ${fields.length - 1}`);
+
     } else {
       // Provide feedback that at least one exercise is required
       alert("At least one exercise is required for a workout");
@@ -375,8 +368,8 @@ export default function EditWorkoutPage() {
             >
               Load Default Exercises
             </button>
-            <BackButton 
-              fallbackRoute="/workouts" 
+            <BackButton
+              fallbackRoute="/workouts"
               className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
               text="Back to Workouts"
             />
@@ -392,10 +385,9 @@ export default function EditWorkoutPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="mb-6">
-            <BackButton 
-              fallbackRoute={`/workouts/${workoutId}`}
+            <BackButton
+              fallbackRoute="/workouts"
               className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
-              text="Back to Workout"
             />
           </div>
 

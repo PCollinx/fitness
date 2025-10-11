@@ -35,13 +35,22 @@ export async function GET(
       return NextResponse.json({ error: "Workout not found" }, { status: 404 });
     }
 
+    // Get current user ID for ownership check (consistent with workout list endpoint)
+    const currentUserId = session?.user?.email
+      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
+          ?.id
+      : null;
+
+    // Debug logging for ownership check
+
+
     // Transform the data
     const transformedWorkout = {
       id: workout.id,
       name: workout.name,
       description: workout.description,
       image: workout.image,
-      isOwner: workout.userId === session.user?.id,
+      isOwner: currentUserId ? workout.userId === currentUserId : false,
       author: workout.user.name || "Unknown",
       exerciseCount: workout.exercises.length,
       muscleGroups: [
@@ -84,13 +93,23 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description, exercises } = body;
+    const { name, description, exercises, public: isPublic } = body;
 
     if (!name || !exercises || !Array.isArray(exercises)) {
       return NextResponse.json(
         { error: "Invalid request data" },
         { status: 400 }
       );
+    }
+
+    // Get current user ID for ownership check (consistent with other methods)
+    const currentUserId = session?.user?.email
+      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
+          ?.id
+      : null;
+
+    if (!currentUserId) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the workout exists and is owned by the user
@@ -106,7 +125,7 @@ export async function PUT(
       return NextResponse.json({ error: "Workout not found" }, { status: 404 });
     }
 
-    if (existingWorkout.userId !== session.user?.id) {
+    if (existingWorkout.userId !== currentUserId) {
       return NextResponse.json(
         { error: "Not authorized to update this workout" },
         { status: 403 }
@@ -121,6 +140,7 @@ export async function PUT(
         data: {
           name,
           description: description || null,
+          public: isPublic !== undefined ? isPublic : false,
           updatedAt: new Date(),
         },
       });
@@ -178,6 +198,16 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get current user ID for ownership check (consistent with GET endpoint)
+    const currentUserId = session?.user?.email
+      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
+          ?.id
+      : null;
+
+    if (!currentUserId) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     // Check if the workout exists and is owned by the user
     const workout = await prisma.workout.findUnique({
       where: { id: params.id },
@@ -192,7 +222,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Workout not found" }, { status: 404 });
     }
 
-    if (workout.userId !== session.user?.id) {
+    if (workout.userId !== currentUserId) {
       return NextResponse.json(
         { error: "Not authorized to delete this workout" },
         { status: 403 }
@@ -235,6 +265,16 @@ export async function PATCH(
       );
     }
 
+    // Get current user ID for ownership check (consistent with other methods)
+    const currentUserId = session?.user?.email
+      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
+          ?.id
+      : null;
+
+    if (!currentUserId) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     // Check if user owns the workout
     const existingWorkout = await prisma.workout.findUnique({
       where: { id: params.id },
@@ -245,7 +285,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Workout not found" }, { status: 404 });
     }
 
-    if (existingWorkout.userId !== session.user?.id) {
+    if (existingWorkout.userId !== currentUserId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

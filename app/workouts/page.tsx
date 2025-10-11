@@ -48,11 +48,20 @@ function WorkoutsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [isQuickMode, setIsQuickMode] = useState(false);
+  const [fromPlan, setFromPlan] = useState(false);
 
   useEffect(() => {
+    // Check for quick workout mode and plan source
+    const quick = searchParams.get("quick");
+    const from = searchParams.get("from");
+
+    setIsQuickMode(quick === "true");
+    setFromPlan(from === "plan");
+
     // Load workouts immediately - public workouts are accessible without authentication
     loadWorkouts();
-  }, []);
+  }, [searchParams]);
 
   // Check for refresh parameter
   useEffect(() => {
@@ -80,7 +89,7 @@ function WorkoutsContent() {
       const response = await fetch("/api/workouts?limit=50");
       if (response.ok) {
         const data = await response.json();
-        console.log("Workout data received:", data.workouts?.slice(0, 2)); // Debug first 2 workouts
+
         setWorkouts(data.workouts || []);
       } else {
         console.error("Failed to load workouts");
@@ -115,16 +124,27 @@ function WorkoutsContent() {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Workouts</h1>
             <p className="text-gray-400">
-              Find the perfect workout for your goals
+              {isQuickMode
+                ? "Choose a ready-made workout and start immediately"
+                : "Find the perfect workout for your goals"}
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex gap-2">
-            <Link
-              href="/workouts/history"
-              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg flex items-center font-medium transition-colors"
-            >
-              <FaHistory className="mr-2" /> History
-            </Link>
+            {isQuickMode && fromPlan ? (
+              <Link
+                href="/workouts/plan"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg flex items-center font-medium transition-colors"
+              >
+                <FaClock className="mr-2" /> Back to Plan
+              </Link>
+            ) : (
+              <Link
+                href="/workouts/history"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg flex items-center font-medium transition-colors"
+              >
+                <FaHistory className="mr-2" /> History
+              </Link>
+            )}
             <div className="flex gap-2">
               <button
                 onClick={loadWorkouts}
@@ -137,12 +157,14 @@ function WorkoutsContent() {
                 />
                 {isLoading ? "Loading" : "Refresh"}
               </button>
-              <Link
-                href="/workouts/new"
-                className="bg-yellow-400 hover:bg-yellow-300 text-black px-3 py-2 rounded-lg flex items-center font-medium"
-              >
-                <FaPlus className="mr-2" /> Create
-              </Link>
+              {!isQuickMode && (
+                <Link
+                  href="/workouts/new"
+                  className="bg-yellow-400 hover:bg-yellow-300 text-black px-3 py-2 rounded-lg flex items-center font-medium"
+                >
+                  <FaPlus className="mr-2" /> Create
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -254,18 +276,37 @@ function WorkoutsContent() {
                   </div>
                   <p className="text-gray-300 text-sm">{workout.description}</p>
                   <div className="mt-4">
-                    <Link
-                      href={`/workouts/${workout.id}`}
-                      className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg flex items-center justify-center transition"
-                    >
-                      View Workout
-                    </Link>
-                    <Link
-                      href={`/workouts/start/${workout.id}`}
-                      className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-2 px-4 rounded-lg flex items-center justify-center mt-2 font-medium transition"
-                    >
-                      <FaPlayCircle className="mr-2" /> Start Workout
-                    </Link>
+                    {isQuickMode ? (
+                      <>
+                        <Link
+                          href={`/workouts/start/${workout.id}?from=plan`}
+                          className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-3 px-4 rounded-lg flex items-center justify-center font-medium transition text-lg"
+                        >
+                          <FaPlayCircle className="mr-2" /> Start Now
+                        </Link>
+                        <Link
+                          href={`/workouts/${workout.id}?from=plan`}
+                          className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg flex items-center justify-center mt-2 transition text-sm"
+                        >
+                          View Details
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href={`/workouts/start/${workout.id}`}
+                          className="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-3 px-4 rounded-lg flex items-center justify-center font-medium transition text-lg"
+                        >
+                          <FaPlayCircle className="mr-2" /> Start Now
+                        </Link>
+                        <Link
+                          href={`/workouts/${workout.id}`}
+                          className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg flex items-center justify-center mt-2 transition text-sm"
+                        >
+                          View Details
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

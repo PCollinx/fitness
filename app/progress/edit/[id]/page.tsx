@@ -9,6 +9,7 @@ import { FaSave, FaArrowLeft, FaCalendarAlt } from "react-icons/fa";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
+import BackButton from "@/app/components/BackButton";
 
 // Progress entry from database
 type ProgressEntry = {
@@ -263,13 +264,11 @@ export default function EditProgressPage() {
     <div className="min-h-screen bg-gray-900 pt-8 pb-12">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
-          <Link
-            href={`/progress/${progressId}`}
+          <BackButton
+            fallbackRoute="/progress"
             className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back to Progress Details</span>
-          </Link>
+            text="Back to Progress Details"
+          />
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">

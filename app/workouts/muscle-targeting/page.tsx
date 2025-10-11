@@ -161,7 +161,7 @@ function MuscleTargetingContent() {
     if (isLoading) {
       const timeout = setTimeout(() => {
         if (isMounted.current) {
-          console.log("Navigation timeout, resetting loading state");
+
           setIsLoading(false);
           setError(
             "Navigation is taking longer than expected. Please try clicking the button again."
@@ -188,7 +188,7 @@ function MuscleTargetingContent() {
       return;
     }
 
-    console.log("Button clicked with selected muscles:", selectedMuscles);
+
     setError(""); // Clear any previous errors
     setIsLoading(true);
 
@@ -206,7 +206,7 @@ function MuscleTargetingContent() {
     params.append("muscles", selectedMuscles.join(","));
 
     const targetUrl = `/workouts/create-with-muscles?${params.toString()}`;
-    console.log("Attempting navigation to:", targetUrl);
+
 
     // Simple navigation - let Next.js handle it
     router.push(targetUrl);

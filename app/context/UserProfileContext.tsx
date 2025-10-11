@@ -8,7 +8,6 @@ import React, {
   ReactNode,
 } from "react";
 import { useSession } from "next-auth/react";
-import { performUserDataMigration } from "../utils/userStorage/migration";
 
 export type UserProfile = {
   id: string;
@@ -67,16 +66,6 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({
     try {
       if (status === "authenticated" && session?.user?.email) {
         const userId = session.user.email;
-
-        // First, attempt to migrate localStorage data if it exists
-        try {
-          await performUserDataMigration(userId);
-        } catch (migrationError) {
-          console.warn(
-            "Migration failed, but continuing with API fetch:",
-            migrationError
-          );
-        }
 
         // Fetch profile from API
         const response = await fetch("/api/user/profile", {
