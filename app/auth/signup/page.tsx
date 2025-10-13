@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 
 const signupSchema = z
@@ -27,6 +27,8 @@ export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -144,17 +146,28 @@ export default function SignupPage() {
               )}
             </div>
 
-            <div>
+            <div className="relative">
               <label htmlFor="password" className="sr-only">
                 Password
               </label>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className="relative block w-full rounded-md border-0 bg-gray-800 p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="relative block w-full rounded-md border-0 bg-gray-800 p-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 placeholder="Password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300"
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="h-5 w-5" />
+                ) : (
+                  <FaEye className="h-5 w-5" />
+                )}
+              </button>
               {errors.password && (
                 <p className="mt-2 text-sm text-red-400">
                   {errors.password.message}
@@ -162,17 +175,28 @@ export default function SignupPage() {
               )}
             </div>
 
-            <div>
+            <div className="relative">
               <label htmlFor="confirm-password" className="sr-only">
                 Confirm Password
               </label>
               <input
                 id="confirm-password"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 {...register("confirmPassword")}
-                className="relative block w-full rounded-md border-0 bg-gray-800 p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="relative block w-full rounded-md border-0 bg-gray-800 p-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 placeholder="Confirm Password"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300"
+              >
+                {showConfirmPassword ? (
+                  <FaEyeSlash className="h-5 w-5" />
+                ) : (
+                  <FaEye className="h-5 w-5" />
+                )}
+              </button>
               {errors.confirmPassword && (
                 <p className="mt-2 text-sm text-red-400">
                   {errors.confirmPassword.message}

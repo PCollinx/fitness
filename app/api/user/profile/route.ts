@@ -174,6 +174,50 @@ export async function PUT(request: NextRequest) {
         }
       }
 
+      // If weight is updated, sync with the most recent progress entry or create new one
+      if (weightNum !== null && weightNum !== undefined) {
+        // Get the most recent progress entry
+        const latestProgress = await tx.progress.findFirst({
+          where: { userId: user.id },
+          orderBy: { date: 'desc' },
+        });
+
+        // If the latest progress is from today, update it
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (latestProgress) {
+          const progressDate = new Date(latestProgress.date);
+          progressDate.setHours(0, 0, 0, 0);
+          
+          if (progressDate.getTime() === today.getTime()) {
+            // Update today's progress entry
+            await tx.progress.update({
+              where: { id: latestProgress.id },
+              data: { weight: weightNum },
+            });
+          } else {
+            // Create a new progress entry for today
+            await tx.progress.create({
+              data: {
+                userId: user.id,
+                date: new Date(),
+                weight: weightNum,
+              },
+            });
+          }
+        } else {
+          // No progress entries exist, create the first one
+          await tx.progress.create({
+            data: {
+              userId: user.id,
+              date: new Date(),
+              weight: weightNum,
+            },
+          });
+        }
+      }
+
       return user;
     });
 

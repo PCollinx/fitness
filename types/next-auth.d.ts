@@ -7,6 +7,7 @@ declare module "next-auth" {
     email: string;
     name: string;
     image?: string;
+    role?: string;
     fitnessGoals?: string[];
     fitnessLevel?: string;
     spotifyAccessToken?: string;
@@ -17,6 +18,7 @@ declare module "next-auth" {
   interface Session {
     user: User & {
       id: string;
+      role?: string;
       fitnessGoals?: string[];
       fitnessLevel?: string;
       spotifyAccessToken?: string;
@@ -29,10 +31,12 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    role?: string;
     fitnessGoals?: string[];
     fitnessLevel?: string;
     spotifyAccessToken?: string;
     spotifyRefreshToken?: string;
     hasCompletedOnboarding?: boolean;
+    onboardingCompleted?: boolean;
   }
 }

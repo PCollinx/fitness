@@ -107,32 +107,45 @@ export async function PUT(
       );
     }
 
-    // Update the progress entry
-    const updatedEntry = await prisma.progress.update({
-      where: { id },
-      data: {
-        date: new Date(date),
-        weight: weight ? parseFloat(weight) : null,
-        bodyFat: bodyFat ? parseFloat(bodyFat) : null,
-        chest: chest ? parseFloat(chest) : null,
-        waist: waist ? parseFloat(waist) : null,
-        hips: hips ? parseFloat(hips) : null,
-        arms: arms ? parseFloat(arms) : null,
-        thighs: thighs ? parseFloat(thighs) : null,
-        notes: notes || null,
-      },
-      select: {
-        id: true,
-        date: true,
-        weight: true,
-        bodyFat: true,
-        chest: true,
-        waist: true,
-        hips: true,
-        arms: true,
-        thighs: true,
-        notes: true,
-      },
+    // Update the progress entry and sync weight with user profile in a transaction
+    const updatedEntry = await prisma.$transaction(async (tx) => {
+      // Update progress entry
+      const entry = await tx.progress.update({
+        where: { id },
+        data: {
+          date: new Date(date),
+          weight: weight ? parseFloat(weight) : null,
+          bodyFat: bodyFat ? parseFloat(bodyFat) : null,
+          chest: chest ? parseFloat(chest) : null,
+          waist: waist ? parseFloat(waist) : null,
+          hips: hips ? parseFloat(hips) : null,
+          arms: arms ? parseFloat(arms) : null,
+          thighs: thighs ? parseFloat(thighs) : null,
+          notes: notes || null,
+        },
+        select: {
+          id: true,
+          date: true,
+          weight: true,
+          bodyFat: true,
+          chest: true,
+          waist: true,
+          hips: true,
+          arms: true,
+          thighs: true,
+          notes: true,
+        },
+      });
+
+      // If weight is provided, update user profile weight
+      if (weight !== undefined && weight !== null) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { weight: parseFloat(weight) },
+        });
+      }
+
+      return entry;
     });
 
     return NextResponse.json(updatedEntry);

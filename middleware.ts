@@ -65,15 +65,23 @@ export async function middleware(req: NextRequest) {
       token &&
       isProtectedRoute &&
       !token.onboardingCompleted &&
-      pathname !== "/onboarding" &&
-      token.fitnessGoals?.length === 0 // Only new users with no fitness goals
+      pathname !== "/onboarding"
     ) {
-      return NextResponse.redirect(new URL("/onboarding", req.url));
+      // Only redirect if user truly has no fitness goals (new user)
+      if (!token.fitnessGoals || token.fitnessGoals.length === 0) {
+        return NextResponse.redirect(new URL("/onboarding", req.url));
+      }
     }
 
     // If user has completed onboarding but trying to access onboarding page
-    if (token && pathname === "/onboarding" && token.onboardingCompleted) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+    if (token && pathname === "/onboarding") {
+      // If they have fitness goals or onboarding is marked complete, redirect to dashboard
+      if (
+        token.onboardingCompleted ||
+        (token.fitnessGoals && token.fitnessGoals.length > 0)
+      ) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
     }
 
     // If already authenticated and trying to access auth routes

@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { exerciseData } from "../lib/exerciseData";
-import { getImageForWorkout, resetUsedImagesTracker } from "../app/utils/workoutImageStorage";
+import {
+  getImageForWorkout,
+  resetUsedImagesTracker,
+} from "../app/utils/workoutImageStorage";
 
 const prisma = new PrismaClient();
 
@@ -765,10 +768,10 @@ async function main() {
 
   // Create default workouts for each fitness goal category
   console.log("🏋️ Creating default workouts...");
-  
+
   // Reset image tracker to ensure unique images for each workout
   resetUsedImagesTracker();
-  
+
   let totalWorkouts = 0;
 
   for (const [goalType, workouts] of Object.entries(defaultWorkouts)) {

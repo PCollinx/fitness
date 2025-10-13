@@ -8,7 +8,7 @@ import { authenticateApiUser, ApiErrors } from "@/lib/auth/api-auth";
 export async function POST(request: NextRequest) {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }

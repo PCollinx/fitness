@@ -21,6 +21,14 @@ export function useIsAdmin() {
         return;
       }
 
+      // First check if role is already in session (faster)
+      if (session?.user?.role === "admin") {
+        setIsAdmin(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fallback to API call if role not in session yet
       try {
         const response = await fetch("/api/auth/check-admin");
         if (response.ok) {

@@ -69,12 +69,10 @@ export default function FitnessGoalsOnboarding({
   useEffect(() => {
     // Only redirect if we're certain the user is unauthenticated
     // Don't redirect during loading state
-    useEffect(() => {
-      if (status === "unauthenticated") {
-        console.log("Redirecting to signin - no valid session");
-        router.push("/auth/signin");
-      }
-    }, [status, router]);
+    if (status === "unauthenticated") {
+      console.log("Redirecting to signin - no valid session");
+      router.push("/auth/signin");
+    }
 
     // If user is authenticated and has already completed onboarding, redirect to dashboard
     if (status === "authenticated" && session?.user?.hasCompletedOnboarding) {

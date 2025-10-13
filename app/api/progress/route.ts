@@ -122,23 +122,36 @@ export async function POST(request: Request) {
     const { date, weight, bodyFat, chest, waist, hips, arms, thighs, notes } =
       body;
 
-    // Create progress entry in database
-    const progress = await prisma.progress.create({
-      data: {
-        userId: user.id,
-        date: new Date(date),
-        weight: weight ? parseFloat(weight) : null,
-        bodyFat: bodyFat ? parseFloat(bodyFat) : null,
-        chest: chest ? parseFloat(chest) : null,
-        waist: waist ? parseFloat(waist) : null,
-        hips: hips ? parseFloat(hips) : null,
-        arms: arms ? parseFloat(arms) : null,
-        thighs: thighs ? parseFloat(thighs) : null,
-        notes: notes || null,
-      },
+    // Create progress entry and sync weight with user profile in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create progress entry
+      const progress = await tx.progress.create({
+        data: {
+          userId: user.id,
+          date: new Date(date),
+          weight: weight ? parseFloat(weight) : null,
+          bodyFat: bodyFat ? parseFloat(bodyFat) : null,
+          chest: chest ? parseFloat(chest) : null,
+          waist: waist ? parseFloat(waist) : null,
+          hips: hips ? parseFloat(hips) : null,
+          arms: arms ? parseFloat(arms) : null,
+          thighs: thighs ? parseFloat(thighs) : null,
+          notes: notes || null,
+        },
+      });
+
+      // If weight is provided, update user profile weight
+      if (weight) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { weight: parseFloat(weight) },
+        });
+      }
+
+      return progress;
     });
 
-    return NextResponse.json(progress);
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error creating progress entry:", error);
     return NextResponse.json(
