@@ -15,19 +15,24 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if exercises already exist to avoid duplicates
-    const existingCount = await prisma.exercise.count();
+    // Check if GLOBAL exercises already exist (userId is null)
+    const existingGlobalCount = await prisma.exercise.count({
+      where: { userId: null },
+    });
 
-    if (existingCount > 0) {
+    if (existingGlobalCount > 0) {
       return NextResponse.json({
-        message: "Exercises already seeded",
-        count: existingCount,
+        message: "Global exercises already seeded",
+        count: existingGlobalCount,
       });
     }
 
-    // Create exercises using shared exercise data
+    // Create global exercises (userId will be null) using shared exercise data
     const createdExercises = await prisma.exercise.createMany({
-      data: exerciseData,
+      data: exerciseData.map((exercise) => ({
+        ...exercise,
+        userId: null, // Explicitly set as global exercises
+      })),
       skipDuplicates: true,
     });
 

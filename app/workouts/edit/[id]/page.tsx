@@ -141,6 +141,13 @@ export default function EditWorkoutPage() {
           fetchExerciseMetadata(),
         ]);
 
+        // Check if exercises need seeding BEFORE setting state
+        if (exerciseData.length === 0) {
+          setNeedsSeeding(true);
+          setIsLoading(false);
+          return;
+        }
+
         // Set exercises and muscle groups state
         setExercises(exerciseData);
         setMuscleGroups(metaData.muscleGroups);
@@ -186,10 +193,6 @@ export default function EditWorkoutPage() {
               | "Recovery") || "Strength",
           exercises: formExercises,
         });
-
-        if (exerciseData.length === 0) {
-          setNeedsSeeding(true);
-        }
       } catch (error) {
         console.error("Error loading workout data:", error);
         alert("Error loading workout data");
@@ -274,7 +277,10 @@ export default function EditWorkoutPage() {
           console.warn("Failed to fetch new workout image, using existing");
         }
       } catch (imageError) {
-        console.warn("Error fetching workout image, using existing:", imageError);
+        console.warn(
+          "Error fetching workout image, using existing:",
+          imageError
+        );
       }
 
       // Create update data for API
@@ -330,7 +336,10 @@ export default function EditWorkoutPage() {
       setExercises((prev) => [...prev, newExercise]);
 
       // Set the new exercise for the current field
-      setValue(`exercises.${currentExerciseIndex}.exerciseId`, newExercise.id);
+      setValue(`exercises.${currentExerciseIndex}.exerciseId`, newExercise.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
 
       // Close modal and reset form
       setShowCreateExercise(false);
@@ -366,20 +375,37 @@ export default function EditWorkoutPage() {
 
   // Toggle exercise dropdown
   const toggleExerciseDropdown = (index: number) => {
-    setVisibleExerciseDropdown(
-      visibleExerciseDropdown === index ? null : index
-    );
+    console.log("toggleExerciseDropdown called with index:", index);
+    console.log("Previous state:", visibleExerciseDropdown);
+    const newState = visibleExerciseDropdown === index ? null : index;
+    console.log("Setting new state:", newState);
+    setVisibleExerciseDropdown(newState);
   };
 
   // Close all dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (e: MouseEvent) => {
+      console.log("Document click detected");
       setVisibleExerciseDropdown(null);
     };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+    // Only add listener if a dropdown is open
+    if (visibleExerciseDropdown !== null) {
+      console.log("Adding document click listener");
+      document.addEventListener("click", handleClickOutside);
+      return () => {
+        console.log("Removing document click listener");
+        document.removeEventListener("click", handleClickOutside);
+      };
+    }
+  }, [visibleExerciseDropdown]);
+
+  // Debug: Log when dropdown state changes
+  useEffect(() => {
+    console.log("visibleExerciseDropdown changed to:", visibleExerciseDropdown);
+    console.log("Exercises loaded:", exercises.length);
+    console.log("Muscle groups loaded:", muscleGroups.length);
+  }, [visibleExerciseDropdown, exercises.length, muscleGroups.length]);
 
   if (isLoading) {
     return (
@@ -387,6 +413,18 @@ export default function EditWorkoutPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
           <p className="text-white">Loading workout...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render form until exercises are loaded
+  if (!needsSeeding && exercises.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-white">Loading exercises...</p>
         </div>
       </div>
     );
@@ -533,12 +571,16 @@ export default function EditWorkoutPage() {
                     className="sr-only peer"
                   />
                   <div className="relative">
-                    <div className={`block w-14 h-8 rounded-full transition-colors ${
-                      isPublic ? 'bg-yellow-500' : 'bg-gray-600'
-                    }`}></div>
-                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
-                      isPublic ? 'translate-x-6' : ''
-                    }`}></div>
+                    <div
+                      className={`block w-14 h-8 rounded-full transition-colors ${
+                        isPublic ? "bg-yellow-500" : "bg-gray-600"
+                      }`}
+                    ></div>
+                    <div
+                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                        isPublic ? "translate-x-6" : ""
+                      }`}
+                    ></div>
                   </div>
                   <span className="ml-3 text-gray-300 text-sm font-medium">
                     Make this workout public
@@ -599,16 +641,21 @@ export default function EditWorkoutPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Exercise Selection */}
-                    <div
-                      className="relative md:col-span-2"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="relative md:col-span-2">
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Exercise *
                       </label>
                       <button
                         type="button"
-                        onClick={() => toggleExerciseDropdown(index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Button clicked, index:", index);
+                          console.log(
+                            "Current visibleExerciseDropdown:",
+                            visibleExerciseDropdown
+                          );
+                          toggleExerciseDropdown(index);
+                        }}
                         className="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-left text-white hover:bg-gray-550 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent flex items-center justify-between"
                       >
                         <span className="truncate">
@@ -654,17 +701,22 @@ export default function EditWorkoutPage() {
 
                                 return (
                                   <div key={muscleGroup}>
-                                    <div className="px-4 py-2 bg-gray-700 text-yellow-500 text-sm font-medium sticky top-[57px] z-10">
+                                    <div className="px-4 py-2 bg-gray-700 text-yellow-500 text-sm font-medium sticky top-[49px] z-10">
                                       {muscleGroup}
                                     </div>
                                     {groupExercises.map((exercise) => (
                                       <button
                                         key={exercise.id}
                                         type="button"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.stopPropagation();
                                           setValue(
                                             `exercises.${index}.exerciseId`,
-                                            exercise.id
+                                            exercise.id,
+                                            {
+                                              shouldValidate: true,
+                                              shouldDirty: true,
+                                            }
                                           );
                                           setVisibleExerciseDropdown(null);
                                         }}
@@ -694,15 +746,21 @@ export default function EditWorkoutPage() {
                                 <button
                                   key={exercise.id}
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setValue(
                                       `exercises.${index}.exerciseId`,
-                                      exercise.id
+                                      exercise.id,
+                                      {
+                                        shouldValidate: true,
+                                        shouldDirty: true,
+                                      }
                                     );
                                     setVisibleExerciseDropdown(null);
                                   }}
                                   className={`w-full px-4 py-2 text-left hover:bg-gray-550 ${
-                                    field.exerciseId === exercise.id
+                                    watchedExercises[index]?.exerciseId ===
+                                    exercise.id
                                       ? "bg-yellow-500/20 text-yellow-400"
                                       : "text-white"
                                   }`}
@@ -857,29 +915,32 @@ export default function EditWorkoutPage() {
 
       {/* Exercise Creation Modal */}
       {showCreateExercise && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
-            <div className="p-6 border-b border-gray-700 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white flex items-center">
-                <FaPlus className="mr-3 text-yellow-500" />
-                Create New Exercise
-              </h3>
-              <button
-                onClick={() => {
-                  setShowCreateExercise(false);
-                  resetExercise();
-                }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <FaTimes size={20} />
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden border border-gray-700 flex flex-col">
+            <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 sm:p-6 z-10 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">
+                  <FaPlus className="mr-2 sm:mr-3 text-yellow-500" />
+                  Create New Exercise
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowCreateExercise(false);
+                    resetExercise();
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <FaTimes size={20} />
+                </button>
+              </div>
             </div>
 
-            <form
-              onSubmit={handleSubmitExercise(onSubmitExercise)}
-              className="p-6 space-y-6"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="overflow-y-auto flex-1">
+              <form
+                onSubmit={handleSubmitExercise(onSubmitExercise)}
+                className="p-4 sm:p-6 space-y-4 sm:space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Exercise Name */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -888,7 +949,7 @@ export default function EditWorkoutPage() {
                   <input
                     {...registerExercise("name")}
                     type="text"
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 sm:py-3 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                     placeholder="e.g., Barbell Bench Press"
                   />
                   {exerciseErrors.name && (
@@ -905,7 +966,7 @@ export default function EditWorkoutPage() {
                   </label>
                   <select
                     {...registerExercise("muscleGroup")}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 sm:py-3 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   >
                     <option value="">Select muscle group</option>
                     {muscleGroups.map((group) => (
@@ -928,7 +989,7 @@ export default function EditWorkoutPage() {
                   </label>
                   <select
                     {...registerExercise("difficulty")}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 sm:py-3 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   >
                     <option value="">Select difficulty</option>
                     <option value="Beginner">Beginner</option>
@@ -950,7 +1011,7 @@ export default function EditWorkoutPage() {
                   <textarea
                     {...registerExercise("description")}
                     rows={3}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 sm:py-3 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
                     placeholder="Brief description of the exercise"
                   />
                   {exerciseErrors.description && (
@@ -968,7 +1029,7 @@ export default function EditWorkoutPage() {
                   <textarea
                     {...registerExercise("instructions")}
                     rows={4}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 sm:py-3 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
                     placeholder="Step-by-step instructions (each step on a new line)"
                   />
                   {exerciseErrors.instructions && (
@@ -979,26 +1040,27 @@ export default function EditWorkoutPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-700">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateExercise(false);
-                    resetExercise();
-                  }}
-                  className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg flex items-center font-medium transition-colors"
-                >
-                  <FaPlus className="mr-2" />
-                  Create Exercise
-                </button>
-              </div>
-            </form>
+                <div className="flex justify-end space-x-3 sm:space-x-4 pt-4 border-t border-gray-700">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateExercise(false);
+                      resetExercise();
+                    }}
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base flex items-center font-medium transition-colors"
+                  >
+                    <FaPlus className="mr-2" />
+                    Create Exercise
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

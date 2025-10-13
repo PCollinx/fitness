@@ -20,8 +20,24 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get("limit")!)
       : undefined;
 
-    // Build where clause
+    // Build where clause - include global exercises and user's own exercises
     const where: any = {};
+
+    // Get user ID if authenticated
+    let userId: string | null = null;
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true },
+      });
+      userId = user?.id || null;
+    }
+
+    // Include global exercises (userId is null) and user's own exercises
+    where.OR = [
+      { userId: null }, // Global exercises
+      ...(userId ? [{ userId }] : []), // User's own exercises if authenticated
+    ];
 
     if (muscleGroup) {
       where.muscleGroup = muscleGroup;
@@ -32,11 +48,18 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
+      const searchConditions = [
         { name: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
         { muscleGroup: { contains: search, mode: "insensitive" } },
       ];
+      
+      // Combine with existing OR for userId
+      where.AND = [
+        { OR: where.OR },
+        { OR: searchConditions },
+      ];
+      delete where.OR;
     }
 
     // Fetch exercises from database
