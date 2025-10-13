@@ -14,13 +14,13 @@ export async function GET(request: NextRequest) {
     // Find the user by email to get the actual database user ID
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    
+
     const schedules = await prisma.workoutSchedule.findMany({
       where: {
         userId: user.id,
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     // Find the user by email to get the actual database user ID
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!user) {
@@ -133,7 +133,7 @@ export async function PUT(request: NextRequest) {
     // Find the user by email to get the actual database user ID
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!user) {
@@ -204,7 +204,7 @@ export async function PUT(request: NextRequest) {
               reminderMinutes: schedule.reminderMinutes ?? 15,
             },
           });
-          
+
           createdSchedules.push(created);
         }
       }
@@ -233,7 +233,7 @@ export async function DELETE(request: NextRequest) {
     // Find the user by email to get the actual database user ID
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!user) {

@@ -13,10 +13,23 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     // Fetch all recent workout sessions for the current user (last 20)
     const recentSessions = await prisma.workoutSession.findMany({
       where: {
-        userId: session.user.id as string,
+        userId: user.id,
       },
       orderBy: {
         startTime: "desc",

@@ -15,15 +15,22 @@ import {
   FaWeight,
   FaTrophy,
   FaCalendarAlt,
+  FaClock,
+  FaCheck,
 } from "react-icons/fa";
 import WorkoutScheduleComponent from "../components/WorkoutSchedule";
 import { useWorkoutStreak } from "../hooks/useWorkoutStreak";
 
 type WorkoutSummary = {
   id: string;
+  sessionId: string;
   name: string;
   date: string;
   exercises: number;
+  duration?: number | null;
+  completedSets: number;
+  totalSets: number;
+  completionRate: number;
 };
 
 type ComprehensiveProgress = {
@@ -305,7 +312,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* Quick Actions */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full">
           <h2 className="text-xl font-semibold mb-4 text-yellow-500">
@@ -398,14 +405,14 @@ export default function Dashboard() {
         <WorkoutStreakDashboard />
 
         {/* Recent Workouts */}
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full lg:col-span-2">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-yellow-500">
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 col-span-full md:col-span-2 lg:col-span-2 order-2 lg:order-none">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+            <h2 className="text-lg sm:text-xl font-semibold text-yellow-500">
               Recent Sessions
             </h2>
             <Link
               href="/workouts/history"
-              className="text-yellow-400 text-sm font-medium hover:underline"
+              className="text-yellow-400 text-sm font-medium hover:underline self-start sm:self-auto"
             >
               View All
             </Link>
@@ -415,40 +422,70 @@ export default function Dashboard() {
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-yellow-500 border-t-transparent"></div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {recentWorkouts.length > 0 ? (
                 recentWorkouts.map((workout) => (
-                  <div
-                    key={workout.id}
-                    className="border-b border-gray-700 pb-4 hover:bg-gray-700 p-2 rounded transition-colors"
+                  <Link
+                    key={workout.sessionId}
+                    href={`/workouts/history`}
+                    className="block bg-gray-750 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-700 p-3 sm:p-4 rounded-lg transition-all duration-200 active:scale-[0.98] sm:active:scale-100"
                   >
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-white">{workout.name}</h3>
-                      <span className="text-sm text-yellow-400">
-                        {formatDate(workout.date)}
-                      </span>
+                    {/* Mobile-first layout */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2 sm:mb-3">
+                          <h3 className="font-medium text-white text-sm sm:text-base truncate pr-3 leading-tight">
+                            {workout.name}
+                          </h3>
+                          <span className="text-xs sm:text-sm text-yellow-400 whitespace-nowrap flex-shrink-0 font-medium">
+                            {formatDate(workout.date)}
+                          </span>
+                        </div>
+                        
+                        {/* Mobile: Stacked stats, Desktop: Inline */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-300">
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <span className="flex items-center flex-shrink-0">
+                              <FaDumbbell className="mr-1 text-yellow-400 text-xs" />
+                              {workout.exercises} exercises
+                            </span>
+                            {workout.duration && (
+                              <span className="flex items-center flex-shrink-0">
+                                <FaClock className="mr-1 text-yellow-400 text-xs" />
+                                {workout.duration}m
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center">
+                            <span className="flex items-center">
+                              <FaCheck className="mr-1 text-green-400 text-xs" />
+                              <span className="hidden sm:inline">{workout.completedSets}/{workout.totalSets} sets </span>
+                              <span className="sm:hidden">{workout.completedSets}/{workout.totalSets} </span>
+                              ({workout.completionRate}%)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-300 font-medium">
-                      {workout.exercises} exercises
-                    </p>
-                  </div>
+                  </Link>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center py-6">
-                  <div className="mb-4 text-yellow-500">
-                    <FaDumbbell className="w-12 h-12" />
+                <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
+                  <div className="mb-3 sm:mb-4 text-yellow-500">
+                    <FaDumbbell className="w-10 h-10 sm:w-12 sm:h-12" />
                   </div>
-                  <h3 className="text-white font-semibold text-lg mb-2">
+                  <h3 className="text-white font-semibold text-base sm:text-lg mb-2">
                     No workouts yet
                   </h3>
-                  <p className="text-gray-400 text-center mb-4 max-w-xs">
+                  <p className="text-gray-400 text-sm sm:text-base text-center mb-4 max-w-xs px-2">
                     Track your fitness journey by logging your first workout
                   </p>
                   <Link
                     href="/workouts/new"
-                    className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg text-sm font-medium transition flex items-center"
+                    className="bg-yellow-400 hover:bg-yellow-300 text-black px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm font-medium transition flex items-center"
                   >
-                    <FaDumbbell className="mr-2" /> Create Your First Workout
+                    <FaDumbbell className="mr-2 text-xs sm:text-sm" /> 
+                    <span className="text-sm sm:text-base">Create Your First Workout</span>
                   </Link>
                 </div>
               )}
@@ -463,7 +500,7 @@ export default function Dashboard() {
               Progress Tracker
             </h2>
             <Link
-              href="/progress"
+              href="/progress?from=dashboard"
               className="text-yellow-400 text-sm font-medium hover:underline"
             >
               View All

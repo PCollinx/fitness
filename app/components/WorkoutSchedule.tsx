@@ -39,13 +39,8 @@ export default function WorkoutScheduleComponent({
   onScheduleUpdate,
   compact = false,
 }: WorkoutScheduleProps) {
-  const {
-    schedules,
-    isLoading,
-    error,
-    updateSchedules,
-    refetch,
-  } = useWorkoutSchedule();
+  const { schedules, isLoading, error, updateSchedules, refetch } =
+    useWorkoutSchedule();
 
   const [editingSchedules, setEditingSchedules] = useState<ScheduleDay[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,11 +49,13 @@ export default function WorkoutScheduleComponent({
   // Initialize editing schedules from fetched schedules
   useEffect(() => {
     const initialSchedules: ScheduleDay[] = [];
-    
+
     // Create schedule for each day of the week
     for (let day = 0; day < 7; day++) {
-      const existingSchedule = schedules.find(s => s.dayOfWeek === day && s.isActive);
-      
+      const existingSchedule = schedules.find(
+        (s) => s.dayOfWeek === day && s.isActive
+      );
+
       initialSchedules.push({
         dayOfWeek: day,
         time: existingSchedule?.time || "09:00",
@@ -68,15 +65,19 @@ export default function WorkoutScheduleComponent({
         reminderMinutes: existingSchedule?.reminderMinutes ?? 15,
       });
     }
-    
+
     setEditingSchedules(initialSchedules);
     setHasChanges(false);
   }, [schedules]);
 
-  const handleScheduleChange = (dayOfWeek: number, field: keyof ScheduleDay, value: any) => {
-    setEditingSchedules(prev => 
-      prev.map(schedule => 
-        schedule.dayOfWeek === dayOfWeek 
+  const handleScheduleChange = (
+    dayOfWeek: number,
+    field: keyof ScheduleDay,
+    value: any
+  ) => {
+    setEditingSchedules((prev) =>
+      prev.map((schedule) =>
+        schedule.dayOfWeek === dayOfWeek
           ? { ...schedule, [field]: value }
           : schedule
       )
@@ -86,16 +87,16 @@ export default function WorkoutScheduleComponent({
 
   const handleTimeChange = (dayOfWeek: number, timeString: string) => {
     const time24 = parseTime12Hour(timeString) || timeString;
-    handleScheduleChange(dayOfWeek, 'time', time24);
+    handleScheduleChange(dayOfWeek, "time", time24);
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const enabledSchedules = editingSchedules.filter(s => s.isEnabled);
-      
+      const enabledSchedules = editingSchedules.filter((s) => s.isEnabled);
+
       const updateData: BulkUpdateScheduleData = {
-        schedules: enabledSchedules.map(schedule => ({
+        schedules: enabledSchedules.map((schedule) => ({
           dayOfWeek: schedule.dayOfWeek,
           time: schedule.time,
           isActive: true,
@@ -105,9 +106,9 @@ export default function WorkoutScheduleComponent({
           reminderMinutes: schedule.reminderMinutes,
         })),
       };
-      
+
       const result = await updateSchedules(updateData);
-      
+
       if (result) {
         setHasChanges(false);
         // Refresh the schedules data to get the latest from the server
@@ -121,13 +122,13 @@ export default function WorkoutScheduleComponent({
 
   const toggleDay = (dayOfWeek: number) => {
     const currentValue = editingSchedules[dayOfWeek]?.isEnabled;
-    handleScheduleChange(dayOfWeek, 'isEnabled', !currentValue);
+    handleScheduleChange(dayOfWeek, "isEnabled", !currentValue);
   };
 
   const getTimeSlots = () => {
     const slots = [];
     for (let hour = 5; hour <= 23; hour++) {
-      const time24 = `${hour.toString().padStart(2, '0')}:00`;
+      const time24 = `${hour.toString().padStart(2, "0")}:00`;
       const time12 = formatTime(time24);
       slots.push({ value: time24, label: time12 });
     }
@@ -182,7 +183,9 @@ export default function WorkoutScheduleComponent({
                     : "bg-gray-700 text-gray-400"
                 }`}
               >
-                {schedule.isEnabled ? formatTime(schedule.time).split(' ')[0] : "Off"}
+                {schedule.isEnabled
+                  ? formatTime(schedule.time).split(" ")[0]
+                  : "Off"}
               </button>
             </div>
           ))}
@@ -248,7 +251,9 @@ export default function WorkoutScheduleComponent({
                     <FaClock className="mr-1 sm:mr-2 text-sm" />
                     <select
                       value={schedule.time}
-                      onChange={(e) => handleTimeChange(schedule.dayOfWeek, e.target.value)}
+                      onChange={(e) =>
+                        handleTimeChange(schedule.dayOfWeek, e.target.value)
+                      }
                       className="bg-gray-700 border border-gray-600 rounded px-2 sm:px-3 py-1 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 min-w-0 w-full max-w-[120px] sm:max-w-none"
                     >
                       {getTimeSlots().map((slot) => (
@@ -270,7 +275,7 @@ export default function WorkoutScheduleComponent({
                       onClick={() =>
                         handleScheduleChange(
                           schedule.dayOfWeek,
-                          'notificationsEnabled',
+                          "notificationsEnabled",
                           !schedule.notificationsEnabled
                         )
                       }
@@ -296,7 +301,7 @@ export default function WorkoutScheduleComponent({
                       onChange={(e) =>
                         handleScheduleChange(
                           schedule.dayOfWeek,
-                          'reminderMinutes',
+                          "reminderMinutes",
                           parseInt(e.target.value)
                         )
                       }

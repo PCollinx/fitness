@@ -95,8 +95,6 @@ export default function WorkoutSessionPage() {
           return;
         }
 
-
-
         // The API storage already returns workoutExercises in the right format
         const transformedWorkout = foundWorkout;
 
@@ -204,8 +202,6 @@ export default function WorkoutSessionPage() {
     }
   };
 
-
-
   // Handle confirm completion
   const handleConfirmComplete = async () => {
     setShowCompleteModal(false);
@@ -266,8 +262,6 @@ export default function WorkoutSessionPage() {
     } finally {
       setIsSubmittingSession(false);
     }
-
-    
   };
 
   // Cancel workout functions
@@ -711,7 +705,8 @@ export default function WorkoutSessionPage() {
                 </h3>
 
                 <p className="text-gray-300 mb-6">
-                  Are you sure you want to cancel this workout? Your progress will not be saved.
+                  Are you sure you want to cancel this workout? Your progress
+                  will not be saved.
                 </p>
 
                 <div className="flex gap-3 justify-center">

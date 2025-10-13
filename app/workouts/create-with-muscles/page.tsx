@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import BackButton from "@/app/components/BackButton";
@@ -83,24 +83,19 @@ function CreateWithMusclesContent() {
   });
 
   // Debug logging
-  
 
   useEffect(() => {
-    
-
     if (status === "loading") {
       return; // Wait for auth to finish loading
     }
 
     if (status === "unauthenticated") {
-
       setError("You must be logged in to create workouts. Please sign in.");
       setIsLoading(false);
       return;
     }
 
     const musclesParam = searchParams.get("muscles");
-
 
     if (!musclesParam || musclesParam.trim() === "") {
       console.warn("No muscles parameter provided");
@@ -200,8 +195,6 @@ function CreateWithMusclesContent() {
         // Close modal and reset form
         setShowCreateExercise(false);
         resetExerciseForm();
-
-
       } else {
         throw new Error("Failed to create exercise");
       }
@@ -237,10 +230,11 @@ function CreateWithMusclesContent() {
         name: exercise.name,
         muscleGroup: exercise.muscleGroup,
       }));
-      const workoutImage =
-        getImageForWorkout(exerciseDetails) ||
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
-
+      const workoutImage = getImageForWorkout(
+        exerciseDetails,
+        workoutName,
+        "Strength"
+      );
 
       const workoutData = {
         name: workoutName.trim(),
@@ -262,8 +256,6 @@ function CreateWithMusclesContent() {
         public: false,
       };
 
-
-
       const response = await fetch("/api/workouts", {
         method: "POST",
         headers: {
@@ -278,7 +270,6 @@ function CreateWithMusclesContent() {
       }
 
       const result = await response.json();
-
 
       // Redirect to the workout details page
       router.push(`/workouts/${result.workout.id}`);
@@ -319,10 +310,11 @@ function CreateWithMusclesContent() {
         name: exercise.name,
         muscleGroup: exercise.muscleGroup,
       }));
-      const workoutImage =
-        getImageForWorkout(exerciseDetails) ||
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
-
+      const workoutImage = getImageForWorkout(
+        exerciseDetails,
+        workoutName,
+        "Strength"
+      );
 
       // First, save the workout to get a proper workout ID
       const workoutData = {
@@ -344,8 +336,6 @@ function CreateWithMusclesContent() {
         })),
         public: false,
       };
-
-
 
       const response = await fetch("/api/workouts", {
         method: "POST",

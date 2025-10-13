@@ -24,7 +24,6 @@ import {
   seedExercises,
   type APIExercise,
 } from "../../utils/exerciseApi";
-import { getImageForWorkout } from "../../utils/workoutImageStorage";
 
 // Validation schema
 const workoutSchema = z.object({
@@ -83,6 +82,7 @@ export default function CreateWorkoutPage() {
     control,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
@@ -104,6 +104,9 @@ export default function CreateWorkoutPage() {
     control,
     name: "exercises",
   });
+
+  // Watch the exercises array to trigger re-renders when values change
+  const watchedExercises = watch("exercises");
 
   // Exercise creation form
   const {
@@ -156,10 +159,10 @@ export default function CreateWorkoutPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
-      const type = urlParams.get('type');
-      
+      const type = urlParams.get("type");
+
       // If type is quick or custom, user came from plan page
-      if (type === 'quick' || type === 'custom') {
+      if (type === "quick" || type === "custom") {
         setFallbackRoute("/workouts/plan");
       }
     }
@@ -218,6 +221,37 @@ export default function CreateWorkoutPage() {
         };
       });
 
+      // Generate workout image dynamically via API
+      let workoutImage = "";
+      try {
+        const imageResponse = await fetch("/api/images/workout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            exercises: exerciseDetails,
+            workoutName: data.name,
+            category: data.category,
+          }),
+        });
+
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          workoutImage = imageData.imageUrl;
+        } else {
+          console.error("Failed to fetch workout image from API");
+          // Use a default image as fallback
+          workoutImage =
+            "https://images.unsplash.com/photo-1534438327276-14e5300c3a48";
+        }
+      } catch (imageError) {
+        console.error("Error fetching workout image:", imageError);
+        // Use a default image as fallback
+        workoutImage =
+          "https://images.unsplash.com/photo-1534438327276-14e5300c3a48";
+      }
+
       // Create the workout data for API
       const workoutData = {
         name: data.name,
@@ -225,15 +259,12 @@ export default function CreateWorkoutPage() {
           data.description ||
           `Custom workout with ${data.exercises.length} exercises`,
         exercises: data.exercises,
-        image: getImageForWorkout(exerciseDetails),
+        image: workoutImage,
         public: data.isPublic,
       };
 
-
-
       // Add the workout via API
       const newWorkout = await addWorkout(workoutData);
-
 
       // Redirect to the workouts page
       router.push("/workouts");
@@ -286,14 +317,16 @@ export default function CreateWorkoutPage() {
         setExercises((prev) => [...prev, newExercise]);
 
         // Auto-select the new exercise for the current dropdown
-        setValue(`exercises.${currentExerciseIndex}.exerciseId`, newExercise.id);
+        setValue(
+          `exercises.${currentExerciseIndex}.exerciseId`,
+          newExercise.id
+        );
 
         // Close modal and reset form
         setShowCreateExercise(false);
         resetExerciseForm();
 
         // Show success message (you can add toast notification here)
-
       } else {
         throw new Error("Failed to create exercise");
       }
@@ -312,7 +345,11 @@ export default function CreateWorkoutPage() {
           <BackButton
             fallbackRoute={fallbackRoute}
             className="text-yellow-500 hover:text-yellow-400 flex items-center transition-colors"
-            text={fallbackRoute === "/workouts/plan" ? "Back to Plan" : "Back to Workouts"}
+            text={
+              fallbackRoute === "/workouts/plan"
+                ? "Back to Plan"
+                : "Back to Workouts"
+            }
           />
         </div>
 
@@ -461,12 +498,7 @@ export default function CreateWorkoutPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 shadow-inner border border-gray-700 slide-up">
-              <h2 className="text-lg font-semibold text-yellow-500 mb-4 flex items-center">
-                <FaRegListAlt className="mr-2" />
-                Exercises
-              </h2>
-
+            <div className=" shadow-inner slide-up">
               {isLoading ? (
                 <div className="flex justify-center items-center h-28">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-yellow-500"></div>
@@ -506,8 +538,10 @@ export default function CreateWorkoutPage() {
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all text-white"
                           >
                             <span>
-                              {field.exerciseId
-                                ? getExerciseName(field.exerciseId)
+                              {watchedExercises[index]?.exerciseId
+                                ? getExerciseName(
+                                    watchedExercises[index].exerciseId
+                                  )
                                 : "Select an exercise"}
                             </span>
                             <svg
@@ -538,7 +572,7 @@ export default function CreateWorkoutPage() {
                           {visibleExerciseDropdown === index && (
                             <div className="absolute z-10 mt-1 w-full bg-gray-800 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-gray-700">
                               {/* Create New Exercise Button */}
-                              <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-2">
+                              <div className="sticky top-0 z-20 bg-gray-900 border-b border-gray-700 p-2">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -557,7 +591,7 @@ export default function CreateWorkoutPage() {
                               {Object.entries(exercisesByMuscleGroup).map(
                                 ([muscleGroup, exercises]) => (
                                   <div key={muscleGroup}>
-                                    <div className="sticky top-0 bg-gray-900 px-3 py-1.5 text-xs font-medium text-yellow-500 uppercase">
+                                    <div className="sticky top-[52px] z-10 bg-gray-900 px-3 py-1.5 text-xs font-medium text-yellow-500 uppercase">
                                       {muscleGroup}
                                     </div>
                                     <div>
@@ -566,12 +600,16 @@ export default function CreateWorkoutPage() {
                                           key={exercise.id}
                                           type="button"
                                           className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors ${
-                                            field.exerciseId === exercise.id
+                                            watchedExercises[index]
+                                              ?.exerciseId === exercise.id
                                               ? "bg-yellow-500/20 text-yellow-500"
                                               : "text-white"
                                           }`}
                                           onClick={() => {
-                                            setValue(`exercises.${index}.exerciseId`, exercise.id);
+                                            setValue(
+                                              `exercises.${index}.exerciseId`,
+                                              exercise.id
+                                            );
                                             toggleExerciseDropdown(index);
                                           }}
                                         >
@@ -744,11 +782,11 @@ export default function CreateWorkoutPage() {
 
         {/* Create Exercise Modal */}
         {showCreateExercise && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
-              <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+            <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden border border-gray-700 flex flex-col">
+              <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 sm:p-6 z-10 flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-yellow-500 flex items-center">
+                  <h2 className="text-lg sm:text-xl font-bold text-yellow-500 flex items-center">
                     <FaPlus className="mr-2" />
                     Create New Exercise
                   </h2>
@@ -776,139 +814,141 @@ export default function CreateWorkoutPage() {
                 </div>
               </div>
 
-              <form
-                onSubmit={handleSubmitExercise(handleCreateExercise)}
-                className="p-6 space-y-6"
-              >
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Exercise Name*
-                  </label>
-                  <input
-                    type="text"
-                    {...registerExercise("name")}
-                    className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
-                    placeholder="e.g., Single Arm Dumbbell Row"
-                  />
-                  {exerciseErrors.name && (
-                    <p className="mt-1 text-sm text-red-400">
-                      {exerciseErrors.name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="overflow-y-auto flex-1">
+                <form
+                  onSubmit={handleSubmitExercise(handleCreateExercise)}
+                  className="p-4 sm:p-6 space-y-4 sm:space-y-6"
+                >
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Muscle Group*
+                      Exercise Name*
                     </label>
-                    <select
-                      {...registerExercise("muscleGroup")}
-                      className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
-                    >
-                      <option value="">Select muscle group</option>
-                      <option value="chest">Chest</option>
-                      <option value="back">Back</option>
-                      <option value="shoulders">Shoulders</option>
-                      <option value="arms">Arms</option>
-                      <option value="legs">Legs</option>
-                      <option value="glutes">Glutes</option>
-                      <option value="core">Core</option>
-                      <option value="cardio">Cardio</option>
-                      <option value="full_body">Full Body</option>
-                    </select>
-                    {exerciseErrors.muscleGroup && (
+                    <input
+                      type="text"
+                      {...registerExercise("name")}
+                      className="w-full px-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-md text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                      placeholder="e.g., Single Arm Dumbbell Row"
+                    />
+                    {exerciseErrors.name && (
                       <p className="mt-1 text-sm text-red-400">
-                        {exerciseErrors.muscleGroup.message}
+                        {exerciseErrors.name.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Muscle Group*
+                      </label>
+                      <select
+                        {...registerExercise("muscleGroup")}
+                        className="w-full px-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-md text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                      >
+                        <option value="">Select muscle group</option>
+                        <option value="chest">Chest</option>
+                        <option value="back">Back</option>
+                        <option value="shoulders">Shoulders</option>
+                        <option value="arms">Arms</option>
+                        <option value="legs">Legs</option>
+                        <option value="glutes">Glutes</option>
+                        <option value="core">Core</option>
+                        <option value="cardio">Cardio</option>
+                        <option value="full_body">Full Body</option>
+                      </select>
+                      {exerciseErrors.muscleGroup && (
+                        <p className="mt-1 text-sm text-red-400">
+                          {exerciseErrors.muscleGroup.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Difficulty*
+                      </label>
+                      <select
+                        {...registerExercise("difficulty")}
+                        className="w-full px-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-md text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                      >
+                        <option value="">Select difficulty</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                      </select>
+                      {exerciseErrors.difficulty && (
+                        <p className="mt-1 text-sm text-red-400">
+                          {exerciseErrors.difficulty.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Description*
+                    </label>
+                    <textarea
+                      {...registerExercise("description")}
+                      rows={3}
+                      className="w-full px-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-md text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all resize-none"
+                      placeholder="Brief description of the exercise"
+                    />
+                    {exerciseErrors.description && (
+                      <p className="mt-1 text-sm text-red-400">
+                        {exerciseErrors.description.message}
                       </p>
                     )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Difficulty*
+                      Instructions*
                     </label>
-                    <select
-                      {...registerExercise("difficulty")}
-                      className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
-                    >
-                      <option value="">Select difficulty</option>
-                      <option value="beginner">Beginner</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
-                    </select>
-                    {exerciseErrors.difficulty && (
+                    <textarea
+                      {...registerExercise("instructions")}
+                      rows={4}
+                      className="w-full px-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-md text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all resize-none"
+                      placeholder="Step-by-step instructions on how to perform this exercise"
+                    />
+                    {exerciseErrors.instructions && (
                       <p className="mt-1 text-sm text-red-400">
-                        {exerciseErrors.difficulty.message}
+                        {exerciseErrors.instructions.message}
                       </p>
                     )}
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Description*
-                  </label>
-                  <textarea
-                    {...registerExercise("description")}
-                    rows={3}
-                    className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
-                    placeholder="Brief description of the exercise"
-                  />
-                  {exerciseErrors.description && (
-                    <p className="mt-1 text-sm text-red-400">
-                      {exerciseErrors.description.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Instructions*
-                  </label>
-                  <textarea
-                    {...registerExercise("instructions")}
-                    rows={4}
-                    className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
-                    placeholder="Step-by-step instructions on how to perform this exercise"
-                  />
-                  {exerciseErrors.instructions && (
-                    <p className="mt-1 text-sm text-red-400">
-                      {exerciseErrors.instructions.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex justify-end gap-4 pt-4 border-t border-gray-700">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCreateExercise(false);
-                      resetExerciseForm();
-                    }}
-                    className="px-6 py-3 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-800 text-white rounded-md font-medium transition-colors flex items-center"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        <FaSave className="mr-2" />
-                        Create Exercise
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
+                  <div className="flex justify-end gap-4 pt-4 border-t border-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateExercise(false);
+                        resetExerciseForm();
+                      }}
+                      className="px-4 sm:px-6 py-2 sm:py-3 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="px-4 sm:px-6 py-2 sm:py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-800 text-white rounded-md font-medium transition-colors flex items-center text-sm sm:text-base"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <FaSave className="mr-2" />
+                          Create Exercise
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )}

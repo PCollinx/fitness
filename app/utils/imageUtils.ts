@@ -1,5 +1,10 @@
 export const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
-export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+export const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 
 export interface ImageValidationResult {
   isValid: boolean;
@@ -8,7 +13,9 @@ export interface ImageValidationResult {
   fileSize?: number;
 }
 
-export async function validateAndProcessImage(file: File): Promise<ImageValidationResult> {
+export async function validateAndProcessImage(
+  file: File
+): Promise<ImageValidationResult> {
   try {
     // Check file type
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -42,10 +49,13 @@ export async function validateAndProcessImage(file: File): Promise<ImageValidati
   }
 }
 
-export async function compressImage(file: File, maxSizeKB: number = 500): Promise<string> {
+export async function compressImage(
+  file: File,
+  maxSizeKB: number = 500
+): Promise<string> {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     const img = new Image();
 
     img.onload = () => {
@@ -73,18 +83,22 @@ export async function compressImage(file: File, maxSizeKB: number = 500): Promis
 
       // Start with high quality and reduce if needed
       let quality = 0.9;
-      let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      let compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
 
       // Reduce quality until under size limit
-      while (compressedDataUrl.length > maxSizeKB * 1024 * 4/3 && quality > 0.1) {
+      while (
+        compressedDataUrl.length > (maxSizeKB * 1024 * 4) / 3 &&
+        quality > 0.1
+      ) {
         quality -= 0.1;
-        compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
       }
 
       resolve(compressedDataUrl);
     };
 
-    img.onerror = () => reject(new Error('Failed to load image for compression'));
+    img.onerror = () =>
+      reject(new Error("Failed to load image for compression"));
     img.src = URL.createObjectURL(file);
   });
 }
@@ -94,16 +108,16 @@ function fileToBase64(file: File): Promise<string> {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
+    reader.onerror = (error) => reject(error);
   });
 }
 
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  
+  if (bytes === 0) return "0 Bytes";
+
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }

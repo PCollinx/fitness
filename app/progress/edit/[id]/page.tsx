@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -44,7 +44,9 @@ export default function EditProgressPage() {
   const { data: session, status } = useSession();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const progressId = params.id as string;
+  const fromDashboard = searchParams.get("from") === "dashboard";
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -265,9 +267,8 @@ export default function EditProgressPage() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
           <BackButton
-            fallbackRoute="/progress"
+            fallbackRoute={fromDashboard ? "/dashboard" : "/progress"}
             className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors font-medium"
-            text="Back to Progress Details"
           />
         </div>
 

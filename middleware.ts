@@ -18,8 +18,8 @@ export async function middleware(req: NextRequest) {
       "/admin",
     ];
 
-    // Define API routes that should bypass authentication
-    const publicAPIRoutes = ["/api/workouts/seed"];
+    // Define API routes that should bypass authentication (currently none)
+    const publicAPIRoutes: string[] = [];
 
     // Check if this is a public API route
     const isPublicAPI = publicAPIRoutes.some((route) =>

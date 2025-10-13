@@ -13,7 +13,20 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id as string;
+    // Get the actual user ID from the database using email
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const userId = currentUser.id;
 
     // Get date ranges for calculations
     const now = new Date();

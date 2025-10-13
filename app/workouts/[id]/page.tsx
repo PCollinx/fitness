@@ -45,7 +45,7 @@ export default function WorkoutDetailPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const searchParams = useSearchParams();
-  const fromPlan = searchParams.get('from') === 'plan';
+  const fromPlan = searchParams.get("from") === "plan";
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,13 +87,11 @@ export default function WorkoutDetailPage() {
       const startUrl = `/workouts/start/${workout.id}`;
       router.push(startUrl);
     } else {
-
     }
   };
 
   const handleEditWorkout = () => {
-
-    const editUrl = fromPlan 
+    const editUrl = fromPlan
       ? `/workouts/edit/${workout?.id}?from=plan`
       : `/workouts/edit/${workout?.id}`;
     router.push(editUrl);
@@ -102,15 +100,12 @@ export default function WorkoutDetailPage() {
   const handleDeleteWorkout = async () => {
     if (!workout || !workout.isOwner) return;
 
-
     setIsDeleting(true);
 
     try {
       const response = await fetch(`/api/workouts/${workout.id}`, {
         method: "DELETE",
       });
-
-
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -167,7 +162,7 @@ export default function WorkoutDetailPage() {
             </p>
             <BackButton
               fallbackRoute={fromPlan ? "/workouts/plan" : "/workouts"}
-              className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg font-medium transition"
+              className="bg-yellow-400 hover:bg-yellow-300 text-white px-6 py-3 rounded-lg font-medium transition"
               text={fromPlan ? "Back to Plan" : "Back to Workouts"}
             />
           </div>

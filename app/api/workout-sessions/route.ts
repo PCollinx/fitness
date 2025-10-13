@@ -2,26 +2,15 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/prisma";
+import { authenticateApiUser, ApiErrors } from "@/lib/auth/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get the actual user ID from the database using email
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     const body = await request.json();
@@ -29,10 +18,7 @@ export async function POST(request: NextRequest) {
     const { workoutId, startTime, endTime, duration, exercises } = body;
 
     if (!workoutId || !startTime || !endTime || !duration) {
-      return NextResponse.json(
-        { success: false, error: "Missing required session data" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Missing required session data");
     }
 
     // Verify the workout exists first
@@ -41,7 +27,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!existingWorkout) {
-      return NextResponse.json({ success: false, error: "Workout not found" }, { status: 404 });
+      return ApiErrors.notFound("Workout");
     }
 
     // Validate and filter exercises before transaction

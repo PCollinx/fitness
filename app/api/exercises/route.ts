@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
+import { authenticateApiUser, ApiErrors } from "@/lib/auth/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,20 +67,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     const body = await request.json();
     const { name, description, muscleGroup, difficulty, instructions } = body;
 
     if (!name || !muscleGroup) {
-      return NextResponse.json(
-        { error: "Name and muscle group are required" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Name and muscle group are required");
     }
 
     // Create new exercise
@@ -90,16 +88,13 @@ export async function POST(request: NextRequest) {
         muscleGroup,
         difficulty: difficulty || "intermediate",
         instructions: instructions || null,
-        userId: session.user.id as string,
+        userId: user!.id,
       },
     });
 
     return NextResponse.json(exercise, { status: 201 });
   } catch (error) {
     console.error("Error creating exercise:", error);
-    return NextResponse.json(
-      { error: "Failed to create exercise" },
-      { status: 500 }
-    );
+    return ApiErrors.internalError("Failed to create exercise");
   }
 }

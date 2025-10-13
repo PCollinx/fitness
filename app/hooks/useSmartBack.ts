@@ -70,7 +70,7 @@ const DYNAMIC_ROUTE_PATTERNS = [
 export function useSmartBack(options: UseSmartBackOptions = {}) {
   const router = useRouter();
   const { fallbackRoute = "/dashboard", preventCycles = true } = options;
-  
+
   // Detect if a custom fallback route was explicitly provided
   const hasCustomFallback = options.fallbackRoute !== undefined;
 
@@ -101,7 +101,7 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
 
   useEffect(() => {
     // Only run on client side
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     // Track navigation history in sessionStorage to persist across page loads
     const updateNavigationHistory = () => {
@@ -145,7 +145,7 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
 
   const handleBack = useCallback(() => {
     // Only run on client side
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       router.push(fallbackRoute);
       return;
     }
@@ -165,6 +165,8 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
           const previousPath = history[currentIndex - 1];
           const previousRouteInfo = getRouteInfo(previousPath);
 
+
+
           // Prevent cycles: if previous route is at same or higher level, go to parent instead
           if (
             previousRouteInfo.level >= currentRouteInfo.level ||
@@ -175,7 +177,9 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
               !previousPath.includes("/edit/"))
           ) {
             // Go to explicit fallback or logical parent
-            const targetRoute = hasCustomFallback ? fallbackRoute : (currentRouteInfo.parent || fallbackRoute);
+            const targetRoute = hasCustomFallback
+              ? fallbackRoute
+              : currentRouteInfo.parent || fallbackRoute;
             router.push(targetRoute);
             return;
           }
@@ -185,7 +189,9 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
         const navigationTimer = setTimeout(() => {
           // If navigation didn't happen, use smart fallback
           if (window.location.pathname === currentPath) {
-            const targetRoute = hasCustomFallback ? fallbackRoute : (currentRouteInfo.parent || fallbackRoute);
+            const targetRoute = hasCustomFallback
+              ? fallbackRoute
+              : currentRouteInfo.parent || fallbackRoute;
             router.push(targetRoute);
           }
         }, 300);
@@ -203,7 +209,9 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
         window.history.back();
       } else {
         // No safe back history, go to explicit fallback or logical parent
-        const targetRoute = hasCustomFallback ? fallbackRoute : (currentRouteInfo.parent || fallbackRoute);
+        const targetRoute = hasCustomFallback
+          ? fallbackRoute
+          : currentRouteInfo.parent || fallbackRoute;
 
         router.push(targetRoute);
       }
@@ -211,13 +219,39 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
       console.warn("Smart back navigation failed, using fallback:", error);
       router.push(fallbackRoute);
     }
-  }, [canGoBack, fallbackRoute, preventCycles, router, getRouteInfo, hasCustomFallback]);
+  }, [
+    canGoBack,
+    fallbackRoute,
+    preventCycles,
+    router,
+    getRouteInfo,
+    hasCustomFallback,
+  ]);
 
   // Get smart back text based on where we would go
   const getBackText = useCallback(() => {
     // Return default text during SSR
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return `Back to ${fallbackRoute === "/dashboard" ? "Dashboard" : "Home"}`;
+    }
+
+    // If a custom fallback route is provided, prioritize it over static hierarchy
+    if (hasCustomFallback) {
+      const fallbackName =
+        fallbackRoute === "/dashboard"
+          ? "Dashboard"
+          : fallbackRoute === "/workouts"
+          ? "Workouts"
+          : fallbackRoute === "/progress"
+          ? "Progress"
+          : fallbackRoute === "/workouts/plan"
+          ? "Workout Plans"
+          : fallbackRoute === "/workouts/muscle-targeting"
+          ? "Muscle Targeting"
+          : fallbackRoute === "/auth/signin"
+          ? "Sign In"
+          : "Home";
+      return `Back to ${fallbackName}`;
     }
 
     const currentPath = window.location.pathname;
@@ -244,7 +278,7 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
     return canGoBack
       ? "Back"
       : `Back to ${fallbackRoute === "/dashboard" ? "Dashboard" : "Home"}`;
-  }, [canGoBack, fallbackRoute, getRouteInfo]);
+  }, [canGoBack, fallbackRoute, getRouteInfo, hasCustomFallback]);
 
   return {
     handleBack,

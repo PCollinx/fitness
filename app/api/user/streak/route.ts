@@ -13,12 +13,23 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id as string;
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
 
     // Get all completed workout sessions ordered by date (most recent first)
     const workoutSessions = await prisma.workoutSession.findMany({
       where: {
-        userId,
+        userId: user.id,
         // Only sessions that have both start and end times (completed)
         duration: { gt: 0 },
       },

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
 import { format, parseISO } from "date-fns";
 import { useSession } from "next-auth/react";
@@ -26,7 +26,9 @@ export default function ProgressDetailPage() {
   const { data: session, status } = useSession();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const progressId = params.id as string;
+  const fromDashboard = searchParams.get("from") === "dashboard";
 
   const [progressEntry, setProgressEntry] = useState<ProgressEntry | null>(
     null
@@ -189,7 +191,9 @@ export default function ProgressDetailPage() {
 
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
-                href={`/progress/edit/${progressEntry.id}`}
+                href={`/progress/edit/${progressEntry.id}${
+                  fromDashboard ? "?from=dashboard" : ""
+                }`}
                 className="inline-flex items-center justify-center px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-lg text-sm font-semibold transition-all"
               >
                 <FaEdit className="mr-2" />

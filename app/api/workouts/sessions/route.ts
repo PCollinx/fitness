@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
+import { authenticateApiUser } from "@/lib/auth/api-auth";
 
 // Force dynamic rendering for this route
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     // Fetch workout sessions from database
     const workoutSessions = await prisma.workoutSession.findMany({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       take: 10,
       orderBy: { startTime: "desc" },
       include: {

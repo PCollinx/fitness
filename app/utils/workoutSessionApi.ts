@@ -213,15 +213,23 @@ export function formatWorkoutSessionData(
     .filter(([exerciseId, sets]) => exerciseId && sets && sets.length > 0)
     .map(([exerciseId, sets]) => {
       // Find the corresponding workout exercise to get target values
-      const workoutExercise = workoutExercises?.find(ex => ex.exerciseId === exerciseId);
-      
+      const workoutExercise = workoutExercises?.find(
+        (ex) => ex.exerciseId === exerciseId
+      );
+
       return {
         exerciseId,
-        sets: sets.map(set => ({
+        sets: sets.map((set) => ({
           completed: set.completed || false,
-          actualReps: set.actualReps ?? (workoutExercise ? parseInt(workoutExercise.reps.toString()) : undefined),
+          actualReps:
+            set.actualReps ??
+            (workoutExercise
+              ? parseInt(workoutExercise.reps.toString())
+              : undefined),
           actualWeight: set.actualWeight ?? workoutExercise?.weight,
-          targetReps: workoutExercise ? parseInt(workoutExercise.reps.toString()) : undefined,
+          targetReps: workoutExercise
+            ? parseInt(workoutExercise.reps.toString())
+            : undefined,
           targetWeight: workoutExercise?.weight,
           notes: set.notes,
         })),

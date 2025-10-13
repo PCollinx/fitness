@@ -14,6 +14,19 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
@@ -23,7 +36,7 @@ export async function GET(request: Request) {
 
     // Build where clause
     const whereClause: any = {
-      userId: session.user.id as string,
+      userId: user.id,
     };
 
     // Add date filters if provided
@@ -92,6 +105,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     const body = await request.json();
     const { date, weight, bodyFat, chest, waist, hips, arms, thighs, notes } =
       body;
@@ -99,7 +125,7 @@ export async function POST(request: Request) {
     // Create progress entry in database
     const progress = await prisma.progress.create({
       data: {
-        userId: session.user.id as string,
+        userId: user.id,
         date: new Date(date),
         weight: weight ? parseFloat(weight) : null,
         bodyFat: bodyFat ? parseFloat(bodyFat) : null,
@@ -130,6 +156,19 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -144,7 +183,7 @@ export async function DELETE(request: Request) {
     const existingEntry = await prisma.progress.findFirst({
       where: {
         id,
-        userId: session.user.id as string,
+        userId: user.id,
       },
     });
 

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
+import { authenticateApiUser, ApiErrors, getCurrentUserId } from "@/lib/auth/api-auth";
 
 interface WorkoutExerciseInput {
   exerciseId: string;
@@ -26,13 +27,10 @@ interface CreateWorkoutInput {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized - Please sign in" },
-        { status: 401 }
-      );
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     const {
@@ -45,44 +43,18 @@ export async function POST(request: NextRequest) {
 
     // Validation
     if (!name || name.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Workout name is required" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Workout name is required");
     }
 
     if (!Array.isArray(exercises) || exercises.length < 3) {
-      return NextResponse.json(
-        { error: "Workout must contain at least 3 exercises" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Workout must contain at least 3 exercises");
     }
 
     // Validate each exercise
     for (const exercise of exercises) {
       if (!exercise.exerciseId || exercise.sets <= 0 || exercise.reps <= 0) {
-        return NextResponse.json(
-          { error: "Each exercise must have valid exerciseId, sets, and reps" },
-          { status: 400 }
-        );
+        return ApiErrors.badRequest("Each exercise must have valid exerciseId, sets, and reps");
       }
-    }
-
-    // Get or create user
-    let user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      console.log("User not found, creating new user for:", session.user.email);
-      // Create user if not exists (for OAuth users)
-      user = await prisma.user.create({
-        data: {
-          email: session.user.email,
-          name: session.user.name || "Unknown",
-          image: session.user.image,
-        },
-      });
     }
 
     // Verify all exercises exist
@@ -93,10 +65,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingExercises.length !== exerciseIds.length) {
-      return NextResponse.json(
-        { error: "One or more exercises not found" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("One or more exercises not found");
     }
 
     // Create workout with exercises
@@ -242,10 +211,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get current user ID for ownership check
-    const currentUserId = session?.user?.email
-      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
-          ?.id
-      : null;
+    const currentUserId = await getCurrentUserId();
 
     const workoutsWithStats = workouts.map((workout) => ({
       id: workout.id,

@@ -233,7 +233,9 @@ function StartWorkoutContent() {
     if (isWorkoutPaused) {
       // Resume workout - add pause duration to total paused time
       if (pauseStartTime) {
-        setPausedTime(prev => prev + (new Date().getTime() - pauseStartTime.getTime()));
+        setPausedTime(
+          (prev) => prev + (new Date().getTime() - pauseStartTime.getTime())
+        );
       }
       setPauseStartTime(null);
     } else {
@@ -272,7 +274,9 @@ function StartWorkoutContent() {
     100;
   const workoutTime = workoutStartTime
     ? Math.floor(
-        (new Date().getTime() - workoutStartTime.getTime() - pausedTime) / 1000 / 60
+        (new Date().getTime() - workoutStartTime.getTime() - pausedTime) /
+          1000 /
+          60
       )
     : 0;
 
@@ -293,7 +297,11 @@ function StartWorkoutContent() {
               onClick={toggleWorkoutPause}
               className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
             >
-              {isWorkoutPaused ? <FaPlay className="mr-1" /> : <FaPause className="mr-1" />}
+              {isWorkoutPaused ? (
+                <FaPlay className="mr-1" />
+              ) : (
+                <FaPause className="mr-1" />
+              )}
               {isWorkoutPaused ? "Resume" : "Pause"}
             </button>
             <button
@@ -351,7 +359,11 @@ function StartWorkoutContent() {
 
         {/* Rest Timer */}
         {isResting && (
-          <div className={`bg-blue-900/50 border border-blue-500 rounded-lg p-6 mb-6 text-center ${isWorkoutPaused ? 'opacity-60' : ''}`}>
+          <div
+            className={`bg-blue-900/50 border border-blue-500 rounded-lg p-6 mb-6 text-center ${
+              isWorkoutPaused ? "opacity-60" : ""
+            }`}
+          >
             <FaClock className="text-4xl text-blue-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Rest Time</h2>
             <p className="text-4xl font-mono text-blue-400 mb-4">
@@ -384,7 +396,11 @@ function StartWorkoutContent() {
 
         {/* Current Exercise */}
         {!isResting && (
-          <div className={`bg-gray-800 rounded-lg p-6 mb-6 ${isWorkoutPaused ? 'opacity-60' : ''}`}>
+          <div
+            className={`bg-gray-800 rounded-lg p-6 mb-6 ${
+              isWorkoutPaused ? "opacity-60" : ""
+            }`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-gray-400 text-sm">
@@ -485,9 +501,12 @@ function StartWorkoutContent() {
             <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
               <div className="text-center mb-6">
                 <FaTimes className="text-red-500 text-4xl mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Cancel Workout?</h3>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Cancel Workout?
+                </h3>
                 <p className="text-gray-400">
-                  Are you sure you want to cancel this workout? Your progress will not be saved.
+                  Are you sure you want to cancel this workout? Your progress
+                  will not be saved.
                 </p>
               </div>
               <div className="flex space-x-3">

@@ -206,9 +206,19 @@ export const addWorkout = async (
           })
         );
 
-        workoutData.image = getImageForWorkout(exerciseDetails);
+        // Generate unique contextual image
+        workoutData.image = await getImageForWorkout(
+          exerciseDetails,
+          workoutData.name,
+          "Strength"
+        );
       } else {
-        workoutData.image = getImageByCategory("strength");
+        // Even for workouts without exercises, try to get a unique image
+        workoutData.image = await getImageForWorkout(
+          [{ name: "general workout", muscleGroup: "full_body" }],
+          workoutData.name,
+          "Strength"
+        );
       }
     }
 
@@ -276,8 +286,6 @@ export const updateWorkout = async (
         })) || [],
     };
 
-
-
     const response = await fetch(`/api/workouts/${workoutId}`, {
       method: "PUT",
       headers: {
@@ -286,12 +294,14 @@ export const updateWorkout = async (
       body: JSON.stringify(requestBody),
     });
 
-
-
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
 
-      throw new Error(`Failed to update workout: ${response.status} - ${errorData.error}`);
+      throw new Error(
+        `Failed to update workout: ${response.status} - ${errorData.error}`
+      );
     }
 
     const result = await response.json();
@@ -388,16 +398,16 @@ export const generateId = (): string => {
 /**
  * Get random workout image (uses existing image utilities)
  */
-export const getRandomWorkoutImage = (
+export const getRandomWorkoutImage = async (
   category: string = "strength",
   exercises?: WorkoutExercise[]
-): string => {
+): Promise<string> => {
   if (exercises && exercises.length > 0) {
     const exerciseDetails = exercises.map((ex) => ({
       name: ex.exerciseName,
       muscleGroup: undefined, // Will be enhanced when we have muscle group data
     }));
-    return getImageForWorkout(exerciseDetails);
+    return await getImageForWorkout(exerciseDetails, undefined, category);
   }
 
   return getImageByCategory(category);
@@ -416,5 +426,3 @@ export {
   getImageForWorkout,
   getImageByCategory,
 } from "./workoutImageStorage";
-
-

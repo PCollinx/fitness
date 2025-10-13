@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/prisma";
+import { authenticateApiUser, ApiErrors, getCurrentUserId } from "@/lib/auth/api-auth";
 
 export async function GET(
   request: NextRequest,
@@ -11,7 +12,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized();
     }
 
     const workout = await prisma.workout.findUnique({
@@ -32,17 +33,13 @@ export async function GET(
     });
 
     if (!workout) {
-      return NextResponse.json({ error: "Workout not found" }, { status: 404 });
+      return ApiErrors.notFound("Workout");
     }
 
-    // Get current user ID for ownership check (consistent with workout list endpoint)
-    const currentUserId = session?.user?.email
-      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
-          ?.id
-      : null;
+    // Get current user ID for ownership check
+    const currentUserId = await getCurrentUserId();
 
     // Debug logging for ownership check
-
 
     // Transform the data
     const transformedWorkout = {
@@ -86,30 +83,17 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     const body = await request.json();
     const { name, description, exercises, public: isPublic } = body;
 
     if (!name || !exercises || !Array.isArray(exercises)) {
-      return NextResponse.json(
-        { error: "Invalid request data" },
-        { status: 400 }
-      );
-    }
-
-    // Get current user ID for ownership check (consistent with other methods)
-    const currentUserId = session?.user?.email
-      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
-          ?.id
-      : null;
-
-    if (!currentUserId) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return ApiErrors.badRequest("Invalid request data");
     }
 
     // Check if the workout exists and is owned by the user
@@ -122,14 +106,11 @@ export async function PUT(
     });
 
     if (!existingWorkout) {
-      return NextResponse.json({ error: "Workout not found" }, { status: 404 });
+      return ApiErrors.notFound("Workout");
     }
 
-    if (existingWorkout.userId !== currentUserId) {
-      return NextResponse.json(
-        { error: "Not authorized to update this workout" },
-        { status: 403 }
-      );
+    if (existingWorkout.userId !== user.id) {
+      return ApiErrors.forbidden();
     }
 
     // Update the workout in a transaction
@@ -192,20 +173,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get current user ID for ownership check (consistent with GET endpoint)
-    const currentUserId = session?.user?.email
-      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
-          ?.id
-      : null;
-
-    if (!currentUserId) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     // Check if the workout exists and is owned by the user
@@ -219,14 +190,11 @@ export async function DELETE(
     });
 
     if (!workout) {
-      return NextResponse.json({ error: "Workout not found" }, { status: 404 });
+      return ApiErrors.notFound("Workout");
     }
 
-    if (workout.userId !== currentUserId) {
-      return NextResponse.json(
-        { error: "Not authorized to delete this workout" },
-        { status: 403 }
-      );
+    if (workout.userId !== user.id) {
+      return ApiErrors.forbidden();
     }
 
     // Delete the workout (exercises will be deleted due to CASCADE)
@@ -249,30 +217,17 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await authenticateApiUser();
+    
+    if (error) {
+      return error;
     }
 
     const body = await request.json();
     const { image } = body;
 
     if (!image) {
-      return NextResponse.json(
-        { error: "Image URL is required" },
-        { status: 400 }
-      );
-    }
-
-    // Get current user ID for ownership check (consistent with other methods)
-    const currentUserId = session?.user?.email
-      ? (await prisma.user.findUnique({ where: { email: session.user.email } }))
-          ?.id
-      : null;
-
-    if (!currentUserId) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return ApiErrors.badRequest("Image URL is required");
     }
 
     // Check if user owns the workout
@@ -282,11 +237,11 @@ export async function PATCH(
     });
 
     if (!existingWorkout) {
-      return NextResponse.json({ error: "Workout not found" }, { status: 404 });
+      return ApiErrors.notFound("Workout");
     }
 
-    if (existingWorkout.userId !== currentUserId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (existingWorkout.userId !== user.id) {
+      return ApiErrors.forbidden();
     }
 
     // Update the workout image

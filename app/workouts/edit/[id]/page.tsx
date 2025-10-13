@@ -30,7 +30,6 @@ import {
   seedExercises,
   type APIExercise,
 } from "../../../utils/exerciseApi";
-import { getImageForWorkout } from "../../../utils/workoutImageStorage";
 
 // Validation schema
 const workoutSchema = z.object({
@@ -92,6 +91,7 @@ export default function EditWorkoutPage() {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
     defaultValues: {
@@ -108,6 +108,10 @@ export default function EditWorkoutPage() {
     control,
     name: "exercises",
   });
+
+  // Watch the exercises array to trigger re-renders when values change
+  const watchedExercises = watch("exercises");
+  const isPublic = watch("isPublic");
 
   const {
     register: registerExercise,
@@ -136,6 +140,10 @@ export default function EditWorkoutPage() {
           fetchExercises(),
           fetchExerciseMetadata(),
         ]);
+
+        // Set exercises and muscle groups state
+        setExercises(exerciseData);
+        setMuscleGroups(metaData.muscleGroups);
 
         // Load the current workout
         const workout = await getWorkoutById(workoutId as string);
@@ -244,7 +252,30 @@ export default function EditWorkoutPage() {
         })
         .filter(Boolean) as { muscleGroup?: string; name?: string }[];
 
-      const workoutImage = getImageForWorkout(exerciseObjects);
+      // Fetch workout image via API (optional for updates, can keep existing image)
+      let workoutImage = currentWorkout.image || "";
+      try {
+        const imageResponse = await fetch("/api/images/workout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            exercises: exerciseObjects,
+            workoutName: data.name,
+            category: data.category || "Strength",
+          }),
+        });
+
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          workoutImage = imageData.imageUrl;
+        } else {
+          console.warn("Failed to fetch new workout image, using existing");
+        }
+      } catch (imageError) {
+        console.warn("Error fetching workout image, using existing:", imageError);
+      }
 
       // Create update data for API
       const updateData = {
@@ -272,17 +303,28 @@ export default function EditWorkoutPage() {
 
   // Handle exercise creation
   const onSubmitExercise = async (data: ExerciseCreationFormValues) => {
+    setIsLoading(true);
     try {
-      // Create new exercise
-      const newExercise: Exercise = {
-        id: `custom_${Date.now()}`,
-        name: data.name,
-        description: data.description,
-        muscleGroup: data.muscleGroup,
-        difficulty: data.difficulty,
-        instructions: data.instructions,
-        createdAt: new Date().toISOString(),
-      };
+      // Create exercise via API
+      const response = await fetch("/api/exercises", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          muscleGroup: data.muscleGroup,
+          difficulty: data.difficulty,
+          instructions: data.instructions,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create exercise");
+      }
+
+      const newExercise: Exercise = await response.json();
 
       // Add to exercises list
       setExercises((prev) => [...prev, newExercise]);
@@ -295,6 +337,9 @@ export default function EditWorkoutPage() {
       resetExercise();
     } catch (error) {
       console.error("Error creating exercise:", error);
+      alert("Failed to create exercise. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -305,10 +350,8 @@ export default function EditWorkoutPage() {
 
   // Remove exercise from workout
   const removeExercise = (index: number) => {
-
     if (fields.length > 1) {
       remove(index);
-
     } else {
       // Provide feedback that at least one exercise is required
       alert("At least one exercise is required for a workout");
@@ -483,15 +526,19 @@ export default function EditWorkoutPage() {
 
               {/* Public/Private Toggle */}
               <div className="md:col-span-2">
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     {...register("isPublic")}
                     type="checkbox"
-                    className="sr-only"
+                    className="sr-only peer"
                   />
                   <div className="relative">
-                    <div className="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                    <div className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                    <div className={`block w-14 h-8 rounded-full transition-colors ${
+                      isPublic ? 'bg-yellow-500' : 'bg-gray-600'
+                    }`}></div>
+                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                      isPublic ? 'translate-x-6' : ''
+                    }`}></div>
                   </div>
                   <span className="ml-3 text-gray-300 text-sm font-medium">
                     Make this workout public
@@ -502,8 +549,8 @@ export default function EditWorkoutPage() {
           </div>
 
           {/* Exercises Section */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between mb-6">
+          <div className="">
+            <div className="flex items-center justify-between px-3 mb-6">
               <h2 className="text-base font-semibold text-white flex items-center">
                 <FaDumbbell className="mr-3 text-yellow-500" />
                 Exercises ({fields.length})
@@ -565,7 +612,11 @@ export default function EditWorkoutPage() {
                         className="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-left text-white hover:bg-gray-550 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent flex items-center justify-between"
                       >
                         <span className="truncate">
-                          {getExerciseName(field.exerciseId)}
+                          {watchedExercises[index]?.exerciseId
+                            ? getExerciseName(
+                                watchedExercises[index].exerciseId
+                              )
+                            : "Select an exercise"}
                         </span>
                         <FaDumbbell className="text-yellow-500 flex-shrink-0" />
                       </button>
@@ -577,18 +628,20 @@ export default function EditWorkoutPage() {
                           onClick={(e) => e.stopPropagation()}
                         >
                           {/* Create New Exercise Option */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCurrentExerciseIndex(index);
-                              setShowCreateExercise(true);
-                              setVisibleExerciseDropdown(null);
-                            }}
-                            className="w-full px-4 py-3 text-left text-yellow-500 hover:bg-gray-550 flex items-center border-b border-gray-500"
-                          >
-                            <FaPlus className="mr-3" />
-                            Create New Exercise
-                          </button>
+                          <div className="sticky top-0 z-20 bg-gray-600 border-b border-gray-500">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCurrentExerciseIndex(index);
+                                setShowCreateExercise(true);
+                                setVisibleExerciseDropdown(null);
+                              }}
+                              className="w-full px-4 py-3 text-left text-yellow-500 hover:bg-gray-550 flex items-center"
+                            >
+                              <FaPlus className="mr-3" />
+                              Create New Exercise
+                            </button>
+                          </div>
 
                           {/* Exercise List */}
                           {exercises.length > 0 ? (
@@ -601,7 +654,7 @@ export default function EditWorkoutPage() {
 
                                 return (
                                   <div key={muscleGroup}>
-                                    <div className="px-4 py-2 bg-gray-700 text-yellow-500 text-sm font-medium sticky top-0">
+                                    <div className="px-4 py-2 bg-gray-700 text-yellow-500 text-sm font-medium sticky top-[57px] z-10">
                                       {muscleGroup}
                                     </div>
                                     {groupExercises.map((exercise) => (
@@ -616,7 +669,8 @@ export default function EditWorkoutPage() {
                                           setVisibleExerciseDropdown(null);
                                         }}
                                         className={`w-full px-4 py-2 text-left hover:bg-gray-550 ${
-                                          field.exerciseId === exercise.id
+                                          watchedExercises[index]
+                                            ?.exerciseId === exercise.id
                                             ? "bg-yellow-500/20 text-yellow-400"
                                             : "text-white"
                                         }`}

@@ -22,6 +22,10 @@ const envSchema = z.object({
   EMAIL_PASSWORD: z.string().optional(),
   EMAIL_FROM: z.string().email().optional(),
 
+  // Image APIs (Optional - for enhanced reliability)
+  PEXELS_API_KEY: z.string().optional(),
+  UNSPLASH_ACCESS_KEY: z.string().optional(),
+
   // Environment
   NODE_ENV: z
     .enum(["development", "production", "test"])

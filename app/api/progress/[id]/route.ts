@@ -17,13 +17,23 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const { id } = params;
 
     // Fetch the specific progress entry
     const progressEntry = await prisma.progress.findFirst({
       where: {
         id,
-        userId: session.user.id as string,
+        userId: user.id,
       },
       select: {
         id: true,
@@ -67,6 +77,16 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const { id } = params;
     const body = await request.json();
     const { date, weight, bodyFat, chest, waist, hips, arms, thighs, notes } =
@@ -76,7 +96,7 @@ export async function PUT(
     const existingEntry = await prisma.progress.findFirst({
       where: {
         id,
-        userId: session.user.id as string,
+        userId: user.id,
       },
     });
 
@@ -136,13 +156,23 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the actual user ID from the database using email
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const { id } = params;
 
     // Verify the progress entry belongs to the user before deleting
     const existingEntry = await prisma.progress.findFirst({
       where: {
         id,
-        userId: session.user.id as string,
+        userId: user.id,
       },
     });
 

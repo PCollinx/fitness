@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { exerciseData } from "../lib/exerciseData";
-import { getImageForWorkout } from "../app/utils/workoutImageStorage";
+import { getImageForWorkout, resetUsedImagesTracker } from "../app/utils/workoutImageStorage";
 
 const prisma = new PrismaClient();
 
@@ -765,6 +765,10 @@ async function main() {
 
   // Create default workouts for each fitness goal category
   console.log("🏋️ Creating default workouts...");
+  
+  // Reset image tracker to ensure unique images for each workout
+  resetUsedImagesTracker();
+  
   let totalWorkouts = 0;
 
   for (const [goalType, workouts] of Object.entries(defaultWorkouts)) {
@@ -804,12 +808,16 @@ async function main() {
 
       const exerciseConnections = await Promise.all(exercisePromises);
 
-      // Get image for this workout
+      // Get smart image recommendation for this workout with context
       const exerciseData = workoutTemplate.exercises.map((ex) => ({
         name: ex.name,
         muscleGroup: ex.muscleGroup,
       }));
-      const workoutImage = getImageForWorkout(exerciseData);
+      const workoutImage = await getImageForWorkout(
+        exerciseData,
+        workoutTemplate.name,
+        workoutTemplate.category
+      );
 
       // Create workout
       const workout = await prisma.workout.create({
