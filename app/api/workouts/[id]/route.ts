@@ -133,9 +133,17 @@ export async function PUT(
 
       // Create new exercises
       for (const [index, exercise] of exercises.entries()) {
-        // Find the exercise in the database
-        const dbExercise = await tx.exercise.findFirst({
-          where: { name: exercise.name },
+        // Use exerciseId if provided, otherwise fall back to finding by name
+        const exerciseId = exercise.exerciseId || exercise.name;
+        
+        if (!exerciseId) {
+          console.warn(`Exercise at index ${index} has no exerciseId or name`);
+          continue;
+        }
+
+        // Verify the exercise exists
+        const dbExercise = await tx.exercise.findUnique({
+          where: { id: exerciseId },
         });
 
         if (dbExercise) {
@@ -146,9 +154,11 @@ export async function PUT(
               sets: exercise.sets,
               reps: exercise.reps,
               weight: exercise.weight || null,
-              order: index,
+              order: exercise.order !== undefined ? exercise.order : index,
             },
           });
+        } else {
+          console.warn(`Exercise with ID ${exerciseId} not found`);
         }
       }
 

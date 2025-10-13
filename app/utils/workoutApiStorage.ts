@@ -278,11 +278,12 @@ export const updateWorkout = async (
       public: updates.public,
       exercises:
         updates.exercises?.map((ex, index) => ({
-          name: ex.exerciseId, // API expects exercise name for now
+          exerciseId: ex.exerciseId, // Send exerciseId to the API
           sets: ex.sets,
           reps: ex.reps,
           weight: ex.weight,
           notes: ex.notes,
+          order: index,
         })) || [],
     };
 
