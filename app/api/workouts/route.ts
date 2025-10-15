@@ -5,7 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import prisma from "@/lib/prisma";
-import { authenticateApiUser, ApiErrors, getCurrentUserId } from "@/lib/auth/api-auth";
+import {
+  authenticateApiUser,
+  ApiErrors,
+  getCurrentUserId,
+} from "@/lib/auth/api-auth";
 
 interface WorkoutExerciseInput {
   exerciseId: string;
@@ -28,7 +32,7 @@ interface CreateWorkoutInput {
 export async function POST(request: NextRequest) {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }
@@ -53,7 +57,9 @@ export async function POST(request: NextRequest) {
     // Validate each exercise
     for (const exercise of exercises) {
       if (!exercise.exerciseId || exercise.sets <= 0 || exercise.reps <= 0) {
-        return ApiErrors.badRequest("Each exercise must have valid exerciseId, sets, and reps");
+        return ApiErrors.badRequest(
+          "Each exercise must have valid exerciseId, sets, and reps"
+        );
       }
     }
 

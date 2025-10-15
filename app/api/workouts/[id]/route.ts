@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/prisma";
-import { authenticateApiUser, ApiErrors, getCurrentUserId } from "@/lib/auth/api-auth";
+import {
+  authenticateApiUser,
+  ApiErrors,
+  getCurrentUserId,
+} from "@/lib/auth/api-auth";
 
 export async function GET(
   request: NextRequest,
@@ -84,7 +88,7 @@ export async function PUT(
 ) {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }
@@ -135,7 +139,7 @@ export async function PUT(
       for (const [index, exercise] of exercises.entries()) {
         // Use exerciseId if provided, otherwise fall back to finding by name
         const exerciseId = exercise.exerciseId || exercise.name;
-        
+
         if (!exerciseId) {
           console.warn(`Exercise at index ${index} has no exerciseId or name`);
           continue;
@@ -184,7 +188,7 @@ export async function DELETE(
 ) {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }
@@ -228,7 +232,7 @@ export async function PATCH(
 ) {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }

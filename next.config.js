@@ -33,6 +33,13 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
+      // Pexels image domain (workout images)
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+        port: "",
+        pathname: "/**",
+      },
       // Spotify image domains
       {
         protocol: "https",

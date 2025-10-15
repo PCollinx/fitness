@@ -9,7 +9,7 @@ import { UserProfileProvider } from "./context/UserProfileContext";
 export const metadata: Metadata = {
   title: "FitTrack - Your Fitness Journey",
   description:
-    "A comprehensive fitness tracking application with workout plans, progress tracking, and social features",
+    "Track your fitness progress with personalized workout plans, body measurements tracking, workout history, streak monitoring, and Spotify music integration. Set goals, create custom workouts targeting specific muscle groups, and stay motivated with scheduled reminders.",
 };
 
 export default function RootLayout({

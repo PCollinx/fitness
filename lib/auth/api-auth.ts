@@ -27,10 +27,7 @@ export async function authenticateApiUser() {
 
   if (!user) {
     return {
-      error: NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      ),
+      error: NextResponse.json({ error: "User not found" }, { status: 404 }),
       user: null,
     };
   }
@@ -72,8 +69,7 @@ export const ApiErrors = {
     ),
   userNotFound: () =>
     NextResponse.json({ error: "User not found" }, { status: 404 }),
-  forbidden: () =>
-    NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+  forbidden: () => NextResponse.json({ error: "Forbidden" }, { status: 403 }),
   notFound: (resource = "Resource") =>
     NextResponse.json({ error: `${resource} not found` }, { status: 404 }),
   badRequest: (message = "Invalid request data") =>

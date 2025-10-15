@@ -1,10 +1,10 @@
 /**
  * Exercise Image Storage System
  * Provides muscle-group-based images for exercises and workouts
- * Uses dynamic Unsplash API for fresh, relevant fitness images
+ * Uses dynamic Pexels API for fresh, relevant fitness images
  */
 
-import { getUnsplashService } from "./unsplashImageService";
+import { getPexelsService } from "./pexelsImageService";
 
 export type MuscleGroup =
   | "chest"
@@ -324,13 +324,15 @@ let usedImages: Set<string> = new Set();
  */
 export const resetUsedImagesTracker = (): void => {
   usedImages.clear();
-  
-  // Also clear Unsplash service history for fresh images
+
+  // Also clear Pexels service history for fresh images
   try {
-    const unsplashService = getUnsplashService();
-    unsplashService.clearImageHistory();
+    const pexelsService = getPexelsService();
+    pexelsService.clearImageHistory();
   } catch (error) {
-    console.log('No Unsplash service available for history clearing (expected during seeding)');
+    console.log(
+      "No Pexels service available for history clearing (expected during seeding)"
+    );
   }
 };
 
@@ -377,9 +379,9 @@ export const getImageForWorkout = async (
   category?: string
 ): Promise<string> => {
   try {
-    // Use dynamic Unsplash API for fresh, contextual images
-    const unsplashService = getUnsplashService();
-    return await unsplashService.fetchImageForWorkout(
+    // Use dynamic Pexels API for fresh, contextual images
+    const pexelsService = getPexelsService();
+    return await pexelsService.fetchImageForWorkout(
       exercises,
       workoutName,
       category

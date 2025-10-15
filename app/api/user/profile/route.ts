@@ -179,17 +179,17 @@ export async function PUT(request: NextRequest) {
         // Get the most recent progress entry
         const latestProgress = await tx.progress.findFirst({
           where: { userId: user.id },
-          orderBy: { date: 'desc' },
+          orderBy: { date: "desc" },
         });
 
         // If the latest progress is from today, update it
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         if (latestProgress) {
           const progressDate = new Date(latestProgress.date);
           progressDate.setHours(0, 0, 0, 0);
-          
+
           if (progressDate.getTime() === today.getTime()) {
             // Update today's progress entry
             await tx.progress.update({

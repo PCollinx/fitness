@@ -165,8 +165,6 @@ export function useSmartBack(options: UseSmartBackOptions = {}) {
           const previousPath = history[currentIndex - 1];
           const previousRouteInfo = getRouteInfo(previousPath);
 
-
-
           // Prevent cycles: if previous route is at same or higher level, go to parent instead
           if (
             previousRouteInfo.level >= currentRouteInfo.level ||

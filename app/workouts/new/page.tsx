@@ -200,7 +200,7 @@ export default function CreateWorkoutPage() {
     const invalidExercises = validExercises.filter(
       (ex) => !exercises.find((e) => e.id === ex.exerciseId)
     );
-    
+
     if (invalidExercises.length > 0) {
       alert(
         "Some selected exercises are no longer available. Please refresh the page and try again."
@@ -282,10 +282,11 @@ export default function CreateWorkoutPage() {
       router.push("/workouts");
     } catch (error) {
       console.error("Error creating workout:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Failed to create workout. Please try again.";
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create workout. Please try again.";
+
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);

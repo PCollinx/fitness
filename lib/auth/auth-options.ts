@@ -8,10 +8,10 @@ import bcrypt from "bcrypt";
 
 import prisma from "../prisma";
 
-// Session types are now defined in types/next-auth.d.ts
+// Session types are defined in types/next-auth.d.ts
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any, // Type assertion to fix adapter compatibility
+  adapter: PrismaAdapter(prisma) as any,
   // Allow linking OAuth accounts to existing users with the same email
   // This is safe because OAuth providers verify email ownership
   events: {
@@ -177,7 +177,7 @@ export const authOptions: NextAuthOptions = {
 
         // Handle OAuth providers (Google, etc.)
         if (account?.provider === "google" || account?.provider === "oauth") {
-          console.log("✅ OAuth sign-in attempt for:", user?.email);
+          console.log("✅ Google sign-in attempt for:", user?.email);
 
           if (!user?.email) {
             console.log("❌ No email provided by OAuth provider");
@@ -195,8 +195,8 @@ export const authOptions: NextAuthOptions = {
 
             // Check if this specific OAuth account is already linked
             const accountAlreadyLinked = existingUser.accounts.some(
-              (acc) => 
-                acc.provider === account.provider && 
+              (acc) =>
+                acc.provider === account.provider &&
                 acc.providerAccountId === account.providerAccountId
             );
 
@@ -211,7 +211,9 @@ export const authOptions: NextAuthOptions = {
             );
 
             if (providerAlreadyLinked) {
-              console.log("⚠️ Different account from same provider already linked");
+              console.log(
+                "⚠️ Different account from same provider already linked"
+              );
               // This might be a different Google account, so deny to prevent confusion
               return `/auth/error?error=AccountNotLinked&provider=${account.provider}`;
             }
@@ -219,7 +221,7 @@ export const authOptions: NextAuthOptions = {
             // User exists but no account from this provider is linked yet
             // Link the OAuth account to the existing user
             console.log("🔗 Linking OAuth account to existing user");
-            
+
             try {
               // The PrismaAdapter will try to create the user, but it already exists
               // We need to manually link the account
@@ -253,7 +255,7 @@ export const authOptions: NextAuthOptions = {
               // Update the user object with the existing user's ID
               // This is crucial for the JWT callback to work correctly
               user.id = existingUser.id;
-              
+
               return true;
             } catch (linkError) {
               console.error("❌ Error linking OAuth account:", linkError);

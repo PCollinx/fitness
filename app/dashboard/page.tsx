@@ -441,7 +441,7 @@ export default function Dashboard() {
                             {formatDate(workout.date)}
                           </span>
                         </div>
-                        
+
                         {/* Mobile: Stacked stats, Desktop: Inline */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-300">
                           <div className="flex items-center gap-3 sm:gap-4">
@@ -459,8 +459,12 @@ export default function Dashboard() {
                           <div className="flex items-center">
                             <span className="flex items-center">
                               <FaCheck className="mr-1 text-green-400 text-xs" />
-                              <span className="hidden sm:inline">{workout.completedSets}/{workout.totalSets} sets </span>
-                              <span className="sm:hidden">{workout.completedSets}/{workout.totalSets} </span>
+                              <span className="hidden sm:inline">
+                                {workout.completedSets}/{workout.totalSets} sets{" "}
+                              </span>
+                              <span className="sm:hidden">
+                                {workout.completedSets}/{workout.totalSets}{" "}
+                              </span>
                               ({workout.completionRate}%)
                             </span>
                           </div>
@@ -484,8 +488,10 @@ export default function Dashboard() {
                     href="/workouts/new"
                     className="bg-yellow-400 hover:bg-yellow-300 text-black px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm font-medium transition flex items-center"
                   >
-                    <FaDumbbell className="mr-2 text-xs sm:text-sm" /> 
-                    <span className="text-sm sm:text-base">Create Your First Workout</span>
+                    <FaDumbbell className="mr-2 text-xs sm:text-sm" />
+                    <span className="text-sm sm:text-base">
+                      Create Your First Workout
+                    </span>
                   </Link>
                 </div>
               )}
