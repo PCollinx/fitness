@@ -336,24 +336,26 @@ export default function AdminPlaylistsPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:flex gap-2 mt-3 sm:mt-4">
+                      <div className="grid grid-cols-3 sm:flex gap-2 mt-3 sm:mt-4">
                         <button
                           onClick={() => handleToggleActive(playlist)}
-                          className="px-2 sm:px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm transition-colors whitespace-nowrap"
+                          className="px-2 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm transition-colors sm:flex-1 truncate"
                         >
-                          {playlist.isActive ? "Deactivate" : "Activate"}
+                          <span className="hidden sm:inline">{playlist.isActive ? "Deactivate" : "Activate"}</span>
+                          <span className="sm:hidden">{playlist.isActive ? "Off" : "On"}</span>
                         </button>
                         <a
                           href={playlist.spotifyPlaylistUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-xs sm:text-sm transition-colors text-center whitespace-nowrap col-span-2 sm:col-span-1 sm:flex-1"
+                          className="px-2 py-2 bg-green-600 hover:bg-green-700 rounded text-xs sm:text-sm transition-colors text-center sm:flex-1 truncate"
                         >
-                          Open in Spotify
+                          <span className="hidden sm:inline">Open in Spotify</span>
+                          <span className="sm:hidden">Spotify</span>
                         </a>
                         <button
                           onClick={() => handleDelete(playlist.id)}
-                          className="px-2 sm:px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-xs sm:text-sm transition-colors whitespace-nowrap"
+                          className="px-2 py-2 bg-red-600 hover:bg-red-700 rounded text-xs sm:text-sm transition-colors truncate"
                         >
                           Delete
                         </button>
