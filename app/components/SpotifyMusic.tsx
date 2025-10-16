@@ -371,56 +371,56 @@ export default function SpotifyMusic() {
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-yellow-400/30 hover:border-yellow-400"
                     onClick={() => openDefaultPlaylistInSpotify(playlist)}
                   >
-                  {/* Playlist Cover */}
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    {playlist.imageUrl ? (
-                      <Image
-                        src={playlist.imageUrl}
-                        alt={playlist.name}
-                        width={300}
-                        height={300}
-                        className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                    ) : (
-                      <div className="w-full aspect-square bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
-                        <FaStar className="text-6xl text-white opacity-50" />
-                      </div>
-                    )}
+                    {/* Playlist Cover */}
+                    <div className="relative overflow-hidden rounded-t-lg">
+                      {playlist.imageUrl ? (
+                        <Image
+                          src={playlist.imageUrl}
+                          alt={playlist.name}
+                          width={300}
+                          height={300}
+                          className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      ) : (
+                        <div className="w-full aspect-square bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+                          <FaStar className="text-6xl text-white opacity-50" />
+                        </div>
+                      )}
 
-                    {/* Curated Badge */}
-                    <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                      <FaStar className="text-xs" />
-                      <span>Curated</span>
+                      {/* Curated Badge */}
+                      <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <FaStar className="text-xs" />
+                        <span>Curated</span>
+                      </div>
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="text-white text-center">
+                          <FaSpotify className="text-3xl mx-auto mb-2" />
+                          <p className="text-sm">Open in Spotify</p>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <FaSpotify className="text-3xl mx-auto mb-2" />
-                        <p className="text-sm">Open in Spotify</p>
+                    {/* Playlist Info */}
+                    <div className="p-3 sm:p-4">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm sm:text-base">
+                        {playlist.name}
+                      </h3>
+
+                      <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
+                        {playlist.description || "Curated workout playlist"}
+                      </p>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span className="truncate capitalize">
+                          {playlist.category}
+                        </span>
+                        <FaExternalLinkAlt className="text-yellow-400 flex-shrink-0 ml-2" />
                       </div>
                     </div>
                   </div>
-
-                  {/* Playlist Info */}
-                  <div className="p-3 sm:p-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm sm:text-base">
-                      {playlist.name}
-                    </h3>
-
-                    <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
-                      {playlist.description || "Curated workout playlist"}
-                    </p>
-
-                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span className="truncate capitalize">
-                        {playlist.category}
-                      </span>
-                      <FaExternalLinkAlt className="text-yellow-400 flex-shrink-0 ml-2" />
-                    </div>
-                  </div>
-                </div>
-              ))}{" "}
+                ))}{" "}
             </div>
 
             {/* Empty State for Default Playlists */}
@@ -458,51 +458,54 @@ export default function SpotifyMusic() {
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-green-500/50"
                   onClick={() => openPlaylistInSpotify(playlist)}
                 >
-                {/* Playlist Cover */}
-                <div className="relative overflow-hidden rounded-t-lg">
-                  {playlist.images && Array.isArray(playlist.images) && playlist.images.length > 0 && playlist.images[0]?.url ? (
-                    <Image
-                      src={playlist.images[0].url}
-                      alt={playlist.name}
-                      width={300}
-                      height={300}
-                      className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
-                    />
-                  ) : (
-                    <div className="w-full aspect-square bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                      <FaMusic className="text-6xl text-white opacity-50" />
-                    </div>
-                  )}
+                  {/* Playlist Cover */}
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    {playlist.images &&
+                    Array.isArray(playlist.images) &&
+                    playlist.images.length > 0 &&
+                    playlist.images[0]?.url ? (
+                      <Image
+                        src={playlist.images[0].url}
+                        alt={playlist.name}
+                        width={300}
+                        height={300}
+                        className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="w-full aspect-square bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                        <FaMusic className="text-6xl text-white opacity-50" />
+                      </div>
+                    )}
 
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <FaSpotify className="text-3xl mx-auto mb-2" />
-                      <p className="text-sm">Open in Spotify</p>
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <FaSpotify className="text-3xl mx-auto mb-2" />
+                        <p className="text-sm">Open in Spotify</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Playlist Info */}
+                  <div className="p-3 sm:p-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm sm:text-base">
+                      {playlist.name}
+                    </h3>
+
+                    <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
+                      {playlist.description ||
+                        `By ${playlist.owner.display_name}`}
+                    </p>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span className="truncate">
+                        {playlist.tracks.total} tracks
+                      </span>
+                      <FaExternalLinkAlt className="text-green-500 flex-shrink-0 ml-2" />
                     </div>
                   </div>
                 </div>
-
-                {/* Playlist Info */}
-                <div className="p-3 sm:p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm sm:text-base">
-                    {playlist.name}
-                  </h3>
-
-                  <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
-                    {playlist.description ||
-                      `By ${playlist.owner.display_name}`}
-                  </p>
-
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span className="truncate">
-                      {playlist.tracks.total} tracks
-                    </span>
-                    <FaExternalLinkAlt className="text-green-500 flex-shrink-0 ml-2" />
-                  </div>
-                </div>
-              </div>
-            ))}{" "}
+              ))}{" "}
           </div>
         )}
 
@@ -510,27 +513,27 @@ export default function SpotifyMusic() {
         {activeTab !== "default" &&
           (!playlists || playlists.length === 0) &&
           !loading && (
-          <div className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <FaSpotify className="text-6xl text-gray-400 mx-auto mb-6" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                No playlists found
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                {activeTab === "user"
-                  ? "Create your first playlist to get started"
-                  : "Switch to 'My Playlists' to see your music"}
-              </p>
-              <button
-                onClick={createWorkoutPlaylist}
-                className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 mx-auto transition-colors"
-              >
-                <FaPlus />
-                <span>Create Playlist</span>
-              </button>
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <FaSpotify className="text-6xl text-gray-400 mx-auto mb-6" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  No playlists found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  {activeTab === "user"
+                    ? "Create your first playlist to get started"
+                    : "Switch to 'My Playlists' to see your music"}
+                </p>
+                <button
+                  onClick={createWorkoutPlaylist}
+                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 mx-auto transition-colors"
+                >
+                  <FaPlus />
+                  <span>Create Playlist</span>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </div>
   );

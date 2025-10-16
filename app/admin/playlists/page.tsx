@@ -336,10 +336,10 @@ export default function AdminPlaylistsPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-4">
+                      <div className="grid grid-cols-2 sm:flex gap-2 mt-3 sm:mt-4">
                         <button
                           onClick={() => handleToggleActive(playlist)}
-                          className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm transition-colors"
+                          className="px-2 sm:px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm transition-colors whitespace-nowrap"
                         >
                           {playlist.isActive ? "Deactivate" : "Activate"}
                         </button>
@@ -347,13 +347,13 @@ export default function AdminPlaylistsPage() {
                           href={playlist.spotifyPlaylistUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-xs sm:text-sm transition-colors text-center"
+                          className="px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-xs sm:text-sm transition-colors text-center whitespace-nowrap col-span-2 sm:col-span-1 sm:flex-1"
                         >
                           Open in Spotify
                         </a>
                         <button
                           onClick={() => handleDelete(playlist.id)}
-                          className="sm:flex-initial px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-xs sm:text-sm transition-colors"
+                          className="px-2 sm:px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-xs sm:text-sm transition-colors whitespace-nowrap"
                         >
                           Delete
                         </button>
