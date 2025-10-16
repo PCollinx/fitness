@@ -101,7 +101,6 @@ export default function SpotifyMusic() {
         setIsConnected(false);
       }
     } catch (error) {
-      console.error("Error checking Spotify connection:", error);
       setIsConnected(false);
     } finally {
       setLoading(false);
@@ -117,7 +116,7 @@ export default function SpotifyMusic() {
         window.location.href = data.authUrl;
       }
     } catch (error) {
-      console.error("Error connecting to Spotify:", error);
+      // Error connecting to Spotify
     }
   };
 
@@ -135,13 +134,9 @@ export default function SpotifyMusic() {
         const playlistItems = data.items || data.playlists?.items || [];
         setPlaylists(playlistItems);
       } else {
-        console.error("Failed to fetch playlists:", response.status, response.statusText);
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Error details:", errorData);
         setPlaylists([]);
       }
     } catch (error) {
-      console.error("Error fetching playlists:", error);
       setPlaylists([]);
     } finally {
       setLoading(false);
@@ -157,13 +152,9 @@ export default function SpotifyMusic() {
         const data = await response.json();
         setDefaultPlaylists(data.playlists || []);
       } else {
-        console.error("Failed to fetch default playlists:", response.status, response.statusText);
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Error details:", errorData);
         setDefaultPlaylists([]);
       }
     } catch (error) {
-      console.error("Error fetching default playlists:", error);
       setDefaultPlaylists([]);
     } finally {
       setLoading(false);

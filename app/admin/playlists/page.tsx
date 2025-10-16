@@ -82,19 +82,16 @@ export default function AdminPlaylistsPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Failed to fetch Spotify playlists:", response.status, errorData);
         throw new Error(errorData.error || "Failed to fetch Spotify playlists");
       }
 
       const data = await response.json();
-      console.log("Fetched Spotify playlists:", data);
       setSpotifyPlaylists(data.items || []);
       
       if (!data.items || data.items.length === 0) {
         setError("No playlists found in your Spotify account");
       }
     } catch (error) {
-      console.error("Error fetching Spotify playlists:", error);
       setError(error instanceof Error ? error.message : "Failed to load Spotify playlists");
       setSpotifyPlaylists([]);
     } finally {
@@ -110,15 +107,12 @@ export default function AdminPlaylistsPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Failed to fetch default playlists:", response.status, errorData);
         throw new Error(errorData.error || "Failed to fetch default playlists");
       }
 
       const data = await response.json();
-      console.log("Fetched default playlists:", data);
       setDefaultPlaylists(data.playlists || []);
     } catch (error) {
-      console.error("Error fetching default playlists:", error);
       setError(error instanceof Error ? error.message : "Failed to load default playlists");
       setDefaultPlaylists([]);
     } finally {
@@ -226,35 +220,35 @@ export default function AdminPlaylistsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-900 text-white pb-20 sm:pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <BackButton />
 
-        <div className="mt-6">
-          <h1 className="text-3xl font-bold text-yellow-400 mb-2">
+        <div className="mt-4 sm:mt-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-1 sm:mb-2">
             Manage Default Playlists
           </h1>
-          <p className="text-gray-400 mb-6">
+          <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">
             Set up default Spotify playlists for all users
           </p>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-400">
+            <div className="mb-4 p-3 sm:p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-400 text-sm sm:text-base">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-500/10 border border-green-500 rounded-lg text-green-400">
+            <div className="mb-4 p-3 sm:p-4 bg-green-500/10 border border-green-500 rounded-lg text-green-400 text-sm sm:text-base">
               {success}
             </div>
           )}
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-gray-700">
+          <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 border-b border-gray-700 overflow-x-auto">
             <button
               onClick={() => setActiveTab("defaults")}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
                 activeTab === "defaults"
                   ? "text-yellow-400 border-b-2 border-yellow-400"
                   : "text-gray-400 hover:text-white"
@@ -269,7 +263,7 @@ export default function AdminPlaylistsPage() {
                   fetchSpotifyPlaylists();
                 }
               }}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
                 activeTab === "spotify"
                   ? "text-yellow-400 border-b-2 border-yellow-400"
                   : "text-gray-400 hover:text-white"
@@ -281,47 +275,47 @@ export default function AdminPlaylistsPage() {
 
           {/* Default Playlists Tab */}
           {activeTab === "defaults" && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {defaultPlaylists.length === 0 ? (
-                <div className="text-center py-12 bg-gray-800 rounded-lg">
-                  <p className="text-gray-400 mb-4">
+                <div className="text-center py-8 sm:py-12 bg-gray-800 rounded-lg">
+                  <p className="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4 px-4">
                     No default playlists yet
                   </p>
                   <button
                     onClick={() => setActiveTab("spotify")}
-                    className="px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors"
+                    className="px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors text-sm sm:text-base"
                   >
                     Add Your First Playlist
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-2">
                   {Array.isArray(defaultPlaylists) &&
                     defaultPlaylists.map((playlist) => (
                       <div
                         key={playlist.id}
-                        className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                        className="bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-700"
                       >
-                      <div className="flex gap-4">
+                      <div className="flex gap-3 sm:gap-4">
                         {playlist.imageUrl && (
                           <img
                             src={playlist.imageUrl}
                             alt={playlist.name}
-                            className="w-20 h-20 rounded object-cover"
+                            className="w-16 h-16 sm:w-20 sm:h-20 rounded object-cover flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg truncate">
+                          <h3 className="font-semibold text-base sm:text-lg truncate">
                             {playlist.name}
                           </h3>
                           {playlist.description && (
-                            <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                            <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">
                               {playlist.description}
                             </p>
                           )}
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 flex-wrap">
                             <span
-                              className={`text-xs px-2 py-1 rounded ${
+                              className={`text-xs px-2 py-0.5 sm:py-1 rounded ${
                                 playlist.category === "workout"
                                   ? "bg-yellow-400/20 text-yellow-400"
                                   : "bg-blue-400/20 text-blue-400"
@@ -330,7 +324,7 @@ export default function AdminPlaylistsPage() {
                               {playlist.category}
                             </span>
                             <span
-                              className={`text-xs px-2 py-1 rounded ${
+                              className={`text-xs px-2 py-0.5 sm:py-1 rounded ${
                                 playlist.isActive
                                   ? "bg-green-400/20 text-green-400"
                                   : "bg-gray-600/20 text-gray-400"
@@ -342,10 +336,10 @@ export default function AdminPlaylistsPage() {
                         </div>
                       </div>
 
-                      <div className="flex gap-2 mt-4">
+                      <div className="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-4">
                         <button
                           onClick={() => handleToggleActive(playlist)}
-                          className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors"
+                          className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm transition-colors"
                         >
                           {playlist.isActive ? "Deactivate" : "Activate"}
                         </button>
@@ -353,13 +347,13 @@ export default function AdminPlaylistsPage() {
                           href={playlist.spotifyPlaylistUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm transition-colors text-center"
+                          className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-xs sm:text-sm transition-colors text-center"
                         >
                           Open in Spotify
                         </a>
                         <button
                           onClick={() => handleDelete(playlist.id)}
-                          className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors"
+                          className="sm:flex-initial px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-xs sm:text-sm transition-colors"
                         >
                           Delete
                         </button>
@@ -375,32 +369,32 @@ export default function AdminPlaylistsPage() {
           {activeTab === "spotify" && (
             <div>
               {!spotifyConnected ? (
-                <div className="text-center py-12 bg-gray-800 rounded-lg">
-                  <p className="text-gray-400 mb-4">
+                <div className="text-center py-8 sm:py-12 bg-gray-800 rounded-lg">
+                  <p className="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4 px-4">
                     Connect your Spotify account to add playlists
                   </p>
                   <a
                     href="/api/spotify/auth"
-                    className="inline-block px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition-colors"
+                    className="inline-block px-5 sm:px-6 py-2.5 sm:py-3 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition-colors text-sm sm:text-base"
                   >
                     Connect Spotify
                   </a>
                 </div>
               ) : selectedPlaylist ? (
-                <div className="bg-gray-800 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">
+                <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+                  <h2 className="text-lg sm:text-xl font-semibold mb-4">
                     Save as Default Playlist
                   </h2>
 
-                  <div className="flex gap-4 mb-6">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                     {selectedPlaylist.images && Array.isArray(selectedPlaylist.images) && selectedPlaylist.images.length > 0 && selectedPlaylist.images[0]?.url ? (
                       <img
                         src={selectedPlaylist.images[0].url}
                         alt={selectedPlaylist.name}
-                        className="w-32 h-32 rounded object-cover"
+                        className="w-full sm:w-32 h-48 sm:h-32 rounded object-cover"
                       />
                     ) : (
-                      <div className="w-32 h-32 rounded bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                      <div className="w-full sm:w-32 h-48 sm:h-32 rounded bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center flex-shrink-0">
                         <svg
                           className="w-16 h-16 text-white opacity-50"
                           fill="currentColor"
@@ -410,22 +404,22 @@ export default function AdminPlaylistsPage() {
                         </svg>
                       </div>
                     )}
-                    <div>
-                      <h3 className="font-semibold text-lg">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-base sm:text-lg">
                         {selectedPlaylist.name}
                       </h3>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-xs sm:text-sm text-gray-400 mt-1">
                         {selectedPlaylist.description || "No description"}
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">
+                      <p className="text-xs sm:text-sm text-gray-500 mt-2">
                         {selectedPlaylist.tracks.total} tracks
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <label className="block text-xs sm:text-sm font-medium mb-2">
                         Category *
                       </label>
                       <select
@@ -433,7 +427,7 @@ export default function AdminPlaylistsPage() {
                         onChange={(e) =>
                           setCategory(e.target.value as "workout" | "general")
                         }
-                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        className="w-full px-3 sm:px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base"
                       >
                         <option value="workout">Workout</option>
                         <option value="general">General</option>
@@ -445,23 +439,23 @@ export default function AdminPlaylistsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <label className="block text-xs sm:text-sm font-medium mb-2">
                         Custom Description (optional)
                       </label>
                       <textarea
                         value={customDescription}
                         onChange={(e) => setCustomDescription(e.target.value)}
                         placeholder="Add a custom description for users..."
-                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+                        className="w-full px-3 sm:px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none text-sm sm:text-base"
                         rows={3}
                       />
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <button
                         onClick={handleSaveAsDefault}
                         disabled={saving}
-                        className="flex-1 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 px-4 py-2.5 bg-yellow-400 text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
                         {saving ? "Saving..." : "Save as Default"}
                       </button>
@@ -470,7 +464,7 @@ export default function AdminPlaylistsPage() {
                           setSelectedPlaylist(null);
                           setCustomDescription("");
                         }}
-                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                        className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm sm:text-base"
                       >
                         Cancel
                       </button>
@@ -479,21 +473,21 @@ export default function AdminPlaylistsPage() {
                 </div>
               ) : (
                 <div>
-                  <div className="mb-4">
+                  <div className="mb-3 sm:mb-4">
                     <button
                       onClick={fetchSpotifyPlaylists}
-                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
+                      className="px-3 sm:px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-xs sm:text-sm"
                     >
                       Refresh Playlists
                     </button>
                   </div>
 
                   {spotifyPlaylists.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-800 rounded-lg">
-                      <p className="text-gray-400">No playlists found</p>
+                    <div className="text-center py-8 sm:py-12 bg-gray-800 rounded-lg">
+                      <p className="text-sm sm:text-base text-gray-400 px-4">No playlists found</p>
                     </div>
                   ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {Array.isArray(spotifyPlaylists) &&
                         spotifyPlaylists.map((playlist) => {
                           const isAlreadyDefault =
@@ -511,12 +505,12 @@ export default function AdminPlaylistsPage() {
                               <img
                                 src={playlist.images[0].url}
                                 alt={playlist.name}
-                                className="w-full h-48 object-cover"
+                                className="w-full h-40 sm:h-48 object-cover"
                               />
                             ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                              <div className="w-full h-40 sm:h-48 bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
                                 <svg
-                                  className="w-20 h-20 text-white opacity-50"
+                                  className="w-16 sm:w-20 h-16 sm:h-20 text-white opacity-50"
                                   fill="currentColor"
                                   viewBox="0 0 20 20"
                                 >
@@ -524,21 +518,21 @@ export default function AdminPlaylistsPage() {
                                 </svg>
                               </div>
                             )}
-                            <div className="p-4">
-                              <h3 className="font-semibold truncate">
+                            <div className="p-3 sm:p-4">
+                              <h3 className="font-semibold text-sm sm:text-base truncate">
                                 {playlist.name}
                               </h3>
-                              <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                              <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">
                                 {playlist.description || "No description"}
                               </p>
-                              <p className="text-xs text-gray-500 mt-2">
+                              <p className="text-xs text-gray-500 mt-1.5 sm:mt-2">
                                 {playlist.tracks.total} tracks
                               </p>
 
                               <button
                                 onClick={() => setSelectedPlaylist(playlist)}
                                 disabled={isAlreadyDefault}
-                                className="w-full mt-4 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full mt-3 sm:mt-4 px-3 sm:px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                               >
                                 {isAlreadyDefault
                                   ? "Already Default"
