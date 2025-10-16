@@ -289,33 +289,33 @@ export default function AdminPlaylistsPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                   {Array.isArray(defaultPlaylists) &&
                     defaultPlaylists.map((playlist) => (
                       <div
                         key={playlist.id}
-                        className="bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-700"
+                        className="bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-700 overflow-hidden"
                       >
-                      <div className="flex gap-3 sm:gap-4">
+                      <div className="flex gap-2 sm:gap-3">
                         {playlist.imageUrl && (
                           <img
                             src={playlist.imageUrl}
                             alt={playlist.name}
-                            className="w-16 h-16 sm:w-20 sm:h-20 rounded object-cover flex-shrink-0"
+                            className="w-14 h-14 sm:w-20 sm:h-20 rounded object-cover flex-shrink-0"
                           />
                         )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base sm:text-lg truncate">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <h3 className="font-semibold text-sm sm:text-base truncate">
                             {playlist.name}
                           </h3>
                           {playlist.description && (
-                            <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">
+                            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 line-clamp-2">
                               {playlist.description}
                             </p>
                           )}
-                          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 flex-wrap">
+                          <div className="flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2 flex-wrap">
                             <span
-                              className={`text-xs px-2 py-0.5 sm:py-1 rounded ${
+                              className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded ${
                                 playlist.category === "workout"
                                   ? "bg-yellow-400/20 text-yellow-400"
                                   : "bg-blue-400/20 text-blue-400"
@@ -324,7 +324,7 @@ export default function AdminPlaylistsPage() {
                               {playlist.category}
                             </span>
                             <span
-                              className={`text-xs px-2 py-0.5 sm:py-1 rounded ${
+                              className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded ${
                                 playlist.isActive
                                   ? "bg-green-400/20 text-green-400"
                                   : "bg-gray-600/20 text-gray-400"
@@ -336,10 +336,10 @@ export default function AdminPlaylistsPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 sm:flex gap-2 mt-3 sm:mt-4">
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-2.5 sm:mt-3">
                         <button
                           onClick={() => handleToggleActive(playlist)}
-                          className="px-2 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm transition-colors sm:flex-1 truncate"
+                          className="px-1.5 sm:px-3 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 rounded text-[10px] sm:text-sm transition-colors truncate"
                         >
                           <span className="hidden sm:inline">{playlist.isActive ? "Deactivate" : "Activate"}</span>
                           <span className="sm:hidden">{playlist.isActive ? "Off" : "On"}</span>
@@ -348,14 +348,14 @@ export default function AdminPlaylistsPage() {
                           href={playlist.spotifyPlaylistUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2 py-2 bg-green-600 hover:bg-green-700 rounded text-xs sm:text-sm transition-colors text-center sm:flex-1 truncate"
+                          className="px-1.5 sm:px-3 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 rounded text-[10px] sm:text-sm transition-colors text-center truncate"
                         >
-                          <span className="hidden sm:inline">Open in Spotify</span>
-                          <span className="sm:hidden">Spotify</span>
+                          <span className="hidden sm:inline">Spotify</span>
+                          <span className="sm:hidden">Play</span>
                         </a>
                         <button
                           onClick={() => handleDelete(playlist.id)}
-                          className="px-2 py-2 bg-red-600 hover:bg-red-700 rounded text-xs sm:text-sm transition-colors truncate"
+                          className="px-1.5 sm:px-3 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 rounded text-[10px] sm:text-sm transition-colors truncate"
                         >
                           Delete
                         </button>
