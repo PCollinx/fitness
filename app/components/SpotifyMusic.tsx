@@ -134,9 +134,15 @@ export default function SpotifyMusic() {
         const data = await response.json();
         const playlistItems = data.items || data.playlists?.items || [];
         setPlaylists(playlistItems);
+      } else {
+        console.error("Failed to fetch playlists:", response.status, response.statusText);
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error details:", errorData);
+        setPlaylists([]);
       }
     } catch (error) {
       console.error("Error fetching playlists:", error);
+      setPlaylists([]);
     } finally {
       setLoading(false);
     }
@@ -150,9 +156,15 @@ export default function SpotifyMusic() {
       if (response.ok) {
         const data = await response.json();
         setDefaultPlaylists(data.playlists || []);
+      } else {
+        console.error("Failed to fetch default playlists:", response.status, response.statusText);
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error details:", errorData);
+        setDefaultPlaylists([]);
       }
     } catch (error) {
       console.error("Error fetching default playlists:", error);
+      setDefaultPlaylists([]);
     } finally {
       setLoading(false);
     }
@@ -361,12 +373,13 @@ export default function SpotifyMusic() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-              {defaultPlaylists.map((playlist) => (
-                <div
-                  key={playlist.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-yellow-400/30 hover:border-yellow-400"
-                  onClick={() => openDefaultPlaylistInSpotify(playlist)}
-                >
+              {Array.isArray(defaultPlaylists) &&
+                defaultPlaylists.map((playlist) => (
+                  <div
+                    key={playlist.id}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-yellow-400/30 hover:border-yellow-400"
+                    onClick={() => openDefaultPlaylistInSpotify(playlist)}
+                  >
                   {/* Playlist Cover */}
                   <div className="relative overflow-hidden rounded-t-lg">
                     {playlist.imageUrl ? (
@@ -416,11 +429,11 @@ export default function SpotifyMusic() {
                     </div>
                   </div>
                 </div>
-              ))}
+              ))}{" "}
             </div>
 
             {/* Empty State for Default Playlists */}
-            {defaultPlaylists.length === 0 && (
+            {(!defaultPlaylists || defaultPlaylists.length === 0) && (
               <div className="text-center py-16">
                 <div className="max-w-md mx-auto">
                   <FaStar className="text-6xl text-gray-400 mx-auto mb-6" />
@@ -447,12 +460,13 @@ export default function SpotifyMusic() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            {playlists.map((playlist) => (
-              <div
-                key={playlist.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-green-500/50"
-                onClick={() => openPlaylistInSpotify(playlist)}
-              >
+            {Array.isArray(playlists) &&
+              playlists.map((playlist) => (
+                <div
+                  key={playlist.id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-green-500/50"
+                  onClick={() => openPlaylistInSpotify(playlist)}
+                >
                 {/* Playlist Cover */}
                 <div className="relative overflow-hidden rounded-t-lg">
                   {playlist.images?.[0]?.url ? (
@@ -497,12 +511,14 @@ export default function SpotifyMusic() {
                   </div>
                 </div>
               </div>
-            ))}
+            ))}{" "}
           </div>
         )}
 
         {/* Empty State */}
-        {playlists.length === 0 && !loading && (
+        {activeTab !== "default" &&
+          (!playlists || playlists.length === 0) &&
+          !loading && (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <FaSpotify className="text-6xl text-gray-400 mx-auto mb-6" />

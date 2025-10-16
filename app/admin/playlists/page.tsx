@@ -75,19 +75,28 @@ export default function AdminPlaylistsPage() {
   const fetchSpotifyPlaylists = async () => {
     try {
       setLoading(true);
+      setError("");
       const response = await fetch(
         "/api/spotify/playlists?type=user&limit=50"
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch Spotify playlists");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to fetch Spotify playlists:", response.status, errorData);
+        throw new Error(errorData.error || "Failed to fetch Spotify playlists");
       }
 
       const data = await response.json();
+      console.log("Fetched Spotify playlists:", data);
       setSpotifyPlaylists(data.items || []);
+      
+      if (!data.items || data.items.length === 0) {
+        setError("No playlists found in your Spotify account");
+      }
     } catch (error) {
       console.error("Error fetching Spotify playlists:", error);
-      setError("Failed to load Spotify playlists");
+      setError(error instanceof Error ? error.message : "Failed to load Spotify playlists");
+      setSpotifyPlaylists([]);
     } finally {
       setLoading(false);
     }
@@ -96,17 +105,22 @@ export default function AdminPlaylistsPage() {
   const fetchDefaultPlaylists = async () => {
     try {
       setLoading(true);
+      setError("");
       const response = await fetch("/api/admin/default-playlists");
 
       if (!response.ok) {
-        throw new Error("Failed to fetch default playlists");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to fetch default playlists:", response.status, errorData);
+        throw new Error(errorData.error || "Failed to fetch default playlists");
       }
 
       const data = await response.json();
+      console.log("Fetched default playlists:", data);
       setDefaultPlaylists(data.playlists || []);
     } catch (error) {
       console.error("Error fetching default playlists:", error);
-      setError("Failed to load default playlists");
+      setError(error instanceof Error ? error.message : "Failed to load default playlists");
+      setDefaultPlaylists([]);
     } finally {
       setLoading(false);
     }
@@ -282,11 +296,12 @@ export default function AdminPlaylistsPage() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {defaultPlaylists.map((playlist) => (
-                    <div
-                      key={playlist.id}
-                      className="bg-gray-800 rounded-lg p-4 border border-gray-700"
-                    >
+                  {Array.isArray(defaultPlaylists) &&
+                    defaultPlaylists.map((playlist) => (
+                      <div
+                        key={playlist.id}
+                        className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                      >
                       <div className="flex gap-4">
                         {playlist.imageUrl && (
                           <img
@@ -350,7 +365,7 @@ export default function AdminPlaylistsPage() {
                         </button>
                       </div>
                     </div>
-                  ))}
+                  ))}{" "}
                 </div>
               )}
             </div>
@@ -479,10 +494,13 @@ export default function AdminPlaylistsPage() {
                     </div>
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {spotifyPlaylists.map((playlist) => {
-                        const isAlreadyDefault = defaultPlaylists.some(
-                          (dp) => dp.spotifyPlaylistId === playlist.id
-                        );
+                      {Array.isArray(spotifyPlaylists) &&
+                        spotifyPlaylists.map((playlist) => {
+                          const isAlreadyDefault =
+                            Array.isArray(defaultPlaylists) &&
+                            defaultPlaylists.some(
+                              (dp) => dp.spotifyPlaylistId === playlist.id
+                            );
 
                         return (
                           <div
@@ -529,7 +547,7 @@ export default function AdminPlaylistsPage() {
                             </div>
                           </div>
                         );
-                      })}
+                      })}{" "}
                     </div>
                   )}
                 </div>
