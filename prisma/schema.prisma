@@ -62,6 +62,7 @@ model User {
   workouts            Workout[]
   workoutSessions     WorkoutSession[]
   workoutSchedules    WorkoutSchedule[]
+  defaultPlaylists    DefaultPlaylist[]  @relation("DefaultPlaylistCreatedBy")
 }
 
 model VerificationToken {
@@ -227,4 +228,23 @@ model WorkoutSchedule {
 
   @@unique([userId, dayOfWeek])
   @@index([userId])
+}
+
+model DefaultPlaylist {
+  id                  String   @id @default(cuid())
+  name                String
+  description         String?
+  spotifyPlaylistId   String   @unique
+  spotifyPlaylistUrl  String
+  imageUrl            String?
+  category            String   @default("workout") // workout, cardio, strength, yoga, etc.
+  isActive            Boolean  @default(true)
+  createdById         String   // Admin user ID
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdBy           User     @relation("DefaultPlaylistCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([isActive])
+  @@index([createdById])
 }

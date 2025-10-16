@@ -9,6 +9,7 @@ import {
   FaPlus,
   FaDumbbell,
   FaUser,
+  FaStar,
 } from "react-icons/fa";
 
 interface SpotifyPlaylist {
@@ -19,6 +20,17 @@ interface SpotifyPlaylist {
   tracks: { total: number };
   external_urls: { spotify: string };
   owner: { display_name: string };
+}
+
+interface DefaultPlaylist {
+  id: string;
+  name: string;
+  description: string | null;
+  spotifyPlaylistId: string;
+  spotifyPlaylistUrl: string;
+  category: string;
+  imageUrl: string | null;
+  createdAt: string;
 }
 
 interface SpotifyTrack {
@@ -39,17 +51,27 @@ export default function SpotifyMusic() {
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
-  const [activeTab, setActiveTab] = useState<"user" | "workout">("user");
+  const [defaultPlaylists, setDefaultPlaylists] = useState<DefaultPlaylist[]>(
+    []
+  );
+  const [activeTab, setActiveTab] = useState<"user" | "workout" | "default">(
+    "user"
+  );
 
   useEffect(() => {
     if (status === "authenticated") {
       checkSpotifyConnection();
+      fetchDefaultPlaylists(); // Always fetch default playlists
     }
   }, [status]);
 
   useEffect(() => {
-    if (status === "authenticated" && isConnected) {
-      fetchPlaylists();
+    if (status === "authenticated") {
+      if (activeTab === "default") {
+        fetchDefaultPlaylists();
+      } else if (isConnected) {
+        fetchPlaylists();
+      }
     }
   }, [status, activeTab, isConnected]);
 
@@ -115,9 +137,30 @@ export default function SpotifyMusic() {
     }
   };
 
+  const fetchDefaultPlaylists = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/default-playlists?category=workout");
+
+      if (response.ok) {
+        const data = await response.json();
+        setDefaultPlaylists(data.playlists || []);
+      }
+    } catch (error) {
+      console.error("Error fetching default playlists:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const openPlaylistInSpotify = (playlist: SpotifyPlaylist) => {
     // Open playlist directly in Spotify
     window.open(playlist.external_urls.spotify, "_blank");
+  };
+
+  const openDefaultPlaylistInSpotify = (playlist: DefaultPlaylist) => {
+    // Open default playlist directly in Spotify
+    window.open(playlist.spotifyPlaylistUrl, "_blank");
   };
 
   const createWorkoutPlaylist = () => {
@@ -236,6 +279,12 @@ export default function SpotifyMusic() {
         <div className="flex space-x-1 mb-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full sm:w-fit overflow-x-auto">
           {[
             {
+              key: "default",
+              label: "Curated",
+              shortLabel: "Curated",
+              icon: <FaStar />,
+            },
+            {
               key: "user",
               label: "My Playlists",
               shortLabel: "My Music",
@@ -274,6 +323,99 @@ export default function SpotifyMusic() {
                 <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
               </div>
             ))}
+          </div>
+        ) : activeTab === "default" ? (
+          <div>
+            {/* Default Playlists Section */}
+            <div className="mb-6 p-4 bg-yellow-400/10 border border-yellow-400/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <FaStar className="text-yellow-400 text-xl flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                    Curated by Our Team
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    These playlists are handpicked by our fitness experts to
+                    keep you motivated during your workouts.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {defaultPlaylists.map((playlist) => (
+                <div
+                  key={playlist.id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group border border-yellow-400/30 hover:border-yellow-400"
+                  onClick={() => openDefaultPlaylistInSpotify(playlist)}
+                >
+                  {/* Playlist Cover */}
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    {playlist.imageUrl ? (
+                      <Image
+                        src={playlist.imageUrl}
+                        alt={playlist.name}
+                        width={300}
+                        height={300}
+                        className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="w-full aspect-square bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+                        <FaStar className="text-6xl text-white opacity-50" />
+                      </div>
+                    )}
+
+                    {/* Curated Badge */}
+                    <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                      <FaStar className="text-xs" />
+                      <span>Curated</span>
+                    </div>
+
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <FaSpotify className="text-3xl mx-auto mb-2" />
+                        <p className="text-sm">Open in Spotify</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Playlist Info */}
+                  <div className="p-3 sm:p-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm sm:text-base">
+                      {playlist.name}
+                    </h3>
+
+                    <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
+                      {playlist.description || "Curated workout playlist"}
+                    </p>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span className="truncate capitalize">
+                        {playlist.category}
+                      </span>
+                      <FaExternalLinkAlt className="text-yellow-400 flex-shrink-0 ml-2" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Empty State for Default Playlists */}
+            {defaultPlaylists.length === 0 && (
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <FaStar className="text-6xl text-gray-400 mx-auto mb-6" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    No curated playlists yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Our team is working on curating the perfect workout
+                    playlists for you. Check back soon!
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
