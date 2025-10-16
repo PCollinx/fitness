@@ -469,7 +469,7 @@ export default function SpotifyMusic() {
                 >
                 {/* Playlist Cover */}
                 <div className="relative overflow-hidden rounded-t-lg">
-                  {playlist.images?.[0]?.url ? (
+                  {playlist.images && Array.isArray(playlist.images) && playlist.images.length > 0 && playlist.images[0]?.url ? (
                     <Image
                       src={playlist.images[0].url}
                       alt={playlist.name}

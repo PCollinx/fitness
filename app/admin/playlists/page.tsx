@@ -143,7 +143,7 @@ export default function AdminPlaylistsPage() {
           spotifyPlaylistId: selectedPlaylist.id,
           spotifyPlaylistUrl: selectedPlaylist.external_urls.spotify,
           category,
-          imageUrl: selectedPlaylist.images[0]?.url || null,
+          imageUrl: (selectedPlaylist.images && Array.isArray(selectedPlaylist.images) && selectedPlaylist.images[0]?.url) || null,
           isActive: true,
         }),
       });
@@ -393,7 +393,7 @@ export default function AdminPlaylistsPage() {
                   </h2>
 
                   <div className="flex gap-4 mb-6">
-                    {selectedPlaylist.images[0] ? (
+                    {selectedPlaylist.images && Array.isArray(selectedPlaylist.images) && selectedPlaylist.images.length > 0 && selectedPlaylist.images[0]?.url ? (
                       <img
                         src={selectedPlaylist.images[0].url}
                         alt={selectedPlaylist.name}
@@ -507,7 +507,7 @@ export default function AdminPlaylistsPage() {
                             key={playlist.id}
                             className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-gray-600 transition-colors"
                           >
-                            {playlist.images[0] ? (
+                            {playlist.images && Array.isArray(playlist.images) && playlist.images.length > 0 && playlist.images[0]?.url ? (
                               <img
                                 src={playlist.images[0].url}
                                 alt={playlist.name}
