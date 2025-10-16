@@ -4,7 +4,7 @@ export const SPOTIFY_CONFIG = {
   CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET!,
   REDIRECT_URI:
     process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI ||
-    "http://localhost:3000/api/auth/callback/spotify",
+    "http://localhost:3000/api/spotify/callback",
   SCOPES: [
     "streaming",
     "user-read-email",

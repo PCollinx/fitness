@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
+import { useIsAdmin } from "@/lib/hooks/useIsAdmin";
 import {
   FaSpotify,
   FaExternalLinkAlt,
@@ -10,6 +12,7 @@ import {
   FaDumbbell,
   FaUser,
   FaStar,
+  FaCog,
 } from "react-icons/fa";
 
 interface SpotifyPlaylist {
@@ -48,6 +51,7 @@ interface SpotifyTrack {
 
 export default function SpotifyMusic() {
   const { data: session, status } = useSession();
+  const { isAdmin } = useIsAdmin();
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
@@ -262,16 +266,29 @@ export default function SpotifyMusic() {
               </div>
             </div>
 
-            <button
-              onClick={createWorkoutPlaylist}
-              className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 sm:px-4 sm:py-3 rounded-lg flex items-center justify-center space-x-1 sm:space-x-2 transition-colors shadow-lg text-sm sm:text-base flex-shrink-0 w-full sm:w-auto"
-            >
-              <FaPlus className="text-sm" />
-              <span className="hidden xs:inline sm:inline">
-                Create Playlist
-              </span>
-              <span className="xs:hidden sm:hidden">Create</span>
-            </button>
+            {activeTab === "default" && isAdmin ? (
+              <Link
+                href="/admin/playlists"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-3 py-2 sm:px-4 sm:py-3 rounded-lg flex items-center justify-center space-x-1 sm:space-x-2 transition-colors shadow-lg text-sm sm:text-base flex-shrink-0 w-full sm:w-auto font-medium"
+              >
+                <FaCog className="text-sm" />
+                <span className="hidden xs:inline sm:inline">
+                  Manage Playlists
+                </span>
+                <span className="xs:hidden sm:hidden">Manage</span>
+              </Link>
+            ) : (
+              <button
+                onClick={createWorkoutPlaylist}
+                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 sm:px-4 sm:py-3 rounded-lg flex items-center justify-center space-x-1 sm:space-x-2 transition-colors shadow-lg text-sm sm:text-base flex-shrink-0 w-full sm:w-auto"
+              >
+                <FaPlus className="text-sm" />
+                <span className="hidden xs:inline sm:inline">
+                  Create Playlist
+                </span>
+                <span className="xs:hidden sm:hidden">Create</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -409,10 +426,20 @@ export default function SpotifyMusic() {
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                     No curated playlists yet
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Our team is working on curating the perfect workout
-                    playlists for you. Check back soon!
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {isAdmin
+                      ? "Add your first curated playlist to help users find great workout music!"
+                      : "Our team is working on curating the perfect workout playlists for you. Check back soon!"}
                   </p>
+                  {isAdmin && (
+                    <Link
+                      href="/admin/playlists"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg font-medium transition-colors"
+                    >
+                      <FaPlus />
+                      <span>Add Default Playlists</span>
+                    </Link>
+                  )}
                 </div>
               </div>
             )}

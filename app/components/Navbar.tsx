@@ -160,13 +160,22 @@ export default function Navbar() {
                       </Link>
 
                       {isAdmin && (
-                        <Link
-                          href="/admin/users"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                          onClick={() => setIsProfileMenuOpen(false)}
-                        >
-                          <FaUsers className="mr-2" /> Manage Users
-                        </Link>
+                        <>
+                          <Link
+                            href="/admin/users"
+                            className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                          >
+                            <FaUsers className="mr-2" /> Manage Users
+                          </Link>
+                          <Link
+                            href="/admin/playlists"
+                            className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                          >
+                            <FaMusic className="mr-2" /> Manage Playlists
+                          </Link>
+                        </>
                       )}
                       <button
                         onClick={() => {
@@ -302,6 +311,34 @@ export default function Navbar() {
                     <span>Schedule</span>
                   </div>
                 </Link>
+                {isAdmin && (
+                  <>
+                    <Link
+                      href="/admin/users"
+                      className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800 text-white"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-gray-400">
+                          <FaUsers />
+                        </span>
+                        <span>Manage Users</span>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/admin/playlists"
+                      className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800 text-white"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-gray-400">
+                          <FaMusic />
+                        </span>
+                        <span>Manage Playlists</span>
+                      </div>
+                    </Link>
+                  </>
+                )}
                 <button
                   onClick={() => {
                     signOut({ callbackUrl: "/" });
