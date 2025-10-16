@@ -378,12 +378,22 @@ export default function AdminPlaylistsPage() {
                   </h2>
 
                   <div className="flex gap-4 mb-6">
-                    {selectedPlaylist.images[0] && (
+                    {selectedPlaylist.images[0] ? (
                       <img
                         src={selectedPlaylist.images[0].url}
                         alt={selectedPlaylist.name}
                         className="w-32 h-32 rounded object-cover"
                       />
+                    ) : (
+                      <div className="w-32 h-32 rounded bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                        <svg
+                          className="w-16 h-16 text-white opacity-50"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                        </svg>
+                      </div>
                     )}
                     <div>
                       <h3 className="font-semibold text-lg">
@@ -479,12 +489,22 @@ export default function AdminPlaylistsPage() {
                             key={playlist.id}
                             className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-gray-600 transition-colors"
                           >
-                            {playlist.images[0] && (
+                            {playlist.images[0] ? (
                               <img
                                 src={playlist.images[0].url}
                                 alt={playlist.name}
                                 className="w-full h-48 object-cover"
                               />
+                            ) : (
+                              <div className="w-full h-48 bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                                <svg
+                                  className="w-20 h-20 text-white opacity-50"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                                </svg>
+                              </div>
                             )}
                             <div className="p-4">
                               <h3 className="font-semibold truncate">

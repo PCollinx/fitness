@@ -13,6 +13,7 @@ import {
   FaUser,
   FaStar,
   FaCog,
+  FaMusic,
 } from "react-icons/fa";
 
 interface SpotifyPlaylist {
@@ -454,13 +455,19 @@ export default function SpotifyMusic() {
               >
                 {/* Playlist Cover */}
                 <div className="relative overflow-hidden rounded-t-lg">
-                  <Image
-                    src={playlist.images?.[0]?.url || "/placeholder-album.png"}
-                    alt={playlist.name}
-                    width={300}
-                    height={300}
-                    className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
+                  {playlist.images?.[0]?.url ? (
+                    <Image
+                      src={playlist.images[0].url}
+                      alt={playlist.name}
+                      width={300}
+                      height={300}
+                      className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                  ) : (
+                    <div className="w-full aspect-square bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                      <FaMusic className="text-6xl text-white opacity-50" />
+                    </div>
+                  )}
 
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
