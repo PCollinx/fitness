@@ -76,7 +76,7 @@ export default function WorkoutStreak({
             {streakData.currentStreak}
           </p>
           <p className="text-gray-400 text-xs">
-            {streakData.currentStreak === 1 ? "day" : "days"}
+            {streakData.currentStreak > 1 ? "days" : "day"}
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function WorkoutStreak({
             {streakData.longestStreak}
           </p>
           <p className="text-gray-400 text-xs">
-            {streakData.longestStreak === 1 ? "day" : "days"}
+            {streakData.longestStreak > 1 ? "days" : "day"}
           </p>
         </div>
 

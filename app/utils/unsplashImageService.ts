@@ -3,7 +3,7 @@
  * Dynamically fetches fitness-specific images using Unsplash API with advanced uniqueness tracking
  */
 
-import { MuscleGroup } from './workoutImageStorage';
+import { MuscleGroup } from "./workoutImageStorage";
 
 interface UnsplashImage {
   id: string;
@@ -27,7 +27,7 @@ interface UnsplashSearchResponse {
  */
 export class UnsplashImageService {
   private apiKey: string;
-  private baseUrl = 'https://api.unsplash.com';
+  private baseUrl = "https://api.unsplash.com";
   private imageCache = new Map<string, string[]>();
   private usedImages = new Set<string>();
   private workoutImageHistory: string[] = [];
@@ -43,59 +43,59 @@ export class UnsplashImageService {
   private getSearchTermsForMuscleGroup(muscleGroup: MuscleGroup): string[] {
     const searchTermsMap: Record<MuscleGroup, string[]> = {
       chest: [
-        'gym chest workout bench press',
-        'fitness chest training dumbbell',
-        'bodybuilding chest exercise gym',
-        'strength training chest workout'
+        "gym chest workout bench press",
+        "fitness chest training dumbbell",
+        "bodybuilding chest exercise gym",
+        "strength training chest workout",
       ],
       back: [
-        'gym back workout pull ups',
-        'fitness back training rowing',
-        'strength training back exercise',
-        'gym deadlift back workout'
+        "gym back workout pull ups",
+        "fitness back training rowing",
+        "strength training back exercise",
+        "gym deadlift back workout",
       ],
       shoulders: [
-        'gym shoulder workout press',
-        'fitness shoulder training deltoid',
-        'strength training shoulder exercise',
-        'gym overhead press workout'
+        "gym shoulder workout press",
+        "fitness shoulder training deltoid",
+        "strength training shoulder exercise",
+        "gym overhead press workout",
       ],
       arms: [
-        'gym arm workout bicep curl',
-        'fitness arm training tricep',
-        'strength training arm exercise',
-        'gym bicep tricep workout'
+        "gym arm workout bicep curl",
+        "fitness arm training tricep",
+        "strength training arm exercise",
+        "gym bicep tricep workout",
       ],
       legs: [
-        'gym leg workout squat',
-        'fitness leg training quadriceps',
-        'strength training leg exercise',
-        'gym squat lunge workout'
+        "gym leg workout squat",
+        "fitness leg training quadriceps",
+        "strength training leg exercise",
+        "gym squat lunge workout",
       ],
       glutes: [
-        'gym glute workout hip thrust',
-        'fitness glute training squat',
-        'strength training glute exercise',
-        'gym deadlift glute workout'
+        "gym glute workout hip thrust",
+        "fitness glute training squat",
+        "strength training glute exercise",
+        "gym deadlift glute workout",
       ],
       core: [
-        'gym core workout abs plank',
-        'fitness core training abdominal',
-        'strength training core exercise',
-        'gym abs core workout'
+        "gym core workout abs plank",
+        "fitness core training abdominal",
+        "strength training core exercise",
+        "gym abs core workout",
       ],
       cardio: [
-        'gym cardio workout treadmill',
-        'fitness cardio training running',
-        'gym cycling cardio exercise',
-        'fitness HIIT cardio workout'
+        "gym cardio workout treadmill",
+        "fitness cardio training running",
+        "gym cycling cardio exercise",
+        "fitness HIIT cardio workout",
       ],
       full_body: [
-        'gym full body workout compound',
-        'fitness functional training crossfit',
-        'strength training compound exercise',
-        'gym deadlift full body workout'
-      ]
+        "gym full body workout compound",
+        "fitness functional training crossfit",
+        "strength training compound exercise",
+        "gym deadlift full body workout",
+      ],
     };
 
     return searchTermsMap[muscleGroup] || searchTermsMap.full_body;
@@ -105,11 +105,11 @@ export class UnsplashImageService {
    * Fetch images from Unsplash for a specific muscle group
    */
   async fetchImagesForMuscleGroup(
-    muscleGroup: MuscleGroup, 
+    muscleGroup: MuscleGroup,
     count: number = 8
   ): Promise<string[]> {
     const cacheKey = `${muscleGroup}-${count}`;
-    
+
     // Return cached images if available
     if (this.imageCache.has(cacheKey)) {
       return this.imageCache.get(cacheKey)!;
@@ -124,18 +124,22 @@ export class UnsplashImageService {
         if (allImages.length >= count) break;
 
         const response = await fetch(
-          `${this.baseUrl}/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=${Math.ceil(count / searchTerms.length)}&orientation=landscape`,
+          `${this.baseUrl}/search/photos?query=${encodeURIComponent(
+            searchTerm
+          )}&per_page=${Math.ceil(
+            count / searchTerms.length
+          )}&orientation=landscape`,
           {
             headers: {
-              'Authorization': `Client-ID ${this.apiKey}`,
+              Authorization: `Client-ID ${this.apiKey}`,
             },
           }
         );
 
         if (response.ok) {
           const data: UnsplashSearchResponse = await response.json();
-          const imageUrls = data.results.map(img => 
-            `${img.urls.regular}&auto=format&fit=crop&w=800&h=600`
+          const imageUrls = data.results.map(
+            (img) => `${img.urls.regular}&auto=format&fit=crop&w=800&h=600`
           );
           allImages.push(...imageUrls);
         } else {
@@ -145,12 +149,11 @@ export class UnsplashImageService {
 
       // Remove duplicates and limit to requested count
       const uniqueImages = [...new Set(allImages)].slice(0, count);
-      
+
       // Cache the results
       this.imageCache.set(cacheKey, uniqueImages);
-      
-      return uniqueImages;
 
+      return uniqueImages;
     } catch (error) {
       console.error(`Error fetching images for ${muscleGroup}:`, error);
       return this.getFallbackImages(muscleGroup, count);
@@ -167,8 +170,12 @@ export class UnsplashImageService {
   ): Promise<string> {
     try {
       // Generate multiple search terms to increase uniqueness options
-      const searchTerms = this.generateSearchTerms(exercises, workoutName, category);
-      
+      const searchTerms = this.generateSearchTerms(
+        exercises,
+        workoutName,
+        category
+      );
+
       // Try each search term until we find a unique image
       for (const searchTerm of searchTerms) {
         const uniqueImage = await this.fetchUniqueImage(searchTerm);
@@ -181,9 +188,8 @@ export class UnsplashImageService {
 
       // If all else fails, get a fallback image that's not recently used
       return this.getUniqueFallbackImage();
-
     } catch (error) {
-      console.error('Error fetching workout image:', error);
+      console.error("Error fetching workout image:", error);
       return this.getUniqueFallbackImage();
     }
   }
@@ -197,46 +203,77 @@ export class UnsplashImageService {
     category?: string
   ): string[] {
     const terms: string[] = [];
-    
+
     // Base contextual terms from workout name
     if (workoutName) {
       const nameWords = workoutName.toLowerCase();
-      
+
       if (/hiit|high.intensity|metabolic|blast|circuit/.test(nameWords)) {
-        terms.push('gym HIIT high intensity workout', 'fitness circuit training', 'metabolic workout gym');
+        terms.push(
+          "gym HIIT high intensity workout",
+          "fitness circuit training",
+          "metabolic workout gym"
+        );
       } else if (/cardio|running|cycling|aerobic/.test(nameWords)) {
-        terms.push('gym cardio fitness workout', 'fitness running treadmill', 'gym cycling cardio');
+        terms.push(
+          "gym cardio fitness workout",
+          "fitness running treadmill",
+          "gym cycling cardio"
+        );
       } else if (/strength|mass.*builder|powerlifting|heavy/.test(nameWords)) {
-        terms.push('gym strength training workout', 'powerlifting gym fitness', 'strength training equipment');
+        terms.push(
+          "gym strength training workout",
+          "powerlifting gym fitness",
+          "strength training equipment"
+        );
       } else if (/pull.*day|back.*day/.test(nameWords)) {
-        terms.push('gym back workout pull ups', 'fitness back training', 'gym rowing back exercise');
+        terms.push(
+          "gym back workout pull ups",
+          "fitness back training",
+          "gym rowing back exercise"
+        );
       } else if (/push.*day|chest.*day/.test(nameWords)) {
-        terms.push('gym chest workout bench press', 'fitness chest training', 'gym push workout');
+        terms.push(
+          "gym chest workout bench press",
+          "fitness chest training",
+          "gym push workout"
+        );
       } else if (/leg.*day|lower.*body/.test(nameWords)) {
-        terms.push('gym leg workout squat', 'fitness leg training', 'gym lower body workout');
+        terms.push(
+          "gym leg workout squat",
+          "fitness leg training",
+          "gym lower body workout"
+        );
       } else if (/stretch|recovery|yoga|mobility/.test(nameWords)) {
-        terms.push('gym stretching yoga fitness', 'fitness recovery stretching', 'gym mobility workout');
+        terms.push(
+          "gym stretching yoga fitness",
+          "fitness recovery stretching",
+          "gym mobility workout"
+        );
       }
     }
 
     // Add muscle group specific terms
     if (exercises.length > 0) {
       const muscleGroupCounts: Record<string, number> = {};
-      
-      exercises.forEach(ex => {
+
+      exercises.forEach((ex) => {
         if (ex.muscleGroup) {
-          const normalized = ex.muscleGroup.toLowerCase().replace(/\s+/g, '_');
-          muscleGroupCounts[normalized] = (muscleGroupCounts[normalized] || 0) + 1;
+          const normalized = ex.muscleGroup.toLowerCase().replace(/\s+/g, "_");
+          muscleGroupCounts[normalized] =
+            (muscleGroupCounts[normalized] || 0) + 1;
         }
       });
 
       const topMuscleGroups = Object.entries(muscleGroupCounts)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([, a], [, b]) => b - a)
         .slice(0, 2); // Top 2 muscle groups
 
       topMuscleGroups.forEach(([group]) => {
         if (group in this.getSearchTermsForMuscleGroup) {
-          const groupTerms = this.getSearchTermsForMuscleGroup(group as MuscleGroup);
+          const groupTerms = this.getSearchTermsForMuscleGroup(
+            group as MuscleGroup
+          );
           terms.push(...groupTerms.slice(0, 2)); // Add first 2 terms for each group
         }
       });
@@ -245,21 +282,21 @@ export class UnsplashImageService {
     // Add category-based terms
     if (category) {
       const categoryLower = category.toLowerCase();
-      if (categoryLower.includes('strength')) {
-        terms.push('gym strength training', 'fitness weight lifting');
-      } else if (categoryLower.includes('cardio')) {
-        terms.push('gym cardio workout', 'fitness cardio training');
-      } else if (categoryLower.includes('flexibility')) {
-        terms.push('gym flexibility yoga', 'fitness stretching');
+      if (categoryLower.includes("strength")) {
+        terms.push("gym strength training", "fitness weight lifting");
+      } else if (categoryLower.includes("cardio")) {
+        terms.push("gym cardio workout", "fitness cardio training");
+      } else if (categoryLower.includes("flexibility")) {
+        terms.push("gym flexibility yoga", "fitness stretching");
       }
     }
 
     // Add generic terms as fallbacks
     terms.push(
-      'gym fitness workout',
-      'fitness training gym',
-      'gym exercise workout',
-      'fitness gym training'
+      "gym fitness workout",
+      "fitness training gym",
+      "gym exercise workout",
+      "fitness gym training"
     );
 
     return [...new Set(terms)]; // Remove duplicates
@@ -270,12 +307,14 @@ export class UnsplashImageService {
    */
   private async fetchUniqueImage(searchTerm: string): Promise<string | null> {
     const maxAttempts = 10; // Try up to 10 images per search term
-    
+
     const response = await fetch(
-      `${this.baseUrl}/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=${maxAttempts}&orientation=landscape`,
+      `${this.baseUrl}/search/photos?query=${encodeURIComponent(
+        searchTerm
+      )}&per_page=${maxAttempts}&orientation=landscape`,
       {
         headers: {
-          'Authorization': `Client-ID ${this.apiKey}`,
+          Authorization: `Client-ID ${this.apiKey}`,
         },
       }
     );
@@ -283,7 +322,7 @@ export class UnsplashImageService {
     if (!response.ok) return null;
 
     const data: UnsplashSearchResponse = await response.json();
-    
+
     // Find first image that hasn't been used recently
     for (const img of data.results) {
       const imageUrl = `${img.urls.regular}&auto=format&fit=crop&w=800&h=600`;
@@ -300,7 +339,7 @@ export class UnsplashImageService {
    */
   private trackUsedImage(imageUrl: string): void {
     this.workoutImageHistory.push(imageUrl);
-    
+
     // Keep history size manageable
     if (this.workoutImageHistory.length > this.maxHistorySize) {
       this.workoutImageHistory.shift(); // Remove oldest
@@ -313,7 +352,7 @@ export class UnsplashImageService {
   private getUniqueFallbackImage(): string {
     const fallbackUrls = [
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&h=600",
-      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600", 
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&h=600",
       "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&h=600",
       "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=800&h=600",
       "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
@@ -348,7 +387,10 @@ export class UnsplashImageService {
       "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=800&h=600",
     ];
 
-    return Array.from({ length: count }, (_, i) => fallbackUrls[i % fallbackUrls.length]);
+    return Array.from(
+      { length: count },
+      (_, i) => fallbackUrls[i % fallbackUrls.length]
+    );
   }
 
   /**
@@ -356,19 +398,26 @@ export class UnsplashImageService {
    */
   async preWarmCache(): Promise<void> {
     const muscleGroups: MuscleGroup[] = [
-      'chest', 'back', 'shoulders', 'arms', 'legs', 
-      'glutes', 'core', 'cardio', 'full_body'
+      "chest",
+      "back",
+      "shoulders",
+      "arms",
+      "legs",
+      "glutes",
+      "core",
+      "cardio",
+      "full_body",
     ];
 
-    const promises = muscleGroups.map(group => 
-      this.fetchImagesForMuscleGroup(group, 8).catch(error => {
+    const promises = muscleGroups.map((group) =>
+      this.fetchImagesForMuscleGroup(group, 8).catch((error) => {
         console.warn(`Failed to pre-warm cache for ${group}:`, error);
         return [];
       })
     );
 
     await Promise.allSettled(promises);
-    console.log('✅ Unsplash image cache pre-warmed for all muscle groups');
+    console.log("✅ Unsplash image cache pre-warmed for all muscle groups");
   }
 
   /**
@@ -377,21 +426,21 @@ export class UnsplashImageService {
   public clearImageHistory(): void {
     this.workoutImageHistory = [];
     this.usedImages.clear();
-    console.log('🔄 Image usage history cleared');
+    console.log("🔄 Image usage history cleared");
   }
 
   /**
    * Get current image usage stats
    */
-  public getImageStats(): { 
-    historySize: number; 
-    maxHistorySize: number; 
+  public getImageStats(): {
+    historySize: number;
+    maxHistorySize: number;
     cacheSize: number;
   } {
     return {
       historySize: this.workoutImageHistory.length,
       maxHistorySize: this.maxHistorySize,
-      cacheSize: this.imageCache.size
+      cacheSize: this.imageCache.size,
     };
   }
 }
@@ -403,7 +452,7 @@ export const getUnsplashService = (): UnsplashImageService => {
   if (!unsplashService) {
     const apiKey = process.env.UNSPLASH_ACCESS_KEY;
     if (!apiKey) {
-      throw new Error('UNSPLASH_ACCESS_KEY environment variable is not set');
+      throw new Error("UNSPLASH_ACCESS_KEY environment variable is not set");
     }
     unsplashService = new UnsplashImageService(apiKey);
   }

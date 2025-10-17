@@ -138,8 +138,8 @@ function WorkoutStreakDashboard() {
             {getStreakEmoji(streakData.currentStreak)}
           </div>
           <div className="text-3xl font-bold text-white mb-2">
-            {streakData.currentStreak} Day{" "}
-            {streakData.currentStreak === 1 ? "" : "s"}
+            {streakData.currentStreak} Day
+            {streakData.currentStreak > 1 ? "s" : ""}
           </div>
           <p className="text-gray-400 text-sm">
             {getStreakMessage(
