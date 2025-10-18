@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }
@@ -55,12 +55,15 @@ export async function GET() {
 
     // Format the sessions to match enhanced WorkoutSummary type for dashboard
     const formattedWorkouts = recentSessions.map((session) => {
-      const totalSets = session.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
-      const completedSets = session.exercises.reduce(
-        (acc, ex) => acc + ex.sets.filter(set => set.completed).length, 
+      const totalSets = session.exercises.reduce(
+        (acc, ex) => acc + ex.sets.length,
         0
       );
-      
+      const completedSets = session.exercises.reduce(
+        (acc, ex) => acc + ex.sets.filter((set) => set.completed).length,
+        0
+      );
+
       return {
         id: session.workout.id,
         sessionId: session.id,
@@ -70,7 +73,8 @@ export async function GET() {
         duration: session.duration ? Math.round(session.duration / 60) : null, // Convert to minutes
         completedSets,
         totalSets,
-        completionRate: totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0,
+        completionRate:
+          totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0,
       };
     });
 

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }

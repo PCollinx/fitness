@@ -53,12 +53,9 @@ export async function GET(request: NextRequest) {
         { description: { contains: search, mode: "insensitive" } },
         { muscleGroup: { contains: search, mode: "insensitive" } },
       ];
-      
+
       // Combine with existing OR for userId
-      where.AND = [
-        { OR: where.OR },
-        { OR: searchConditions },
-      ];
+      where.AND = [{ OR: where.OR }, { OR: searchConditions }];
       delete where.OR;
     }
 
@@ -91,7 +88,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { error, user } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }

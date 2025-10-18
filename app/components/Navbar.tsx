@@ -73,7 +73,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <FaDumbbell className="h-8 w-8 text-yellow-400" />
-              <span className="font-bold text-xl">MyTrainer</span>
+              <span className="font-bold text-xl">FitTrack</span>
             </Link>
           </div>
 

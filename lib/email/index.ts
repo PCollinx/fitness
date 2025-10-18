@@ -28,26 +28,26 @@ export async function sendPasswordResetEmail(
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to,
-    subject: "Reset Your Password - MyTrainer App",
+    subject: "Reset Your Password - FitTrack",
     text:
       `Hello ${username},\n\n` +
-      `You requested a password reset for your MyTrainer account. Please click the link below to reset your password:\n\n` +
+      `You requested a password reset for your FitTrack account. Please click the link below to reset your password:\n\n` +
       `${resetUrl}\n\n` +
       `This link will expire in 1 hour.\n\n` +
       `If you didn't request this, please ignore this email and your password will remain unchanged.\n\n` +
       `Thanks,\n` +
-      `The MyTrainer Team`,
+      `The FitTrack Team`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
         <h2 style="color: #f59e0b; text-align: center;">Reset Your Password</h2>
         <p>Hello ${username},</p>
-        <p>You requested a password reset for your MyTrainer account. Please click the button below to reset your password:</p>
+        <p>You requested a password reset for your FitTrack account. Please click the button below to reset your password:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${resetUrl}" style="background-color: #f59e0b; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a>
         </div>
         <p>This link will expire in 1 hour.</p>
         <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
-        <p>Thanks,<br>The MyTrainer Team</p>
+        <p>Thanks,<br>The FitTrack Team</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
           <p>If the button doesn't work, copy and paste this link into your browser:</p>
           <p>${resetUrl}</p>
@@ -80,20 +80,20 @@ export async function sendPasswordChangeConfirmationEmail(
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to,
-    subject: "Your Password Has Been Changed - MyTrainer App",
+    subject: "Your Password Has Been Changed - FitTrack",
     text:
       `Hello ${username},\n\n` +
-      `This is a confirmation that the password for your MyTrainer account has just been changed.\n\n` +
+      `This is a confirmation that the password for your FitTrack account has just been changed.\n\n` +
       `If you did not make this change, please contact our support team immediately.\n\n` +
       `Thanks,\n` +
-      `The MyTrainer Team`,
+      `The FitTrack Team`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
         <h2 style="color: #f59e0b; text-align: center;">Password Changed</h2>
         <p>Hello ${username},</p>
-        <p>This is a confirmation that the password for your MyTrainer account has just been changed.</p>
+        <p>This is a confirmation that the password for your FitTrack account has just been changed.</p>
         <p>If you did not make this change, please contact our support team immediately.</p>
-        <p>Thanks,<br>The MyTrainer Team</p>
+        <p>Thanks,<br>The FitTrack Team</p>
       </div>
     `,
   };

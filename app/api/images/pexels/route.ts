@@ -100,8 +100,7 @@ export async function GET(request: NextRequest) {
       ],
     };
 
-    const searchTerms =
-      searchTermsMap[muscleGroup] || searchTermsMap.full_body;
+    const searchTerms = searchTermsMap[muscleGroup] || searchTermsMap.full_body;
     const allImages: PexelsPhoto[] = [];
 
     // Fetch images from multiple search terms for variety
@@ -133,8 +132,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Remove duplicates and get unique images
-    const uniqueImages = [...new Map(allImages.map(img => [img.id, img])).values()];
-    
+    const uniqueImages = [
+      ...new Map(allImages.map((img) => [img.id, img])).values(),
+    ];
+
     // Limit to requested count
     const selectedImages = uniqueImages.slice(0, count);
 

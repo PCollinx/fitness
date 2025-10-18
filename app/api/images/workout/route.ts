@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     // Authenticate the user
     const { error } = await authenticateApiUser();
-    
+
     if (error) {
       return error;
     }
@@ -26,11 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the image URL using the server-side utility
-    const imageUrl = await getImageForWorkout(
-      exercises,
-      workoutName,
-      category
-    );
+    const imageUrl = await getImageForWorkout(exercises, workoutName, category);
 
     return NextResponse.json({ imageUrl }, { status: 200 });
   } catch (error) {

@@ -198,7 +198,7 @@ export class SpotifyService {
   async createWorkoutPlaylist(
     userId: string,
     name: string,
-    description = "Created by Fitness App for workout sessions"
+    description = "Created by FitTrack for workout sessions"
   ): Promise<SpotifyPlaylist> {
     return spotifyApiRequest(`/users/${userId}/playlists`, this.accessToken, {
       method: "POST",
