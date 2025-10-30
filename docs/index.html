@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FitTrack Documentation and Legal Pages">
+    <title>FitTrack - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .link-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: block;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .link-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .link-card p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        footer {
+            margin-top: 50px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .github-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .github-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️ FitTrack</h1>
+        <p class="tagline">Modern Fitness Tracking Application</p>
+        
+        <div class="links">
+            <a href="privacy-policy.html" class="link-card">
+                <h2>Privacy Policy</h2>
+                <p>Learn how we protect and handle your data</p>
+            </a>
+            
+            <a href="https://github.com/PCollinx/fitness" class="link-card" target="_blank">
+                <h2>GitHub Repository</h2>
+                <p>View the source code and contribute</p>
+            </a>
+        </div>
+
+        <footer>
+            <p>
+                Open source project by 
+                <a href="https://github.com/PCollinx" class="github-link" target="_blank">PCollinx</a>
+            </p>
+            <p style="margin-top: 10px;">&copy; 2025 FitTrack. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

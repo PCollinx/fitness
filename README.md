@@ -66,3 +66,30 @@
 - **Date Handling**: Native JavaScript Date API
 - **Image Handling**: Next.js Image optimization
 - **Deployment**: Vercel-ready with edge runtime support
+- **Documentation**: GitHub Pages for privacy policy and legal documents
+
+## Documentation
+
+This project uses GitHub Pages to host public documentation and legal pages.
+
+### Privacy Policy
+
+The privacy policy is hosted at: `https://pcollinx.github.io/fitness/privacy-policy.html`
+
+This URL can be used for:
+- Chrome Extension submissions
+- App store listings
+- Legal compliance requirements
+- User transparency
+
+### Setting Up GitHub Pages
+
+To enable GitHub Pages for this repository:
+
+1. Go to Repository Settings → Pages
+2. Under "Build and deployment", set Source to "GitHub Actions"
+3. The workflow in `.github/workflows/deploy-pages.yml` will automatically deploy content from the `docs/` folder
+4. Visit `https://pcollinx.github.io/fitness/` to see your documentation
+
+For more details, see [docs/README.md](docs/README.md).
+
