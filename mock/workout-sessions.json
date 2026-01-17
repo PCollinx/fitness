@@ -67,6 +67,8 @@
             "setNumber": 1,
             "targetReps": 8,
             "actualReps": 8,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "restTime": 120
           },
@@ -75,6 +77,8 @@
             "setNumber": 2,
             "targetReps": 8,
             "actualReps": 7,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "restTime": 120
           },
@@ -83,6 +87,8 @@
             "setNumber": 3,
             "targetReps": 8,
             "actualReps": 6,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "notes": "Struggled on last reps"
           }
@@ -181,6 +187,8 @@
             "setNumber": 1,
             "targetReps": 15,
             "actualReps": 15,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "restTime": 60
           },
@@ -189,6 +197,8 @@
             "setNumber": 2,
             "targetReps": 15,
             "actualReps": 15,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "restTime": 60
           },
@@ -197,6 +207,8 @@
             "setNumber": 3,
             "targetReps": 15,
             "actualReps": 14,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "restTime": 60
           },
@@ -205,6 +217,8 @@
             "setNumber": 4,
             "targetReps": 15,
             "actualReps": 12,
+            "targetWeight": null,
+            "actualWeight": null,
             "completed": true,
             "notes": "Tired but pushed through"
           }
