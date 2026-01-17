@@ -66,3 +66,23 @@
 - **Date Handling**: Native JavaScript Date API
 - **Image Handling**: Next.js Image optimization
 - **Deployment**: Vercel-ready with edge runtime support
+
+## 📦 Mock Data
+
+This repository includes a comprehensive mock data folder for development and testing:
+
+- **Location**: `/mock` directory
+- **Contents**: Sample users, exercises, workouts, sessions, progress tracking, and more
+- **Format**: JSON files with realistic, relational data
+- **Usage**: Import for development, testing, demos, or documentation
+- **Documentation**: See [mock/README.md](./mock/README.md) for details
+- **Download Instructions**: See [mock/DOWNLOAD.md](./mock/DOWNLOAD.md) for various download options
+
+The mock data includes:
+- 3 user profiles (beginner, intermediate, advanced)
+- 6 exercise definitions with instructions
+- 4 workout routines
+- 3 completed workout sessions with detailed performance data
+- 7 progress tracking entries
+- 5 fitness goals
+- 9 weekly workout schedules
