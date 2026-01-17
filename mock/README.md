@@ -12,7 +12,7 @@ Sample user profiles with various fitness levels and goals.
 ### `exercises.json`
 A collection of common fitness exercises with descriptions and instructions.
 - **Fields**: id, name, description, muscleGroup, difficulty, instructions
-- **Muscle Groups**: chest, back, legs, shoulders, arms, core, full body
+- **Muscle Groups**: chest, back, legs, shoulders, core, full body
 - **Difficulty Levels**: beginner, intermediate, advanced
 
 ### `workouts.json`
