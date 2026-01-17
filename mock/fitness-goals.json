@@ -1,0 +1,37 @@
+[
+  {
+    "id": "mock-goal-1",
+    "userId": "mock-user-1",
+    "goalType": "muscle-building",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-goal-2",
+    "userId": "mock-user-1",
+    "goalType": "strength-training",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-goal-3",
+    "userId": "mock-user-2",
+    "goalType": "endurance",
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "updatedAt": "2024-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "mock-goal-4",
+    "userId": "mock-user-2",
+    "goalType": "mobility",
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "updatedAt": "2024-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "mock-goal-5",
+    "userId": "mock-user-3",
+    "goalType": "weight-loss",
+    "createdAt": "2024-01-15T00:00:00.000Z",
+    "updatedAt": "2024-01-15T00:00:00.000Z"
+  }
+]

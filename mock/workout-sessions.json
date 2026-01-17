@@ -1,0 +1,215 @@
+[
+  {
+    "id": "mock-session-1",
+    "workoutId": "mock-workout-1",
+    "userId": "mock-user-1",
+    "startTime": "2024-01-15T09:00:00.000Z",
+    "endTime": "2024-01-15T10:15:00.000Z",
+    "duration": 75,
+    "notes": "Great workout! Felt strong on all lifts",
+    "createdAt": "2024-01-15T10:15:00.000Z",
+    "updatedAt": "2024-01-15T10:15:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-session-exercise-1",
+        "exerciseId": "mock-exercise-1",
+        "order": 1,
+        "sets": [
+          {
+            "id": "mock-set-1",
+            "setNumber": 1,
+            "targetReps": 10,
+            "actualReps": 10,
+            "targetWeight": 80.0,
+            "actualWeight": 80.0,
+            "completed": true,
+            "restTime": 90
+          },
+          {
+            "id": "mock-set-2",
+            "setNumber": 2,
+            "targetReps": 10,
+            "actualReps": 10,
+            "targetWeight": 80.0,
+            "actualWeight": 80.0,
+            "completed": true,
+            "restTime": 90
+          },
+          {
+            "id": "mock-set-3",
+            "setNumber": 3,
+            "targetReps": 10,
+            "actualReps": 9,
+            "targetWeight": 80.0,
+            "actualWeight": 80.0,
+            "completed": true,
+            "restTime": 90
+          },
+          {
+            "id": "mock-set-4",
+            "setNumber": 4,
+            "targetReps": 10,
+            "actualReps": 8,
+            "targetWeight": 80.0,
+            "actualWeight": 80.0,
+            "completed": true,
+            "notes": "Last set was tough"
+          }
+        ]
+      },
+      {
+        "id": "mock-session-exercise-2",
+        "exerciseId": "mock-exercise-3",
+        "order": 2,
+        "sets": [
+          {
+            "id": "mock-set-5",
+            "setNumber": 1,
+            "targetReps": 8,
+            "actualReps": 8,
+            "completed": true,
+            "restTime": 120
+          },
+          {
+            "id": "mock-set-6",
+            "setNumber": 2,
+            "targetReps": 8,
+            "actualReps": 7,
+            "completed": true,
+            "restTime": 120
+          },
+          {
+            "id": "mock-set-7",
+            "setNumber": 3,
+            "targetReps": 8,
+            "actualReps": 6,
+            "completed": true,
+            "notes": "Struggled on last reps"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mock-session-2",
+    "workoutId": "mock-workout-2",
+    "userId": "mock-user-1",
+    "startTime": "2024-01-17T08:30:00.000Z",
+    "endTime": "2024-01-17T09:45:00.000Z",
+    "duration": 75,
+    "notes": "Leg day was brutal but effective",
+    "createdAt": "2024-01-17T09:45:00.000Z",
+    "updatedAt": "2024-01-17T09:45:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-session-exercise-3",
+        "exerciseId": "mock-exercise-2",
+        "order": 1,
+        "sets": [
+          {
+            "id": "mock-set-8",
+            "setNumber": 1,
+            "targetReps": 8,
+            "actualReps": 8,
+            "targetWeight": 100.0,
+            "actualWeight": 100.0,
+            "completed": true,
+            "restTime": 180
+          },
+          {
+            "id": "mock-set-9",
+            "setNumber": 2,
+            "targetReps": 8,
+            "actualReps": 8,
+            "targetWeight": 100.0,
+            "actualWeight": 100.0,
+            "completed": true,
+            "restTime": 180
+          },
+          {
+            "id": "mock-set-10",
+            "setNumber": 3,
+            "targetReps": 8,
+            "actualReps": 7,
+            "targetWeight": 100.0,
+            "actualWeight": 100.0,
+            "completed": true,
+            "restTime": 180
+          },
+          {
+            "id": "mock-set-11",
+            "setNumber": 4,
+            "targetReps": 8,
+            "actualReps": 6,
+            "targetWeight": 100.0,
+            "actualWeight": 100.0,
+            "completed": true,
+            "restTime": 180
+          },
+          {
+            "id": "mock-set-12",
+            "setNumber": 5,
+            "targetReps": 8,
+            "actualReps": 6,
+            "targetWeight": 100.0,
+            "actualWeight": 95.0,
+            "completed": true,
+            "notes": "Dropped weight for final set"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mock-session-3",
+    "workoutId": "mock-workout-3",
+    "userId": "mock-user-2",
+    "startTime": "2024-02-01T06:00:00.000Z",
+    "endTime": "2024-02-01T06:45:00.000Z",
+    "duration": 45,
+    "notes": "High energy morning workout!",
+    "createdAt": "2024-02-01T06:45:00.000Z",
+    "updatedAt": "2024-02-01T06:45:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-session-exercise-4",
+        "exerciseId": "mock-exercise-6",
+        "order": 1,
+        "sets": [
+          {
+            "id": "mock-set-13",
+            "setNumber": 1,
+            "targetReps": 15,
+            "actualReps": 15,
+            "completed": true,
+            "restTime": 60
+          },
+          {
+            "id": "mock-set-14",
+            "setNumber": 2,
+            "targetReps": 15,
+            "actualReps": 15,
+            "completed": true,
+            "restTime": 60
+          },
+          {
+            "id": "mock-set-15",
+            "setNumber": 3,
+            "targetReps": 15,
+            "actualReps": 14,
+            "completed": true,
+            "restTime": 60
+          },
+          {
+            "id": "mock-set-16",
+            "setNumber": 4,
+            "targetReps": 15,
+            "actualReps": 12,
+            "completed": true,
+            "notes": "Tired but pushed through"
+          }
+        ]
+      }
+    ]
+  }
+]

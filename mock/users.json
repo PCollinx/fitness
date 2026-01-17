@@ -1,0 +1,53 @@
+[
+  {
+    "id": "mock-user-1",
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "emailVerified": "2024-01-15T10:00:00.000Z",
+    "image": "https://i.pravatar.cc/150?img=12",
+    "bio": "Fitness enthusiast looking to build muscle and improve overall health.",
+    "height": 180.5,
+    "weight": 82.5,
+    "role": "user",
+    "onboardingCompleted": true,
+    "fitnessLevel": "intermediate",
+    "workoutsCompleted": 45,
+    "streakDays": 7,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "mock-user-2",
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "emailVerified": "2024-02-01T09:30:00.000Z",
+    "image": "https://i.pravatar.cc/150?img=25",
+    "bio": "Marathon runner and yoga practitioner. Focused on endurance and flexibility.",
+    "height": 165.0,
+    "weight": 58.0,
+    "role": "user",
+    "onboardingCompleted": true,
+    "fitnessLevel": "advanced",
+    "workoutsCompleted": 120,
+    "streakDays": 21,
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "updatedAt": "2024-02-01T09:30:00.000Z"
+  },
+  {
+    "id": "mock-user-3",
+    "name": "Mike Johnson",
+    "email": "mike.johnson@example.com",
+    "emailVerified": "2024-01-20T14:00:00.000Z",
+    "image": "https://i.pravatar.cc/150?img=33",
+    "bio": "Beginner trying to lose weight and get in shape.",
+    "height": 175.0,
+    "weight": 95.0,
+    "role": "user",
+    "onboardingCompleted": true,
+    "fitnessLevel": "beginner",
+    "workoutsCompleted": 12,
+    "streakDays": 3,
+    "createdAt": "2024-01-15T00:00:00.000Z",
+    "updatedAt": "2024-01-20T14:00:00.000Z"
+  }
+]

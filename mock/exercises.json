@@ -1,0 +1,62 @@
+[
+  {
+    "id": "mock-exercise-1",
+    "name": "Bench Press",
+    "description": "A compound exercise that primarily targets the chest muscles",
+    "muscleGroup": "chest",
+    "difficulty": "intermediate",
+    "instructions": "1. Lie on a flat bench with feet firmly on the ground\n2. Grip the bar slightly wider than shoulder-width\n3. Lower the bar to your chest in a controlled manner\n4. Press the bar back up to starting position",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-exercise-2",
+    "name": "Squats",
+    "description": "A fundamental lower body exercise targeting quads, glutes, and hamstrings",
+    "muscleGroup": "legs",
+    "difficulty": "intermediate",
+    "instructions": "1. Stand with feet shoulder-width apart\n2. Keep chest up and core engaged\n3. Lower your body by bending knees and hips\n4. Push through heels to return to starting position",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-exercise-3",
+    "name": "Pull-ups",
+    "description": "An upper body exercise that targets the back and biceps",
+    "muscleGroup": "back",
+    "difficulty": "advanced",
+    "instructions": "1. Hang from a pull-up bar with palms facing away\n2. Pull your body up until chin is above the bar\n3. Lower yourself in a controlled manner\n4. Repeat for desired reps",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-exercise-4",
+    "name": "Shoulder Press",
+    "description": "A pressing movement that targets the shoulder muscles",
+    "muscleGroup": "shoulders",
+    "difficulty": "intermediate",
+    "instructions": "1. Sit or stand with dumbbells at shoulder height\n2. Press weights overhead until arms are fully extended\n3. Lower weights back to shoulder level\n4. Maintain core stability throughout",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-exercise-5",
+    "name": "Plank",
+    "description": "A core strengthening isometric exercise",
+    "muscleGroup": "core",
+    "difficulty": "beginner",
+    "instructions": "1. Start in a forearm plank position\n2. Keep body in a straight line from head to heels\n3. Engage core and hold position\n4. Breathe steadily throughout",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "mock-exercise-6",
+    "name": "Burpees",
+    "description": "A full-body cardio exercise combining squat, plank, and jump",
+    "muscleGroup": "full body",
+    "difficulty": "intermediate",
+    "instructions": "1. Start in standing position\n2. Drop into squat and place hands on ground\n3. Jump feet back into plank\n4. Do a push-up, jump feet forward, and jump up",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]

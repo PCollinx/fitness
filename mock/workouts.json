@@ -1,0 +1,104 @@
+[
+  {
+    "id": "mock-workout-1",
+    "name": "Upper Body Strength",
+    "description": "A comprehensive upper body workout focusing on chest, back, and shoulders",
+    "userId": "mock-user-1",
+    "public": true,
+    "image": "https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg",
+    "createdAt": "2024-01-05T00:00:00.000Z",
+    "updatedAt": "2024-01-05T00:00:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-workout-exercise-1",
+        "exerciseId": "mock-exercise-1",
+        "sets": 4,
+        "reps": 10,
+        "weight": 80.0,
+        "order": 1
+      },
+      {
+        "id": "mock-workout-exercise-2",
+        "exerciseId": "mock-exercise-3",
+        "sets": 3,
+        "reps": 8,
+        "order": 2
+      },
+      {
+        "id": "mock-workout-exercise-3",
+        "exerciseId": "mock-exercise-4",
+        "sets": 3,
+        "reps": 12,
+        "weight": 20.0,
+        "order": 3
+      }
+    ]
+  },
+  {
+    "id": "mock-workout-2",
+    "name": "Leg Day Beast",
+    "description": "Intense lower body workout for building strength and muscle",
+    "userId": "mock-user-1",
+    "public": true,
+    "image": "https://images.pexels.com/photos/3076509/pexels-photo-3076509.jpeg",
+    "createdAt": "2024-01-06T00:00:00.000Z",
+    "updatedAt": "2024-01-06T00:00:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-workout-exercise-4",
+        "exerciseId": "mock-exercise-2",
+        "sets": 5,
+        "reps": 8,
+        "weight": 100.0,
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "mock-workout-3",
+    "name": "HIIT Cardio Blast",
+    "description": "High-intensity interval training for fat burning and endurance",
+    "userId": "mock-user-2",
+    "public": true,
+    "image": "https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg",
+    "createdAt": "2024-01-08T00:00:00.000Z",
+    "updatedAt": "2024-01-08T00:00:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-workout-exercise-5",
+        "exerciseId": "mock-exercise-6",
+        "sets": 4,
+        "reps": 15,
+        "order": 1
+      },
+      {
+        "id": "mock-workout-exercise-6",
+        "exerciseId": "mock-exercise-5",
+        "sets": 3,
+        "reps": 60,
+        "notes": "Hold for 60 seconds",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "mock-workout-4",
+    "name": "Core Crusher",
+    "description": "Focused core workout for building a strong midsection",
+    "userId": "mock-user-3",
+    "public": false,
+    "image": "https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg",
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "updatedAt": "2024-01-10T00:00:00.000Z",
+    "exercises": [
+      {
+        "id": "mock-workout-exercise-7",
+        "exerciseId": "mock-exercise-5",
+        "sets": 4,
+        "reps": 45,
+        "notes": "Hold for 45 seconds",
+        "order": 1
+      }
+    ]
+  }
+]
