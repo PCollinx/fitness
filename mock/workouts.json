@@ -22,6 +22,7 @@
         "exerciseId": "mock-exercise-3",
         "sets": 3,
         "reps": 8,
+        "weight": null,
         "order": 2
       },
       {
@@ -69,6 +70,7 @@
         "exerciseId": "mock-exercise-6",
         "sets": 4,
         "reps": 15,
+        "weight": null,
         "order": 1
       },
       {
@@ -76,6 +78,7 @@
         "exerciseId": "mock-exercise-5",
         "sets": 3,
         "reps": 60,
+        "weight": null,
         "notes": "Hold for 60 seconds",
         "order": 2
       }
@@ -96,6 +99,7 @@
         "exerciseId": "mock-exercise-5",
         "sets": 4,
         "reps": 45,
+        "weight": null,
         "notes": "Hold for 45 seconds",
         "order": 1
       }
